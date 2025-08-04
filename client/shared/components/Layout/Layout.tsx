@@ -41,12 +41,12 @@ export default function Layout({ children }: LayoutProps) {
   const [isOffline, setIsOffline] = useState(false);
   const location = useLocation();
 
-  const navigation = [
+  const navigation = useMemo(() => [
     { name: "Dashboard", href: "/", icon: Home },
     { name: "Songs", href: "/songs", icon: Music },
     { name: "Setlists", href: "/setlists", icon: List },
     { name: "Arrangements", href: "/arrangements", icon: BookOpen },
-  ];
+  ], []);
 
   const handleThemeChange = useCallback((newTheme: "light" | "dark" | "stage") => {
     setTheme(newTheme);
