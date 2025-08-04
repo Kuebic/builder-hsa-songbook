@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
-import Layout from "@/components/Layout";
-import SongCard from "@/components/SongCard";
+import { Layout } from "@/shared/components/Layout";
+import { SongCard } from "@features/songs";
+import { mockSongs, mockStats } from "@features/songs/utils/mockData";
+import { useSongSearch } from "@features/songs";
+import { Song, SongFilters } from "@features/songs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -26,106 +29,14 @@ import {
   PlusCircle,
 } from "lucide-react";
 
-// Mock data for demonstration
-const mockSongs = [
-  {
-    id: "1",
-    title: "Amazing Grace",
-    artist: "John Newton",
-    key: "G",
-    tempo: 85,
-    difficulty: "beginner" as const,
-    themes: ["grace", "salvation", "traditional"],
-    viewCount: 1524,
-    avgRating: 4.8,
-    basicChords: ["G", "C", "D", "Em", "Am"],
-    lastUsed: new Date("2024-01-15"),
-    isFavorite: true,
-  },
-  {
-    id: "2",
-    title: "How Great Is Our God",
-    artist: "Chris Tomlin",
-    key: "A",
-    tempo: 120,
-    difficulty: "intermediate" as const,
-    themes: ["worship", "praise", "contemporary"],
-    viewCount: 2341,
-    avgRating: 4.9,
-    basicChords: ["A", "E", "F#m", "D", "Bm"],
-    lastUsed: new Date("2024-01-10"),
-    isFavorite: false,
-  },
-  {
-    id: "3",
-    title: "Holy Spirit",
-    artist: "Francesca Battistelli",
-    key: "E",
-    tempo: 72,
-    difficulty: "intermediate" as const,
-    themes: ["holy spirit", "prayer", "worship"],
-    viewCount: 987,
-    avgRating: 4.7,
-    basicChords: ["E", "A", "B", "C#m", "F#m"],
-    lastUsed: new Date("2024-01-08"),
-    isFavorite: true,
-  },
-  {
-    id: "4",
-    title: "Cornerstone",
-    artist: "Hillsong",
-    key: "C",
-    tempo: 95,
-    difficulty: "advanced" as const,
-    themes: ["foundation", "hope", "contemporary"],
-    viewCount: 1876,
-    avgRating: 4.6,
-    basicChords: ["C", "F", "G", "Am", "Dm"],
-    isFavorite: false,
-  },
-  {
-    id: "5",
-    title: "Great Are You Lord",
-    artist: "All Sons & Daughters",
-    key: "D",
-    tempo: 130,
-    difficulty: "beginner" as const,
-    themes: ["praise", "worship", "contemporary"],
-    viewCount: 1432,
-    avgRating: 4.5,
-    basicChords: ["D", "A", "Bm", "G", "Em"],
-    isFavorite: false,
-  },
-  {
-    id: "6",
-    title: "In Christ Alone",
-    artist: "Keith Getty & Stuart Townend",
-    key: "F",
-    tempo: 80,
-    difficulty: "intermediate" as const,
-    themes: ["christ", "salvation", "hymn"],
-    viewCount: 2145,
-    avgRating: 4.9,
-    basicChords: ["F", "C", "Dm", "Bb", "Gm"],
-    lastUsed: new Date("2024-01-12"),
-    isFavorite: true,
-  },
-];
 
-const mockStats = {
-  totalSongs: 1247,
-  totalSetlists: 89,
-  recentlyAdded: 12,
-  topContributors: 45,
-};
-
-export default function Index() {
+export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedKey, setSelectedKey] = useState<string>("all");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [songs, setSongs] = useState(mockSongs);
-  const [filteredSongs, setFilteredSongs] = useState(mockSongs);
+  const [songs, setSongs] = useState<Song[]>(mockSongs);
+  const [filteredSongs, setFilteredSongs] = useState<Song[]>(mockSongs);
 
   useEffect(() => {
     let filtered = songs;

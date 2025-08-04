@@ -6,10 +6,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Songs from "./pages/Songs";
-import Setlists from "./pages/Setlists";
-import Arrangements from "./pages/Arrangements";
+import { DashboardPage } from "@features/dashboard";
+import { SongsPage } from "@features/songs";
+import { SetlistsPage } from "@features/setlists";
+import { ArrangementsPage } from "@features/arrangements";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,10 +21,10 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/songs" element={<Songs />} />
-          <Route path="/setlists" element={<Setlists />} />
-          <Route path="/arrangements" element={<Arrangements />} />
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/songs" element={<SongsPage />} />
+          <Route path="/setlists" element={<SetlistsPage />} />
+          <Route path="/arrangements" element={<ArrangementsPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

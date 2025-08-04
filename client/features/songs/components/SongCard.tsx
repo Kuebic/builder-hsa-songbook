@@ -26,21 +26,7 @@ import {
   Edit,
   Share,
 } from "lucide-react";
-
-interface Song {
-  id: string;
-  title: string;
-  artist: string;
-  key: string;
-  tempo?: number;
-  difficulty: "beginner" | "intermediate" | "advanced";
-  themes: string[];
-  viewCount: number;
-  avgRating: number;
-  basicChords: string[];
-  lastUsed?: Date;
-  isFavorite?: boolean;
-}
+import { Song } from "../types/song.types";
 
 interface SongCardProps {
   song: Song;

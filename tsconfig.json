@@ -29,7 +29,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./client/*"],
-      "@shared/*": ["./shared/*"]
+      "@features/*": ["./client/features/*"],
+      "@shared/*": ["./shared/*"],
+      "@/shared/*": ["./client/shared/*"]
     }
   },
   "include": [

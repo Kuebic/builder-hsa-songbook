@@ -1,4 +1,4 @@
-import Layout from "@/components/Layout";
+import { Layout } from "@/shared/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookOpen, ArrowLeft } from "lucide-react";
