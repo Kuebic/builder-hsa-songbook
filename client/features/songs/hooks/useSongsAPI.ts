@@ -295,8 +295,12 @@ export function useSongsStats() {
 
         return result.data;
       } catch (error) {
-        // Fallback to mock stats on any error
-        console.warn('Using mock stats due to error:', error);
+        // Fallback to mock stats on any error (including timeouts)
+        if (error.name === 'AbortError') {
+          console.warn('Stats API request timed out, using mock data');
+        } else {
+          console.warn('Using mock stats due to error:', error);
+        }
         const { mockStats } = await import('../utils/mockData');
         return mockStats;
       }
