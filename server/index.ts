@@ -30,6 +30,7 @@ export async function createServer() {
   app.get("/api/songs", songsRoutes.getSongs);
   app.post("/api/songs", songsRoutes.createSong);
   app.get("/api/songs/search", songsRoutes.searchSongs);
+  app.get("/api/songs/stats", songsRoutes.getSongsStats);
   app.get("/api/songs/:id", songsRoutes.getSong);
   app.put("/api/songs/:id", songsRoutes.updateSong);
   app.delete("/api/songs/:id", songsRoutes.deleteSong);
