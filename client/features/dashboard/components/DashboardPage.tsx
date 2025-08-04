@@ -148,7 +148,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {mockStats.totalSetlists}
+                {stats?.totalSetlists || 0}
               </div>
               <p className="text-xs text-muted-foreground">Across all users</p>
             </CardContent>
@@ -163,7 +163,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {mockStats.topContributors}
+                {stats?.topContributors || 0}
               </div>
               <p className="text-xs text-muted-foreground">Active this month</p>
             </CardContent>
