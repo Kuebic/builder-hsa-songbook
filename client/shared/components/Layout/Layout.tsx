@@ -182,15 +182,15 @@ export default function Layout({ children }: LayoutProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleThemeChange("light")}>
+                <DropdownMenuItem onClick={handleLightTheme}>
                   <Sun className="mr-2 h-4 w-4" />
                   Light
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleThemeChange("dark")}>
+                <DropdownMenuItem onClick={handleDarkTheme}>
                   <Moon className="mr-2 h-4 w-4" />
                   Dark
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleThemeChange("stage")}>
+                <DropdownMenuItem onClick={handleStageTheme}>
                   <Monitor className="mr-2 h-4 w-4" />
                   Stage Mode
                 </DropdownMenuItem>
