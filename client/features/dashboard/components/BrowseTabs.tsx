@@ -40,13 +40,13 @@ export default function BrowseTabs() {
   // Filter and sort songs
   const filteredSongs = useMemo(() => {
     let filtered = songs.filter((song) => {
-      const matchesSearch = !searchQuery || 
+      const matchesSearch = !searchQuery ||
         song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         song.artist?.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const matchesKey = !selectedKey || song.key === selectedKey;
-      const matchesDifficulty = !selectedDifficulty || song.difficulty === selectedDifficulty;
-      const matchesTheme = !selectedTheme || song.themes.includes(selectedTheme);
+
+      const matchesKey = !selectedKey || selectedKey === "all" || song.key === selectedKey;
+      const matchesDifficulty = !selectedDifficulty || selectedDifficulty === "all" || song.difficulty === selectedDifficulty;
+      const matchesTheme = !selectedTheme || selectedTheme === "all" || song.themes.includes(selectedTheme);
 
       return matchesSearch && matchesKey && matchesDifficulty && matchesTheme;
     });
