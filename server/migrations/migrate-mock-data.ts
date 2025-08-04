@@ -291,7 +291,7 @@ export async function migrateMockData() {
           createdBy: adminUserId,
           isPublic: true,
           ratings: {
-            average: Math.random() * 2 + 3.5, // Random rating between 3.5-5.5
+            average: Math.random() * 1.5 + 3.5, // Random rating between 3.5-5.0
             count: Math.floor(Math.random() * 50) + 10, // Random count 10-60
           },
           views: Math.floor(Math.random() * 2000) + 100, // Random views 100-2100
