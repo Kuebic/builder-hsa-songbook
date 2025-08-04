@@ -17,6 +17,36 @@ export default defineConfig(() => {
   },
   build: {
     outDir: "dist/spa",
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // React core libraries
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          // UI libraries
+          "ui-vendor": ["lucide-react", "clsx", "tailwind-merge", "class-variance-authority"],
+          // Radix UI components (heavy)
+          "radix-vendor": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-label",
+            "@radix-ui/react-popover",
+            "@radix-ui/react-select",
+            "@radix-ui/react-slot",
+            "@radix-ui/react-tabs",
+            "@radix-ui/react-toast",
+            "@radix-ui/react-tooltip"
+          ],
+          // Data fetching and state
+          "data-vendor": ["@tanstack/react-query", "@clerk/clerk-react"],
+          // Form handling
+          "form-vendor": ["react-hook-form", "@hookform/resolvers", "zod"],
+          // Date utilities (only if date-fns is imported)
+          // "date-vendor": ["date-fns"],
+          // Chord functionality
+          "chord-vendor": ["chordsheetjs"]
+        }
+      }
+    }
   },
   plugins: [
     react(), 

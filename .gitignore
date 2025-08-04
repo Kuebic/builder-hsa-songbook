@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Prevent accidental build artifacts in wrong locations
+/*/dist/
+/2/
+/build/
+/out/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -27,4 +33,5 @@ coverage/
 .config/
 !.env
 .claude/
+claude/
 .env.local

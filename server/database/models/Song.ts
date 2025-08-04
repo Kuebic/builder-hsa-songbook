@@ -20,6 +20,7 @@ export interface ISong extends Document {
   source?: string; // Max 100 chars, indexed
   lyrics?: string; // Max 10,000 chars
   notes?: string; // Max 2,000 chars
+  defaultArrangement?: Types.ObjectId; // Reference to default Arrangement
   metadata: {
     createdBy: Types.ObjectId; // Reference to User
     lastModifiedBy: Types.ObjectId; // Reference to User
@@ -116,6 +117,10 @@ const songSchema = new Schema<ISong>({
   notes: {
     type: String,
     maxlength: 2000,
+  },
+  defaultArrangement: {
+    type: Schema.Types.ObjectId,
+    ref: "Arrangement",
   },
   metadata: {
     createdBy: { 

@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { Arrangement, Song } from "../database/models";
 import { z } from "zod";
 import { Types } from "mongoose";
-import { IArrangement } from "../database/models/Arrangement";
 
 // Validation schemas
 const createArrangementSchema = z.object({
@@ -50,38 +49,56 @@ const createArrangementSchema = z.object({
 const updateArrangementSchema = createArrangementSchema.partial();
 
 // Transform arrangement to client format
-function transformArrangementToClientFormat(arrangement: IArrangement): any {
+function transformArrangementToClientFormat(arrangement: any): any {
+  if (!arrangement) {
+    console.error("Received null arrangement");
+    return null;
+  }
+  
   const doc = arrangement.toObject ? arrangement.toObject() : arrangement;
+  
+  if (!doc._id) {
+    console.error("Arrangement missing _id", doc);
+    return null;
+  }
   
   return {
     _id: doc._id.toString(),
-    name: doc.name,
-    songIds: doc.songIds.map((id: any) => typeof id === 'object' && id._id ? id._id.toString() : id.toString()),
-    createdBy: typeof doc.createdBy === 'object' && doc.createdBy._id ? doc.createdBy._id.toString() : doc.createdBy.toString(),
-    chordData: doc.chordData,
-    key: doc.key,
+    name: doc.name || "Untitled Arrangement",
+    songIds: (doc.songIds || []).map((id: any) => {
+      if (!id) return null;
+      return typeof id === 'object' && id._id ? id._id.toString() : id.toString();
+    }).filter(Boolean),
+    createdBy: doc.createdBy ? (typeof doc.createdBy === 'object' && doc.createdBy._id ? doc.createdBy._id.toString() : doc.createdBy.toString()) : null,
+    chordData: doc.chordData || "",
+    key: doc.key || 'C',
     tempo: doc.tempo,
-    timeSignature: doc.timeSignature,
-    difficulty: doc.difficulty,
+    timeSignature: doc.timeSignature || "4/4",
+    difficulty: doc.difficulty || "intermediate",
     description: doc.description,
-    tags: doc.tags,
-    metadata: doc.metadata,
-    documentSize: doc.documentSize,
+    tags: doc.tags || [],
+    metadata: doc.metadata || {
+      isPublic: true,
+      ratings: { average: 0, count: 0 },
+      views: 0,
+      isMashup: false
+    },
+    documentSize: doc.documentSize || 0,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
     // Add populated data if available
-    songs: doc.songIds.map((song: any) => {
-      if (typeof song === 'object' && song.title) {
+    songs: (doc.songIds || []).map((song: any) => {
+      if (typeof song === 'object' && song && song.title) {
         return {
-          _id: song._id.toString(),
+          _id: song._id ? song._id.toString() : null,
           title: song.title,
           artist: song.artist
         };
       }
       return null;
     }).filter(Boolean),
-    createdByUser: typeof doc.createdBy === 'object' && doc.createdBy.profile ? {
-      displayName: doc.createdBy.profile.displayName || doc.createdBy.name
+    createdByUser: doc.createdBy && typeof doc.createdBy === 'object' && doc.createdBy.profile ? {
+      displayName: doc.createdBy.profile?.displayName || doc.createdBy.name || "Unknown User"
     } : null
   };
 }
@@ -120,14 +137,19 @@ export async function getArrangementsBySong(req: Request, res: Response) {
       "metadata.isPublic": true,
     })
       .populate("songIds", "title artist")
-      .populate("createdBy", "profile.displayName")
-      .sort({ "metadata.ratings.average": -1, "metadata.views": -1 });
+      .populate("createdBy", "profile.displayName name")
+      .sort({ "metadata.ratings.average": -1, "metadata.views": -1 })
+      .lean();
 
+    const transformedArrangements = arrangements
+      .map(transformArrangementToClientFormat)
+      .filter(Boolean); // Filter out any null results
+    
     res.json({
       success: true,
-      data: arrangements.map(transformArrangementToClientFormat),
+      data: transformedArrangements,
       meta: {
-        total: arrangements.length,
+        total: transformedArrangements.length,
       },
     });
   } catch (error) {
@@ -189,13 +211,14 @@ export async function createArrangement(req: Request, res: Response) {
 
     await arrangement.save();
 
-    // Populate references before returning
-    await arrangement.populate("songIds", "title artist");
-    await arrangement.populate("createdBy", "profile.displayName");
+    // Reload the arrangement with populated fields
+    const savedArrangement = await Arrangement.findById(arrangement._id)
+      .populate("songIds", "title artist")
+      .populate("createdBy", "profile.displayName name");
 
     res.status(201).json({
       success: true,
-      data: transformArrangementToClientFormat(arrangement),
+      data: transformArrangementToClientFormat(savedArrangement),
     });
   } catch (error) {
     console.error("Error creating arrangement:", error);
@@ -243,7 +266,9 @@ export async function updateArrangement(req: Request, res: Response) {
 
     // Update fields
     if (updateData.name !== undefined) arrangement.name = updateData.name;
-    if (updateData.chordData !== undefined) arrangement.chordData = updateData.chordData as any;
+    if (updateData.chordData !== undefined) {
+      arrangement.chordData = updateData.chordData;
+    }
     if (updateData.key !== undefined) arrangement.key = updateData.key;
     if (updateData.tempo !== undefined) arrangement.tempo = updateData.tempo;
     if (updateData.timeSignature !== undefined) arrangement.timeSignature = updateData.timeSignature;
@@ -288,13 +313,15 @@ export async function updateArrangement(req: Request, res: Response) {
 
     await arrangement.save();
 
-    // Populate references before returning
-    await arrangement.populate("songIds", "title artist");
-    await arrangement.populate("createdBy", "profile.displayName");
+    // Reload the arrangement to trigger decompression middleware
+    const updatedArrangement = await Arrangement.findById(arrangement._id)
+      .populate("songIds", "title artist")
+      .populate("createdBy", "profile.displayName name");
+
 
     res.json({
       success: true,
-      data: arrangement,
+      data: transformArrangementToClientFormat(updatedArrangement),
     });
   } catch (error) {
     console.error("Error updating arrangement:", error);

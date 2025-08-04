@@ -1,6 +1,12 @@
 import { useState, useCallback, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+} from "@clerk/clerk-react";
 
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +22,6 @@ import {
   Music,
   Search,
   List,
-  User,
   Moon,
   Sun,
   Monitor,
@@ -182,10 +187,17 @@ export default function Layout({ children }: LayoutProps) {
               {themeIcon}
             </Button>
 
-            {/* User menu - simplified for stability */}
-            <Button variant="ghost" size="icon" title="User Menu">
-              <User className="h-4 w-4" />
-            </Button>
+            {/* User menu - with Clerk authentication */}
+            <SignedOut>
+              <SignInButton mode="modal">
+                <Button variant="ghost" size="sm">
+                  Sign In
+                </Button>
+              </SignInButton>
+            </SignedOut>
+            <SignedIn>
+              <UserButton afterSignOutUrl="/" />  
+            </SignedIn>
           </div>
         </div>
       </header>

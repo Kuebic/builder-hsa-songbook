@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star, Users } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface SongRatingProps {
   currentRating: number;
@@ -17,13 +18,18 @@ export default function SongRating({
 }: SongRatingProps) {
   const [hoveredRating, setHoveredRating] = useState(0);
   const [isRating, setIsRating] = useState(false);
+  const { toast } = useToast();
 
   const handleRate = async (rating: number) => {
     setIsRating(true);
     try {
       await onRate(rating);
-    } catch (error) {
-      console.error("Failed to rate song:", error);
+    } catch {
+      toast({
+        title: "Rating failed",
+        description: "Unable to save your rating. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsRating(false);
     }
@@ -51,7 +57,7 @@ export default function SongRating({
                 : "text-muted-foreground hover:text-yellow-500"
             }`}
           />
-        </button>
+        </button>,
       );
     }
     

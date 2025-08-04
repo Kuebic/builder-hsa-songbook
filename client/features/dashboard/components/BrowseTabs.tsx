@@ -31,6 +31,7 @@ import {
 import { useSongs, useSongsStats } from "../../songs/hooks/useSongsAPI";
 import SongCard from "../../songs/components/SongCard";
 import { useUserId } from "@/shared/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 type ViewMode = "grid" | "list";
 type SortOption = "recent" | "popular" | "title" | "rating";
@@ -45,6 +46,7 @@ export default function BrowseTabs() {
 
   // Get user ID from authentication context
   const userId = useUserId();
+  const { toast } = useToast();
   
   // Fetch songs and stats
   const {
@@ -130,23 +132,29 @@ export default function BrowseTabs() {
     sortBy !== "recent";
 
   // Authentication-dependent functionality
-  const handleToggleFavorite = useCallback(async (songId: string) => {
+  const handleToggleFavorite = useCallback(async (_songId: string) => {
     if (!userId) {
-      console.warn("User not authenticated - favorites require login");
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to save favorites",
+        variant: "default",
+      });
       return;
     }
     // TODO: Implement favorites toggle with API call
-    console.log("Toggle favorite:", songId, "for user:", userId);
-  }, [userId]);
+  }, [userId, toast]);
 
-  const handleAddToSetlist = useCallback((songId: string) => {
+  const handleAddToSetlist = useCallback((_songId: string) => {
     if (!userId) {
-      console.warn("User not authenticated - setlists require login");
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to add songs to setlists",
+        variant: "default",
+      });
       return;
     }
     // TODO: Implement add to setlist functionality
-    console.log("Add to setlist:", songId, "for user:", userId);
-  }, [userId]);
+  }, [userId, toast]);
 
   const renderStatsCards = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -333,7 +341,7 @@ export default function BrowseTabs() {
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2">
           {searchQuery && (
-            <Badge variant="secondary">Search: "{searchQuery}"</Badge>
+            <Badge variant="secondary">{`Search: "${searchQuery}"`}</Badge>
           )}
           {selectedKey && selectedKey !== "all" && (
             <Badge variant="secondary">Key: {selectedKey}</Badge>
@@ -488,7 +496,7 @@ export default function BrowseTabs() {
               <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">Trending Content</h3>
               <p className="text-muted-foreground">
-                Discover what's popular in the worship community.
+                Discover what&apos;s popular in the worship community.
               </p>
             </CardContent>
           </Card>

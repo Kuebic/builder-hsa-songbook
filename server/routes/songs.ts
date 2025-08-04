@@ -53,6 +53,7 @@ function transformSongToClientFormat(song: any) {
     lastUsed: undefined, // Client-side only
     isFavorite: false, // Client-side only
     chordData: song.chordData,
+    defaultArrangementId: song.defaultArrangement?.toString(),
   };
 }
 

@@ -17,7 +17,9 @@ export default tseslint.config(
       'vitest.config.ts',
       'vite.config.ts',
       'vite.config.server.ts',
-      'eslint.config.js'
+      'eslint.config.js',
+      '.claude/**',
+      'claude/**'
     ],
   },
   {

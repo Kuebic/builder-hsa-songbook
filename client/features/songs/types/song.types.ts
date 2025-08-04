@@ -60,6 +60,7 @@ export interface ClientSong {
   lastUsed?: Date;
   isFavorite: boolean; // Client-side only
   chordData?: string; // Optional for display
+  defaultArrangementId?: string; // ID of the default arrangement
 }
 
 // Arrangement interface matching MongoDB schema

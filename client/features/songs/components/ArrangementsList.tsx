@@ -59,10 +59,11 @@ export default function ArrangementsList({
   const rateArrangementMutation = useRateArrangement();
 
   const handleCreateArrangement = async () => {
-    if (!newArrangementName.trim()) return;
+    if (!newArrangementName.trim()) {
+      return;
+    }
     
     if (!currentUser) {
-      console.error("No user authenticated");
       return;
     }
     
@@ -83,17 +84,17 @@ export default function ArrangementsList({
       setNewArrangementName("");
       setNewArrangementDescription("");
     } catch (error) {
-      console.error("Failed to create arrangement:", error);
     }
   };
 
   const handleDeleteArrangement = async (arrangementId: string) => {
-    if (!confirm("Are you sure you want to delete this arrangement?")) return;
+    if (!confirm("Are you sure you want to delete this arrangement?")) {
+      return;
+    }
     
     try {
       await deleteArrangementMutation.mutateAsync(arrangementId);
     } catch (error) {
-      console.error("Failed to delete arrangement:", error);
     }
   };
 
@@ -101,7 +102,6 @@ export default function ArrangementsList({
     try {
       await rateArrangementMutation.mutateAsync({ id: arrangementId, rating });
     } catch (error) {
-      console.error("Failed to rate arrangement:", error);
     }
   };
 

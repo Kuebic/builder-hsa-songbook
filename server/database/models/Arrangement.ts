@@ -1,5 +1,4 @@
 import { Schema, model, Document, Model, Types } from "mongoose";
-import { compress, decompress } from "@mongodb-js/zstd";
 import { MusicalKey } from "./User.js"; // Import MusicalKey
 import { Difficulty } from "./Song.js"; // Import Difficulty from Song
 
@@ -9,7 +8,7 @@ export interface IArrangement extends Document {
   name: string; // Required, max 200 chars
   songIds: Types.ObjectId[]; // Array supports mashups
   createdBy: Types.ObjectId; // Reference to User, indexed
-  chordData: Buffer; // Zstd compressed, max 100KB
+  chordData: string; // ChordPro format, max 500KB
   key: MusicalKey;
   tempo?: number; // 40-200 BPM
   timeSignature: string; // Default "4/4"
@@ -97,13 +96,13 @@ const arrangementSchema = new Schema<IArrangement>({
     index: true,
   },
   chordData: {
-    type: Buffer, // Compressed ChordPro data
+    type: String, // ChordPro data (plain text)
     required: true,
     validate: {
-      validator: function (v: Buffer) {
-        return v.length <= 100 * 1024; // 100KB compressed limit for arrangements
+      validator: function (v: string) {
+        return v.length <= 500 * 1024; // 500KB limit for arrangements (uncompressed)
       },
-      message: "Compressed chord data exceeds 100KB limit",
+      message: "Chord data exceeds 500KB limit",
     },
   },
   key: {
@@ -190,12 +189,8 @@ arrangementSchema.index({ createdBy: 1, createdAt: -1 }); // User's arrangements
 arrangementSchema.index({ 'metadata.isPublic': 1, createdAt: -1 }); // Public arrangements
 arrangementSchema.index({ tags: 1, 'metadata.isPublic': 1 }); // Tag searches
 
-// Compression middleware - compress on save
+// Pre-save middleware for validation
 arrangementSchema.pre("save", async function (this: IArrangement, next) {
-  if (this.isModified("chordData") && typeof this.chordData === "string") {
-    const buffer = Buffer.from(this.chordData as unknown as string, "utf8");
-    this.chordData = await compress(buffer, 3); // Zstd level 3
-  }
 
   // Auto-set isMashup based on songIds length
   this.metadata.isMashup = this.songIds.length > 1;
@@ -238,32 +233,9 @@ arrangementSchema.post('save', async function(doc: IArrangement) {
   }
 });
 
-// Decompression middleware - decompress on find
-arrangementSchema.post("find", async function (docs: IArrangement[]) {
-  for (const doc of docs) {
-    if (doc.chordData && Buffer.isBuffer(doc.chordData)) {
-      try {
-        const decompressed = await decompress(doc.chordData);
-        (doc.chordData as unknown) = decompressed.toString("utf8");
-      } catch (error) {
-        console.error("Error decompressing chord data for arrangement:", doc._id, error);
-        (doc.chordData as unknown) = ""; // Fallback to empty string
-      }
-    }
-  }
-});
+// No decompression needed - chord data is stored as plain text
 
-arrangementSchema.post("findOne", async function (doc: IArrangement | null) {
-  if (doc && doc.chordData && Buffer.isBuffer(doc.chordData)) {
-    try {
-      const decompressed = await decompress(doc.chordData);
-      (doc.chordData as unknown) = decompressed.toString("utf8");
-    } catch (error) {
-      console.error("Error decompressing chord data for arrangement:", doc._id, error);
-      (doc.chordData as unknown) = ""; // Fallback to empty string
-    }
-  }
-});
+// No post-processing needed for findOne - chord data is plain text
 
 // Utility methods
 arrangementSchema.methods.updateViews = function () {
@@ -279,17 +251,8 @@ arrangementSchema.methods.addRating = function (rating: number) {
 };
 
 arrangementSchema.methods.getDecompressedChordData = async function (): Promise<string> {
-  if (!this.chordData || !Buffer.isBuffer(this.chordData)) {
-    return '';
-  }
-  
-  try {
-    const decompressed = await decompress(this.chordData);
-    return decompressed.toString('utf8');
-  } catch (error) {
-    console.error('Error decompressing chord data for arrangement:', this._id, error);
-    return '';
-  }
+  // Since chordData is now stored as plain text, just return it directly
+  return this.chordData || '';
 };
 
 arrangementSchema.methods.getMashupDuration = function () {
