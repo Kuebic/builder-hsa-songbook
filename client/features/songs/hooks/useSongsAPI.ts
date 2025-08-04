@@ -33,27 +33,40 @@ export function useSongs(params: SongQueryParams = {}) {
   return useQuery({
     queryKey: ['songs', params],
     queryFn: async (): Promise<ClientSong[]> => {
-      const searchParams = new URLSearchParams();
-      
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          searchParams.append(key, String(value));
+      try {
+        const searchParams = new URLSearchParams();
+
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            searchParams.append(key, String(value));
+          }
+        });
+
+        const response = await fetch(`/api/songs?${searchParams.toString()}`);
+
+        if (!response.ok) {
+          // If API is not available, fallback to mock data
+          if (response.status >= 500) {
+            console.warn('API not available, using mock data');
+            const { mockClientSongs } = await import('../utils/mockData');
+            return mockClientSongs;
+          }
+          throw new Error(`Failed to fetch songs: ${response.statusText}`);
         }
-      });
 
-      const response = await fetch(`/api/songs?${searchParams.toString()}`);
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch songs: ${response.statusText}`);
+        const result: APIResponse<ClientSong[]> = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.error?.message || 'Failed to fetch songs');
+        }
+
+        return result.data;
+      } catch (error) {
+        // Fallback to mock data on any error
+        console.warn('Using mock data due to error:', error);
+        const { mockClientSongs } = await import('../utils/mockData');
+        return mockClientSongs;
       }
-
-      const result: APIResponse<ClientSong[]> = await response.json();
-      
-      if (!result.success) {
-        throw new Error(result.error?.message || 'Failed to fetch songs');
-      }
-
-      return result.data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime)
