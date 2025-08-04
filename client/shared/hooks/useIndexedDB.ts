@@ -48,7 +48,7 @@ export function useIndexedDB(): UseIndexedDBReturn {
 
   // Refresh storage stats
   const refreshStats = useCallback(async () => {
-    if (!isReady) return;
+    if (!isReady) {return;}
 
     try {
       await indexedDB.updateStorageStats();
@@ -79,17 +79,17 @@ export function useCachedSongs() {
   const { isReady } = useIndexedDB();
 
   const cacheSong = useCallback(async (song: any) => {
-    if (!isReady) return;
+    if (!isReady) {return;}
     await indexedDB.cacheSong(song);
   }, [isReady]);
 
   const getCachedSong = useCallback(async (id: string) => {
-    if (!isReady) return null;
+    if (!isReady) {return null;}
     return await indexedDB.getSong(id);
   }, [isReady]);
 
   const searchCachedSongs = useCallback(async (query: string) => {
-    if (!isReady) return [];
+    if (!isReady) {return [];}
     return await indexedDB.searchCachedSongs(query);
   }, [isReady]);
 
@@ -105,17 +105,17 @@ export function useCachedSetlists() {
   const { isReady } = useIndexedDB();
 
   const cacheSetlist = useCallback(async (setlist: any) => {
-    if (!isReady) return;
+    if (!isReady) {return;}
     await indexedDB.cacheSetlist(setlist);
   }, [isReady]);
 
   const getCachedSetlist = useCallback(async (id: string) => {
-    if (!isReady) return null;
+    if (!isReady) {return null;}
     return await indexedDB.getSetlist(id);
   }, [isReady]);
 
   const getUserSetlists = useCallback(async (userId: string) => {
-    if (!isReady) return [];
+    if (!isReady) {return [];}
     return await indexedDB.getSetlistsByUser(userId);
   }, [isReady]);
 
@@ -136,26 +136,26 @@ export function useSyncQueue() {
     entityId: string;
     data: any;
   }) => {
-    if (!isReady) return;
+    if (!isReady) {return;}
     await indexedDB.addToSyncQueue(operation);
   }, [isReady]);
 
   const getPendingItems = useCallback(async () => {
-    if (!isReady) return [];
+    if (!isReady) {return [];}
     return await indexedDB.getPendingSyncItems();
   }, [isReady]);
 
   const updateItemStatus = useCallback(async (
     id: string, 
     status: "pending" | "processing" | "failed",
-    incrementRetries = false
+    incrementRetries = false,
   ) => {
-    if (!isReady) return;
+    if (!isReady) {return;}
     await indexedDB.updateSyncItemStatus(id, status, incrementRetries);
   }, [isReady]);
 
   const removeItem = useCallback(async (id: string) => {
-    if (!isReady) return;
+    if (!isReady) {return;}
     await indexedDB.removeSyncItem(id);
   }, [isReady]);
 
@@ -179,12 +179,12 @@ export function useOfflinePreferences() {
     notation: "english" | "german" | "latin";
     lastSync: number;
   }) => {
-    if (!isReady) return;
+    if (!isReady) {return;}
     await indexedDB.savePreferences(preferences);
   }, [isReady]);
 
   const getPreferences = useCallback(async (userId: string) => {
-    if (!isReady) return null;
+    if (!isReady) {return null;}
     return await indexedDB.getPreferences(userId);
   }, [isReady]);
 

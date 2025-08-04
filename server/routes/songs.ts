@@ -9,7 +9,7 @@ const createSongSchema = z.object({
   chordData: z.string().min(1), // ChordPro format
   key: z.enum([
     "C", "C#", "Db", "D", "D#", "Eb", "E", "F", 
-    "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"
+    "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B",
   ]).optional(),
   tempo: z.number().min(40).max(200).optional(),
   timeSignature: z.string().optional(),

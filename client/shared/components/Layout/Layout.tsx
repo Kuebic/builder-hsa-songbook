@@ -38,7 +38,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [theme, setTheme] = useState<"light" | "dark" | "stage">("light");
-  const [isOffline, setIsOffline] = useState(false);
+  const [isOffline] = useState(false);
   const location = useLocation();
 
   const navigation = [

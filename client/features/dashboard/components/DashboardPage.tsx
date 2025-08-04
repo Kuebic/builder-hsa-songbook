@@ -2,11 +2,9 @@ import { useState, useEffect } from "react";
 import { Layout } from "@/shared/components/Layout";
 import { SongCard } from "@features/songs";
 import { mockClientSongs, mockStats } from "@features/songs/utils/mockData";
-import { useSongSearch } from "@features/songs";
-import { ClientSong, SongFilters } from "@features/songs";
+import { ClientSong } from "@features/songs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -34,7 +32,6 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedKey, setSelectedKey] = useState<string>("all");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [songs, setSongs] = useState<ClientSong[]>(mockClientSongs);
   const [filteredSongs, setFilteredSongs] = useState<ClientSong[]>(mockClientSongs);
 
@@ -46,7 +43,7 @@ export default function DashboardPage() {
       filtered = filtered.filter(
         (song) =>
           song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          song.artist.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          song.artist?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           song.themes.some((theme) =>
             theme.toLowerCase().includes(searchQuery.toLowerCase()),
           ),
@@ -78,7 +75,7 @@ export default function DashboardPage() {
 
   const handleAddToSetlist = (songId: string) => {
     // TODO: Implement add to setlist functionality
-    console.log("Adding song to setlist:", songId);
+    void songId;
   };
 
   const recentSongs = songs.filter((song) => song.lastUsed).slice(0, 4);

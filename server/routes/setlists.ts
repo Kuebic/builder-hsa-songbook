@@ -277,9 +277,9 @@ export async function updateSetlist(req: Request, res: Response) {
     // TODO: Add authorization check - only owner can update
     
     // Update basic fields
-    if (updateData.name) setlist.name = updateData.name;
-    if (updateData.description !== undefined) setlist.description = updateData.description;
-    if (updateData.tags) setlist.tags = updateData.tags;
+    if (updateData.name) {setlist.name = updateData.name;}
+    if (updateData.description !== undefined) {setlist.description = updateData.description;}
+    if (updateData.tags) {setlist.tags = updateData.tags;}
     if (updateData.songs) {
       setlist.songs = updateData.songs.map(song => ({
         arrangementId: song.arrangementId!,
@@ -293,8 +293,8 @@ export async function updateSetlist(req: Request, res: Response) {
     if (updateData.date !== undefined) {
       setlist.metadata.date = updateData.date ? new Date(updateData.date) : undefined;
     }
-    if (updateData.venue !== undefined) setlist.metadata.venue = updateData.venue;
-    if (updateData.isPublic !== undefined) setlist.metadata.isPublic = updateData.isPublic;
+    if (updateData.venue !== undefined) {setlist.metadata.venue = updateData.venue;}
+    if (updateData.isPublic !== undefined) {setlist.metadata.isPublic = updateData.isPublic;}
 
     await setlist.save();
 

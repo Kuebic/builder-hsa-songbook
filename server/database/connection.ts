@@ -103,7 +103,7 @@ export class DatabaseConnection {
   private async checkStorageUsage(): Promise<void> {
     try {
       const db = mongoose.connection.db;
-      if (!db) return;
+      if (!db) {return;}
 
       const stats = await db.stats();
       const usageBytes = stats.dataSize + stats.indexSize;

@@ -1,5 +1,4 @@
 import { indexedDB } from "../indexeddb/database";
-import { useNetworkContext } from "../../contexts/NetworkContext";
 
 export interface SyncOperation {
   id: string;
@@ -43,7 +42,7 @@ export class SyncManager {
 
   // Start automatic sync processing
   startAutoSync(): void {
-    if (this.syncInterval) return;
+    if (this.syncInterval) {return;}
 
     // Process sync queue every 30 seconds
     this.syncInterval = setInterval(() => {
@@ -64,7 +63,7 @@ export class SyncManager {
 
   // Process all pending operations in sync queue
   async processSyncQueue(): Promise<void> {
-    if (this.isProcessing) return;
+    if (this.isProcessing) {return;}
 
     // Check network status
     if (!navigator.onLine) {
@@ -166,7 +165,7 @@ export class SyncManager {
     // Process results
     for (const result of results) {
       const operation = operations.find(op => op.id === result.operationId);
-      if (!operation) continue;
+      if (!operation) {continue;}
 
       if (result.success) {
         // Remove successful operation from queue

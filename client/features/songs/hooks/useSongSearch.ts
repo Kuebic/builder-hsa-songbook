@@ -12,10 +12,10 @@ export function useSongSearch(songs: Song[], filters: SongFilters) {
       filtered = filtered.filter(
         (song) =>
           song.title.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
-          song.artist.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
+          song.artist?.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
           song.themes.some((theme) =>
-            theme.toLowerCase().includes(filters.searchQuery.toLowerCase())
-          )
+            theme.toLowerCase().includes(filters.searchQuery.toLowerCase()),
+          ),
       );
     }
 
@@ -27,14 +27,14 @@ export function useSongSearch(songs: Song[], filters: SongFilters) {
     // Difficulty filter
     if (filters.difficulty !== "all") {
       filtered = filtered.filter(
-        (song) => song.difficulty === filters.difficulty
+        (song) => song.difficulty === filters.difficulty,
       );
     }
 
     // Theme filter
     if (filters.themes.length > 0) {
       filtered = filtered.filter((song) =>
-        filters.themes.some((theme) => song.themes.includes(theme))
+        filters.themes.some((theme) => song.themes.includes(theme)),
       );
     }
 

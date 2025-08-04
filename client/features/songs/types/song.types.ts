@@ -223,10 +223,10 @@ export function songToClientFormat(song: Song): ClientSong {
 
 // Helper function to extract chords from ChordPro data
 function extractChordsFromChordPro(chordPro: string): string[] {
-  const chordRegex = /\[([A-G][#b]?[^\/\]]*)\]/g;
+  const chordRegex = /\[([A-G][#b]?[^/\]]*)\]/g;
   const matches = chordPro.match(chordRegex);
   
-  if (!matches) return [];
+  if (!matches) {return [];}
   
   const chords = matches
     .map(match => match.slice(1, -1)) // Remove brackets

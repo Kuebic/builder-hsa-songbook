@@ -75,7 +75,7 @@ const songSchema = new Schema<ISong>({
     type: String,
     enum: [
       "C", "C#", "Db", "D", "D#", "Eb", "E", "F", 
-      "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"
+      "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B",
     ],
     index: true,
   },
@@ -117,35 +117,35 @@ const songSchema = new Schema<ISong>({
     createdBy: { 
       type: String, 
       required: true, 
-      index: true 
+      index: true, 
     },
     isPublic: { 
       type: Boolean, 
       default: true, 
-      index: true 
+      index: true, 
     },
     ratings: {
       average: { 
         type: Number, 
         default: 0, 
         min: 0, 
-        max: 5 
+        max: 5, 
       },
       count: { 
         type: Number, 
         default: 0, 
-        min: 0 
+        min: 0, 
       },
     },
     views: { 
       type: Number, 
       default: 0, 
-      min: 0 
+      min: 0, 
     },
   },
   documentSize: { 
     type: Number, 
-    required: true 
+    required: true, 
   },
 }, {
   timestamps: true,
@@ -157,11 +157,11 @@ songSchema.index(
   { 
     title: "text", 
     artist: "text", 
-    themes: "text" 
+    themes: "text", 
   }, 
   { 
-    weights: { title: 10, artist: 8, themes: 6 } 
-  }
+    weights: { title: 10, artist: 8, themes: 6 }, 
+  },
 );
 
 // Compression middleware - compress on save
@@ -240,7 +240,7 @@ songSchema.statics.findByKey = function (key: string) {
 songSchema.statics.searchSongs = function (query: string, limit = 20) {
   return this.find(
     { $text: { $search: query } },
-    { score: { $meta: "textScore" } }
+    { score: { $meta: "textScore" } },
   )
   .sort({ score: { $meta: "textScore" } })
   .limit(limit);

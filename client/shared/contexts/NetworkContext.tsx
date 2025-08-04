@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode } from "react";
+import { createContext, useContext, ReactNode } from "react";
 import { useNetworkStatus, NetworkStatus } from "../hooks/useNetworkStatus";
 
 interface NetworkContextValue extends NetworkStatus {
@@ -50,10 +50,10 @@ export function useConnectionInfo(): {
   const { isOnline, isSlowConnection, effectiveType, downlink } = useNetworkContext();
 
   const quality: "excellent" | "good" | "poor" | "offline" = (() => {
-    if (!isOnline) return "offline";
+    if (!isOnline) {return "offline";}
     
-    if (effectiveType === "4g" && downlink > 1.5) return "excellent";
-    if (effectiveType === "4g" || (effectiveType === "3g" && downlink > 0.7)) return "good";
+    if (effectiveType === "4g" && downlink > 1.5) {return "excellent";}
+    if (effectiveType === "4g" || (effectiveType === "3g" && downlink > 0.7)) {return "good";}
     
     return "poor";
   })();

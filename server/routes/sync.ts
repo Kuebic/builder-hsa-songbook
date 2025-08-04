@@ -36,7 +36,7 @@ export async function batchSync(req: Request, res: Response) {
           result,
         });
       } catch (error) {
-        console.error(`Sync operation failed:`, operation, error);
+        console.error("Sync operation failed:", operation, error);
         
         // Check if it's a conflict
         if (error instanceof ConflictError) {
@@ -247,12 +247,13 @@ async function processSyncOperation(operation: z.infer<typeof syncOperationSchem
 // Song sync operations
 async function processSongSync(operation: string, entityId: string, data: any) {
   switch (operation) {
-    case "create":
+    case "create": {
       const song = new Song(data);
       await song.save();
       return song;
+    }
       
-    case "update":
+    case "update": {
       const existingSong = await Song.findById(entityId);
       if (!existingSong) {
         throw new Error("Song not found");
@@ -269,10 +270,12 @@ async function processSongSync(operation: string, entityId: string, data: any) {
       Object.assign(existingSong, data);
       await existingSong.save();
       return existingSong;
+    }
       
-    case "delete":
+    case "delete": {
       await Song.findByIdAndDelete(entityId);
       return { deleted: true };
+    }
       
     default:
       throw new Error(`Unknown operation: ${operation}`);
@@ -282,12 +285,13 @@ async function processSongSync(operation: string, entityId: string, data: any) {
 // Setlist sync operations
 async function processSetlistSync(operation: string, entityId: string, data: any) {
   switch (operation) {
-    case "create":
+    case "create": {
       const setlist = new Setlist(data);
       await setlist.save();
       return setlist;
+    }
       
-    case "update":
+    case "update": {
       const existingSetlist = await Setlist.findById(entityId);
       if (!existingSetlist) {
         throw new Error("Setlist not found");
@@ -304,10 +308,12 @@ async function processSetlistSync(operation: string, entityId: string, data: any
       Object.assign(existingSetlist, data);
       await existingSetlist.save();
       return existingSetlist;
+    }
       
-    case "delete":
+    case "delete": {
       await Setlist.findByIdAndDelete(entityId);
       return { deleted: true };
+    }
       
     default:
       throw new Error(`Unknown operation: ${operation}`);
@@ -317,12 +323,13 @@ async function processSetlistSync(operation: string, entityId: string, data: any
 // Arrangement sync operations
 async function processArrangementSync(operation: string, entityId: string, data: any) {
   switch (operation) {
-    case "create":
+    case "create": {
       const arrangement = new Arrangement(data);
       await arrangement.save();
       return arrangement;
+    }
       
-    case "update":
+    case "update": {
       const existingArrangement = await Arrangement.findById(entityId);
       if (!existingArrangement) {
         throw new Error("Arrangement not found");
@@ -339,10 +346,12 @@ async function processArrangementSync(operation: string, entityId: string, data:
       Object.assign(existingArrangement, data);
       await existingArrangement.save();
       return existingArrangement;
+    }
       
-    case "delete":
+    case "delete": {
       await Arrangement.findByIdAndDelete(entityId);
       return { deleted: true };
+    }
       
     default:
       throw new Error(`Unknown operation: ${operation}`);
@@ -352,12 +361,13 @@ async function processArrangementSync(operation: string, entityId: string, data:
 // User sync operations
 async function processUserSync(operation: string, entityId: string, data: any) {
   switch (operation) {
-    case "create":
+    case "create": {
       const user = new User({ _id: entityId, ...data });
       await user.save();
       return user;
+    }
       
-    case "update":
+    case "update": {
       const existingUser = await User.findById(entityId);
       if (!existingUser) {
         // Create user if it doesn't exist (common for Clerk users)
@@ -369,10 +379,12 @@ async function processUserSync(operation: string, entityId: string, data: any) {
       Object.assign(existingUser, data);
       await existingUser.save();
       return existingUser;
+    }
       
-    case "delete":
+    case "delete": {
       await User.findByIdAndDelete(entityId);
       return { deleted: true };
+    }
       
     default:
       throw new Error(`Unknown operation: ${operation}`);
@@ -400,7 +412,7 @@ async function getServerChangesSince(timestamp: number): Promise<any[]> {
 class ConflictError extends Error {
   constructor(
     public serverData: any,
-    public lastModified: number
+    public lastModified: number,
   ) {
     super("Data conflict detected");
     this.name = "ConflictError";

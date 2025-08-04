@@ -205,7 +205,7 @@ class IndexedDBManager {
     return allSongs.filter(song => 
       song.title.toLowerCase().includes(lowerQuery) ||
       song.artist?.toLowerCase().includes(lowerQuery) ||
-      song.themes.some(theme => theme.toLowerCase().includes(lowerQuery))
+      song.themes.some(theme => theme.toLowerCase().includes(lowerQuery)),
     );
   }
 

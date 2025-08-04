@@ -28,7 +28,7 @@ export function useNetworkStatus(): UseNetworkStatusReturn {
 
   // Get connection info if available (Chrome/Edge)
   const getConnectionInfo = useCallback((): Partial<NetworkStatus> => {
-    // @ts-ignore - NetworkInformation is not in TypeScript types yet
+    // @ts-expect-error - NetworkInformation is not in TypeScript types yet
     const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     
     if (connection) {
@@ -111,7 +111,7 @@ export function useNetworkStatus(): UseNetworkStatusReturn {
     window.addEventListener("offline", handleOffline);
 
     // Connection change events (Chrome/Edge)
-    // @ts-ignore
+    // @ts-expect-error - NetworkInformation is not in TypeScript types yet
     const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     
     if (connection) {
@@ -137,7 +137,7 @@ export function useNetworkStatus(): UseNetworkStatusReturn {
 
   // Periodic connectivity check (every 30 seconds when online)
   useEffect(() => {
-    if (!networkStatus.isOnline) return;
+    if (!networkStatus.isOnline) {return;}
 
     const interval = setInterval(async () => {
       const isStillOnline = await checkConnection();
@@ -155,7 +155,7 @@ export function useNetworkStatus(): UseNetworkStatusReturn {
 
   // Retry connection check when offline (every 10 seconds)
   useEffect(() => {
-    if (networkStatus.isOnline) return;
+    if (networkStatus.isOnline) {return;}
 
     const interval = setInterval(async () => {
       if (navigator.onLine) {
@@ -193,10 +193,10 @@ export function useConnectionQuality(): {
   const { isOnline, effectiveType, downlink, rtt } = useNetworkStatus();
 
   const quality = (() => {
-    if (!isOnline) return "offline";
+    if (!isOnline) {return "offline";}
     
-    if (effectiveType === "4g" && downlink > 1.5) return "excellent";
-    if (effectiveType === "4g" || (effectiveType === "3g" && downlink > 0.7)) return "good";
+    if (effectiveType === "4g" && downlink > 1.5) {return "excellent";}
+    if (effectiveType === "4g" || (effectiveType === "3g" && downlink > 0.7)) {return "good";}
     
     return "poor";
   })();

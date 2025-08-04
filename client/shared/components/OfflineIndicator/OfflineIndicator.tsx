@@ -1,4 +1,3 @@
-import React from "react";
 import { AlertCircle, Wifi, WifiOff, Loader2, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useConnectionInfo } from "../../contexts/NetworkContext";
@@ -68,7 +67,7 @@ export function OfflineIndicator({ className, showDetails = false }: OfflineIndi
   };
 
   const statusInfo = getStatusInfo();
-  if (!statusInfo) return null;
+  if (!statusInfo) {return null;}
 
   const { icon: Icon, text, description, variant } = statusInfo;
 
@@ -87,7 +86,7 @@ export function OfflineIndicator({ className, showDetails = false }: OfflineIndi
       <Icon 
         className={cn(
           "h-4 w-4",
-          variant === "syncing" && "animate-spin"
+          variant === "syncing" && "animate-spin",
         )} 
       />
       <span className="font-medium">{text}</span>

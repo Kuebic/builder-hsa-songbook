@@ -92,7 +92,7 @@ const arrangementSchema = new Schema<IArrangement>({
       type: String,
       enum: [
         "C", "C#", "Db", "D", "D#", "Eb", "E", "F", 
-        "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"
+        "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B",
       ],
       index: true,
     },
@@ -154,7 +154,7 @@ const arrangementSchema = new Schema<IArrangement>({
 // Create text index for search
 arrangementSchema.index(
   { name: "text" },
-  { weights: { name: 10 } }
+  { weights: { name: 10 } },
 );
 
 // Compound indexes for efficient queries
@@ -234,7 +234,7 @@ arrangementSchema.methods.getMashupDuration = function () {
     return 0;
   }
   
-  return this.metadata.mashupSections.reduce((total, section) => {
+  return this.metadata.mashupSections.reduce((total: number, section: any) => {
     return total + (section.endBar - section.startBar + 1);
   }, 0);
 };
@@ -261,7 +261,7 @@ arrangementSchema.statics.findByDifficulty = function (difficulty: string) {
 arrangementSchema.statics.searchArrangements = function (query: string, limit = 20) {
   return this.find(
     { $text: { $search: query }, isPublic: true },
-    { score: { $meta: "textScore" } }
+    { score: { $meta: "textScore" } },
   )
   .populate("songIds", "title artist")
   .sort({ score: { $meta: "textScore" } })

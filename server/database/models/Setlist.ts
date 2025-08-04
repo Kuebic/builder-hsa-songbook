@@ -124,7 +124,7 @@ const setlistSchema = new Schema<ISetlist>({
 // Create text index for search
 setlistSchema.index(
   { name: "text", description: "text", tags: "text" },
-  { weights: { name: 10, description: 5, tags: 3 } }
+  { weights: { name: 10, description: 5, tags: 3 } },
 );
 
 // Compound indexes for efficient queries
@@ -172,10 +172,10 @@ setlistSchema.methods.addSong = function (arrangementId: string, transposeBy = 0
 
 setlistSchema.methods.removeSong = function (arrangementId: string) {
   this.songs = this.songs.filter(
-    song => song.arrangementId.toString() !== arrangementId
+    (song: any) => song.arrangementId.toString() !== arrangementId,
   );
   // Reorder remaining songs
-  this.songs.forEach((song, index) => {
+  this.songs.forEach((song: any, index: number) => {
     song.order = index + 1;
   });
   return this.save();
@@ -186,7 +186,7 @@ setlistSchema.methods.reorderSongs = function (newOrder: string[]) {
   
   for (let i = 0; i < newOrder.length; i++) {
     const arrangementId = newOrder[i];
-    const song = this.songs.find(s => s.arrangementId.toString() === arrangementId);
+    const song = this.songs.find((s: any) => s.arrangementId.toString() === arrangementId);
     if (song) {
       song.order = i + 1;
       reorderedSongs.push(song);
@@ -198,7 +198,7 @@ setlistSchema.methods.reorderSongs = function (newOrder: string[]) {
 };
 
 setlistSchema.methods.updateSongTranspose = function (arrangementId: string, transposeBy: number) {
-  const song = this.songs.find(s => s.arrangementId.toString() === arrangementId);
+  const song = this.songs.find((s: any) => s.arrangementId.toString() === arrangementId);
   if (song) {
     song.transposeBy = transposeBy;
     return this.save();
@@ -272,7 +272,7 @@ setlistSchema.statics.findByTag = function (tag: string, limit = 20) {
 setlistSchema.statics.searchSetlists = function (query: string, limit = 20) {
   return this.find(
     { $text: { $search: query }, "metadata.isPublic": true },
-    { score: { $meta: "textScore" } }
+    { score: { $meta: "textScore" } },
   )
   .populate({
     path: "songs.arrangementId",

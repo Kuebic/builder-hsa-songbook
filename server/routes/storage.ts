@@ -3,7 +3,7 @@ import { database } from "../database/connection";
 import { Song, Setlist, Arrangement, User } from "../database/models";
 
 // Get database storage statistics
-export async function getStorageStats(req: Request, res: Response) {
+export async function getStorageStats(_req: Request, res: Response) {
   try {
     const stats = await database.getStorageStats();
 
@@ -74,7 +74,7 @@ export async function triggerCleanup(req: Request, res: Response) {
     // Find duplicate slugs (shouldn't happen but just in case)
     const duplicateSlugs = await Song.aggregate([
       { $group: { _id: "$slug", count: { $sum: 1 }, ids: { $push: "$_id" } } },
-      { $match: { count: { $gt: 1 } } }
+      { $match: { count: { $gt: 1 } } },
     ]);
 
     cleanupResults.duplicateSlugs = duplicateSlugs.length;
@@ -95,7 +95,7 @@ export async function triggerCleanup(req: Request, res: Response) {
       $or: [
         { "stats.lastUsed": { $lt: sixMonthsAgo } },
         { "stats.lastUsed": null },
-        { "stats.usageCount": 0 }
+        { "stats.usageCount": 0 },
       ],
       isPublic: false, // Only cleanup private arrangements
     });
@@ -163,7 +163,7 @@ export async function triggerCleanup(req: Request, res: Response) {
 }
 
 // Get compression statistics
-export async function getCompressionStats(req: Request, res: Response) {
+export async function getCompressionStats(_req: Request, res: Response) {
   try {
     // Sample some documents to estimate compression ratio
     const sampleSongs = await Song.find({})
@@ -225,7 +225,7 @@ export async function getCompressionStats(req: Request, res: Response) {
 }
 
 // Health check endpoint with storage monitoring
-export async function healthCheck(req: Request, res: Response) {
+export async function healthCheck(_req: Request, res: Response) {
   try {
     const isConnected = database.isConnectedToDatabase();
     

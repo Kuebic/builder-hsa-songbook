@@ -34,7 +34,7 @@ async function startServer() {
       console.log(`🚀 HSA Songbook server running on port ${port}`);
       console.log(`📱 Frontend: http://localhost:${port}`);
       console.log(`🔧 API: http://localhost:${port}/api`);
-      console.log(`💾 Database: Connected to MongoDB Atlas`);
+      console.log("💾 Database: Connected to MongoDB Atlas");
     });
     
   } catch (error) {
