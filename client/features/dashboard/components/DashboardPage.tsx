@@ -121,8 +121,12 @@ export default function DashboardPage() {
     );
   }
 
-  // Show error state
-  if (error) {
+  // Show error state (but don't let it cause infinite renders)
+  const hasError = useMemo(() => Boolean(error), [error]);
+  const errorMessage = useMemo(() =>
+    error?.message || "Please check your connection and try again.", [error]);
+
+  if (hasError && !isLoading) {
     return (
       <Layout>
         <div className="space-y-8">
@@ -130,7 +134,7 @@ export default function DashboardPage() {
             <div className="text-center">
               <h3 className="text-lg font-semibold mb-2">Unable to load songs</h3>
               <p className="text-muted-foreground mb-4">
-                {error.message || "Please check your connection and try again."}
+                {errorMessage}
               </p>
               <Button onClick={() => window.location.reload()}>
                 Retry
