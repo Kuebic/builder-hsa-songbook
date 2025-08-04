@@ -54,6 +54,15 @@
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* HSA Songbook Theme Colors */
+    --worship: 25 95% 53%;
+    --worship-foreground: 0 0% 100%;
+    --worship-gold: 45 100% 51%;
+    --worship-gold-foreground: 0 0% 0%;
+    --chord: 210 40% 96.1%;
+    --chord-foreground: 222.2 47.4% 11.2%;
+    --chord-background: 0 0% 100%;
   }
 
   .dark {
