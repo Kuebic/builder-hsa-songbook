@@ -98,6 +98,43 @@ export default function DashboardPage() {
     .sort((a, b) => b.viewCount - a.viewCount)
     .slice(0, 4);
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="space-y-8">
+          <div className="flex items-center justify-center py-16">
+            <div className="text-center">
+              <div className="animate-spin h-8 w-8 mx-auto mb-4 border-2 border-worship border-t-transparent rounded-full" />
+              <p className="text-muted-foreground">Loading songs from database...</p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <Layout>
+        <div className="space-y-8">
+          <div className="flex items-center justify-center py-16">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold mb-2">Unable to load songs</h3>
+              <p className="text-muted-foreground mb-4">
+                {error.message || "Please check your connection and try again."}
+              </p>
+              <Button onClick={() => window.location.reload()}>
+                Retry
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="space-y-8">
