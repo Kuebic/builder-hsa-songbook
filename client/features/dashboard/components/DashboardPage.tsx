@@ -35,8 +35,17 @@ export default function DashboardPage() {
   const [selectedKey, setSelectedKey] = useState<string>("all");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [songs, setSongs] = useState<ClientSong[]>(mockClientSongs);
-  const [filteredSongs, setFilteredSongs] = useState<ClientSong[]>(mockClientSongs);
+
+  // Fetch songs from MongoDB
+  const { data: songs = [], isLoading, error } = useSongs({
+    limit: 50,
+    isPublic: true
+  });
+
+  // Fetch dashboard stats
+  const { data: stats } = useSongsStats();
+
+  const [filteredSongs, setFilteredSongs] = useState<ClientSong[]>([]);
 
   useEffect(() => {
     let filtered = songs;
