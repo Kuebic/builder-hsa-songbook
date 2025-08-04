@@ -5,7 +5,7 @@ import { createServer } from "./server";
 import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(() => ({
   server: {
     host: "::",
     port: 8080,
@@ -79,24 +79,24 @@ export default defineConfig(({ mode }) => ({
           {
             src: "pwa-64x64.png",
             sizes: "64x64",
-            type: "image/png"
+            type: "image/png",
           },
           {
             src: "pwa-192x192.png",
             sizes: "192x192",
-            type: "image/png"
+            type: "image/png",
           },
           {
             src: "pwa-512x512.png",
             sizes: "512x512",
-            type: "image/png"
+            type: "image/png",
           },
           {
             src: "maskable-icon-512x512.png",
             sizes: "512x512",
             type: "image/png",
-            purpose: "maskable"
-          }
+            purpose: "maskable",
+          },
         ],
         categories: ["music", "productivity", "utilities"],
         shortcuts: [
@@ -105,21 +105,21 @@ export default defineConfig(({ mode }) => ({
             short_name: "Songs",
             description: "Browse chord charts",
             url: "/songs",
-            icons: [{ src: "pwa-192x192.png", sizes: "192x192" }]
+            icons: [{ src: "pwa-192x192.png", sizes: "192x192" }],
           },
           {
             name: "Setlists",
             short_name: "Setlists",
             description: "Manage setlists",
             url: "/setlists",
-            icons: [{ src: "pwa-192x192.png", sizes: "192x192" }]
-          }
-        ]
+            icons: [{ src: "pwa-192x192.png", sizes: "192x192" }],
+          },
+        ],
       },
       devOptions: {
         enabled: true, // Enable PWA in development
       },
-    })
+    }),
   ],
   resolve: {
     alias: {
