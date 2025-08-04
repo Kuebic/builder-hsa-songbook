@@ -36,11 +36,13 @@ export default function DashboardPage() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  // Fetch songs from MongoDB
-  const { data: songs = [], isLoading, error } = useSongs({
+  // Fetch songs from MongoDB with stable params
+  const songsQueryParams = useMemo(() => ({
     limit: 50,
     isPublic: true
-  });
+  }), []);
+
+  const { data: songs = [], isLoading, error } = useSongs(songsQueryParams);
 
   // Fetch dashboard stats
   const { data: stats } = useSongsStats();
