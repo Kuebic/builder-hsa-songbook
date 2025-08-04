@@ -174,7 +174,7 @@ export default function Layout({ children }: LayoutProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
-                  <ThemeIcon />
+                  {themeIcon}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
