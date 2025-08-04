@@ -42,7 +42,14 @@ export function useSongs(params: SongQueryParams = {}) {
           }
         });
 
-        const response = await fetch(`/api/songs?${searchParams.toString()}`);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+        const response = await fetch(`/api/songs?${searchParams.toString()}`, {
+          signal: controller.signal
+        });
+
+        clearTimeout(timeout);
 
         if (!response.ok) {
           // If API is not available, fallback to mock data
