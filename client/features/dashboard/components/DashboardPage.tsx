@@ -48,6 +48,11 @@ export default function DashboardPage() {
   const [filteredSongs, setFilteredSongs] = useState<ClientSong[]>([]);
 
   useEffect(() => {
+    if (!songs.length) {
+      setFilteredSongs([]);
+      return;
+    }
+
     let filtered = songs;
 
     // Search filter
@@ -55,7 +60,7 @@ export default function DashboardPage() {
       filtered = filtered.filter(
         (song) =>
           song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          song.artist.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          song.artist?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           song.themes.some((theme) =>
             theme.toLowerCase().includes(searchQuery.toLowerCase()),
           ),
