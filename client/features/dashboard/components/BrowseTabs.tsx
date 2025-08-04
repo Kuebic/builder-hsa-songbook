@@ -84,13 +84,13 @@ export default function BrowseTabs() {
 
   const clearFilters = () => {
     setSearchQuery("");
-    setSelectedKey("");
-    setSelectedDifficulty("");
-    setSelectedTheme("");
+    setSelectedKey("all");
+    setSelectedDifficulty("all");
+    setSelectedTheme("all");
     setSortBy("recent");
   };
 
-  const hasActiveFilters = searchQuery || selectedKey || selectedDifficulty || selectedTheme || sortBy !== "recent";
+  const hasActiveFilters = searchQuery || (selectedKey && selectedKey !== "all") || (selectedDifficulty && selectedDifficulty !== "all") || (selectedTheme && selectedTheme !== "all") || sortBy !== "recent";
 
   const renderStatsCards = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
