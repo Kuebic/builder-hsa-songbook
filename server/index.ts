@@ -94,8 +94,38 @@ export async function initializeServer() {
   try {
     await database.connect();
     console.log("🚀 Database initialized successfully");
+
+    // Check if we need to run migrations
+    await runInitialMigration();
+
   } catch (error) {
     console.error("❌ Failed to initialize database:", error);
+
+    // For development, continue without database
+    if (process.env.NODE_ENV === "development") {
+      console.warn("⚠️  Continuing in development mode without database");
+      return;
+    }
+
     process.exit(1);
+  }
+}
+
+async function runInitialMigration() {
+  try {
+    const { Song } = await import("./database/models");
+    const songCount = await Song.countDocuments();
+
+    if (songCount === 0) {
+      console.log("📦 Database is empty, running initial migration...");
+      const { migrateMockData } = await import("./migrations/migrate-mock-data");
+      const result = await migrateMockData();
+      console.log("✅ Initial migration completed:", result);
+    } else {
+      console.log(`📊 Database already has ${songCount} songs`);
+    }
+  } catch (error) {
+    console.warn("⚠️  Could not run migration:", error.message);
+    console.log("💡 The app will continue with an empty database");
   }
 }
