@@ -267,7 +267,14 @@ export function useSongsStats() {
     queryKey: ['songs', 'stats'],
     queryFn: async () => {
       try {
-        const response = await fetch('/api/songs/stats');
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+        const response = await fetch('/api/songs/stats', {
+          signal: controller.signal
+        });
+
+        clearTimeout(timeout);
 
         if (!response.ok) {
           // Fallback to mock stats if endpoint doesn't exist yet
