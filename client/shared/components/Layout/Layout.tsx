@@ -42,19 +42,7 @@ export default function Layout({ children }: LayoutProps) {
     { name: "Arrangements", href: "/arrangements", icon: BookOpen },
   ], []);
 
-  const handleThemeChange = useCallback((newTheme: "light" | "dark" | "stage") => {
-    setTheme(newTheme);
-    document.documentElement.setAttribute("data-theme", newTheme);
-    if (newTheme === "dark" || newTheme === "stage") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, []);
 
-  const handleLightTheme = useCallback(() => handleThemeChange("light"), [handleThemeChange]);
-  const handleDarkTheme = useCallback(() => handleThemeChange("dark"), [handleThemeChange]);
-  const handleStageTheme = useCallback(() => handleThemeChange("stage"), [handleThemeChange]);
 
   const themeIcon = useMemo(() => {
     switch (theme) {
