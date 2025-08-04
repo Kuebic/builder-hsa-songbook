@@ -5,11 +5,26 @@ import { z } from "zod";
 // Helper function to transform MongoDB song to client format
 function transformSongToClientFormat(song: any) {
   // Extract basic chords from ChordPro data
-  const extractChordsFromChordPro = (chordPro: string): string[] => {
+  const extractChordsFromChordPro = (chordPro: any): string[] => {
     if (!chordPro) return [];
 
+    // Handle case where chordData might not be a string (compressed data, etc.)
+    let chordProString: string;
+    try {
+      if (typeof chordPro === 'string') {
+        chordProString = chordPro;
+      } else {
+        // If it's not a string, it might be compressed or in another format
+        // For now, return empty array as we can't easily extract chords
+        return [];
+      }
+    } catch (error) {
+      console.warn('Error processing chord data:', error);
+      return [];
+    }
+
     const chordRegex = /\[([A-G][#b]?[^\/\]]*)\]/g;
-    const matches = chordPro.match(chordRegex);
+    const matches = chordProString.match(chordRegex);
 
     if (!matches) return [];
 
