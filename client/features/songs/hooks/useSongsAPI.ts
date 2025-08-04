@@ -259,20 +259,29 @@ export function useSongsStats() {
   return useQuery({
     queryKey: ['songs', 'stats'],
     queryFn: async () => {
-      const response = await fetch('/api/songs/stats');
-      
-      if (!response.ok) {
-        // Fallback to mock stats if endpoint doesn't exist yet
-        return {
-          totalSongs: 0,
-          totalSetlists: 0,
-          recentlyAdded: 0,
-          topContributors: 0,
-        };
-      }
+      try {
+        const response = await fetch('/api/songs/stats');
 
-      const result = await response.json();
-      return result.data;
+        if (!response.ok) {
+          // Fallback to mock stats if endpoint doesn't exist yet
+          console.warn('Stats API not available, using fallback data');
+          const { mockStats } = await import('../utils/mockData');
+          return mockStats;
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.error?.message || 'Failed to fetch stats');
+        }
+
+        return result.data;
+      } catch (error) {
+        // Fallback to mock stats on any error
+        console.warn('Using mock stats due to error:', error);
+        const { mockStats } = await import('../utils/mockData');
+        return mockStats;
+      }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
