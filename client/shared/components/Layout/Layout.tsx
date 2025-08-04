@@ -178,27 +178,44 @@ export default function Layout({ children }: LayoutProps) {
             </Button>
 
             {/* Theme switcher */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <Popover>
+              <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon">
                   {themeIcon}
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={setLightTheme}>
-                  <Sun className="mr-2 h-4 w-4" />
-                  Light
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={setDarkTheme}>
-                  <Moon className="mr-2 h-4 w-4" />
-                  Dark
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={setStageTheme}>
-                  <Monitor className="mr-2 h-4 w-4" />
-                  Stage Mode
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </PopoverTrigger>
+              <PopoverContent className="w-40 p-1" align="end">
+                <div className="space-y-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={setLightTheme}
+                  >
+                    <Sun className="mr-2 h-4 w-4" />
+                    Light
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={setDarkTheme}
+                  >
+                    <Moon className="mr-2 h-4 w-4" />
+                    Dark
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={setStageTheme}
+                  >
+                    <Monitor className="mr-2 h-4 w-4" />
+                    Stage Mode
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
 
             {/* User menu */}
             <DropdownMenu>
