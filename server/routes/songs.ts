@@ -418,3 +418,37 @@ export async function searchSongs(req: Request, res: Response) {
     });
   }
 }
+
+// Get songs statistics for dashboard
+export async function getSongsStats(req: Request, res: Response) {
+  try {
+    const [totalSongs, recentSongs] = await Promise.all([
+      Song.countDocuments({ "metadata.isPublic": true }),
+      Song.countDocuments({
+        "metadata.isPublic": true,
+        createdAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } // Last 7 days
+      })
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        totalSongs,
+        totalSetlists: 0, // TODO: Implement when setlists are connected
+        recentlyAdded: recentSongs,
+        topContributors: 0, // TODO: Implement user counting
+      },
+    });
+
+  } catch (error) {
+    console.error("Error fetching songs stats:", error);
+
+    res.status(500).json({
+      success: false,
+      error: {
+        code: "INTERNAL_ERROR",
+        message: "Failed to fetch statistics",
+      },
+    });
+  }
+}
