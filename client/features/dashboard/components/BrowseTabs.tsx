@@ -29,9 +29,9 @@ export default function BrowseTabs() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [sortBy, setSortBy] = useState<SortOption>("recent");
-  const [selectedKey, setSelectedKey] = useState<string>("");
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("");
-  const [selectedTheme, setSelectedTheme] = useState<string>("");
+  const [selectedKey, setSelectedKey] = useState<string>("all");
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
+  const [selectedTheme, setSelectedTheme] = useState<string>("all");
 
   // Fetch songs and stats
   const { data: songs = [], isLoading: songsLoading, error: songsError } = useSongs();
