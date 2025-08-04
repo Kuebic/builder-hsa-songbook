@@ -58,6 +58,10 @@ export default function Layout({ children }: LayoutProps) {
     }
   }, []);
 
+  const handleLightTheme = useCallback(() => handleThemeChange("light"), [handleThemeChange]);
+  const handleDarkTheme = useCallback(() => handleThemeChange("dark"), [handleThemeChange]);
+  const handleStageTheme = useCallback(() => handleThemeChange("stage"), [handleThemeChange]);
+
   const themeIcon = useMemo(() => {
     switch (theme) {
       case "dark":
