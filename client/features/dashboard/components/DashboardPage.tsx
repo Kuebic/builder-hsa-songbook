@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Layout } from "@/shared/components/Layout";
 import { SongCard } from "@features/songs";
-import { mockClientSongs, mockStats } from "@features/songs/utils/mockData";
+import { mockStats } from "@features/songs/utils/mockData";
 import { ClientSong } from "@features/songs";
+import { useSongs } from "@/shared/hooks/useSongs";
+import { useUserId } from "@/shared/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,9 +34,18 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedKey, setSelectedKey] = useState<string>("all");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
-  const [songs, setSongs] = useState<ClientSong[]>(mockClientSongs);
-  const [filteredSongs, setFilteredSongs] = useState<ClientSong[]>(mockClientSongs);
+  
+  // Get user ID from authentication context
+  const userId = useUserId();
+  
+  // Use the API hook to fetch real songs from MongoDB
+  const { songs, loading, error, fetchSongs, toggleFavorite } = useSongs({ 
+    autoFetch: true,
+    userId: userId || undefined // Use authenticated user ID or undefined if not logged in
+  });
+  const [filteredSongs, setFilteredSongs] = useState<ClientSong[]>([]);
 
+  // Apply filters when songs data or filters change
   useEffect(() => {
     let filtered = songs;
 
@@ -65,18 +76,22 @@ export default function DashboardPage() {
     setFilteredSongs(filtered);
   }, [searchQuery, selectedKey, selectedDifficulty, songs]);
 
-  const handleToggleFavorite = (songId: string) => {
-    setSongs((prev) =>
+  const handleToggleFavorite = useCallback(async (songId: string) => {
+    // Update the filtered songs for immediate UI feedback
+    setFilteredSongs((prev) =>
       prev.map((song) =>
         song.id === songId ? { ...song, isFavorite: !song.isFavorite } : song,
       ),
     );
-  };
+    
+    // Use the hook's toggleFavorite method to persist to backend
+    await toggleFavorite(songId);
+  }, [toggleFavorite]);
 
-  const handleAddToSetlist = (songId: string) => {
+  const handleAddToSetlist = useCallback((songId: string) => {
     // TODO: Implement add to setlist functionality
     void songId;
-  };
+  }, []);
 
   const recentSongs = songs.filter((song) => song.lastUsed).slice(0, 4);
   const favoriteSongs = songs.filter((song) => song.isFavorite).slice(0, 4);
@@ -117,10 +132,10 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {mockStats.totalSongs.toLocaleString()}
+                {songs.length.toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">
-                +{mockStats.recentlyAdded} this week
+                {loading ? 'Loading...' : 'from database'}
               </p>
             </CardContent>
           </Card>
@@ -249,6 +264,21 @@ export default function DashboardPage() {
 
           <TabsContent value="all" className="mt-6">
             <div className="space-y-6">
+              {/* Error handling */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                  <p className="text-red-800 text-sm">
+                    <strong>Error loading songs:</strong> {error.message}
+                  </p>
+                  <button 
+                    onClick={() => fetchSongs()}
+                    className="mt-2 text-red-600 hover:text-red-800 text-sm underline"
+                  >
+                    Try again
+                  </button>
+                </div>
+              )}
+
               {/* Search and Filters */}
               <div className="flex flex-col lg:flex-row gap-4">
                 <div className="flex-1">
@@ -317,16 +347,29 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {filteredSongs.map((song) => (
-                    <SongCard
-                      key={song.id}
-                      song={song}
-                      onToggleFavorite={handleToggleFavorite}
-                      onAddToSetlist={handleAddToSetlist}
-                    />
-                  ))}
-                </div>
+                {loading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {/* Loading skeleton */}
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="bg-gray-200 rounded-lg h-48 mb-3"></div>
+                        <div className="bg-gray-200 rounded h-4 mb-2"></div>
+                        <div className="bg-gray-200 rounded h-3 w-3/4"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {filteredSongs.map((song) => (
+                      <SongCard
+                        key={song.id}
+                        song={song}
+                        onToggleFavorite={handleToggleFavorite}
+                        onAddToSetlist={handleAddToSetlist}
+                      />
+                    ))}
+                  </div>
+                )}
 
                 {filteredSongs.length === 0 && (
                   <div className="text-center py-12">
