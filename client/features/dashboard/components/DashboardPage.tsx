@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Layout } from "@/shared/components/Layout";
 import { SongCard } from "@features/songs";
-import { mockClientSongs, mockStats } from "@features/songs/utils/mockData";
+import { useSongs, useSongsStats } from "@features/songs/hooks/useSongsAPI";
 import { useSongSearch } from "@features/songs";
 import { ClientSong, SongFilters } from "@features/songs";
 import { Button } from "@/components/ui/button";
