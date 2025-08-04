@@ -26,10 +26,10 @@ import {
   Edit,
   Share,
 } from "lucide-react";
-import { Song } from "../types/song.types";
+import { ClientSong } from "../types/song.types";
 
 interface SongCardProps {
-  song: Song;
+  song: ClientSong;
   onAddToSetlist?: (songId: string) => void;
   onToggleFavorite?: (songId: string) => void;
   showActions?: boolean;

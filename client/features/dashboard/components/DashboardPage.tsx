@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Layout } from "@/shared/components/Layout";
 import { SongCard } from "@features/songs";
-import { mockSongs, mockStats } from "@features/songs/utils/mockData";
+import { mockClientSongs, mockStats } from "@features/songs/utils/mockData";
 import { useSongSearch } from "@features/songs";
-import { Song, SongFilters } from "@features/songs";
+import { ClientSong, SongFilters } from "@features/songs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -35,8 +35,8 @@ export default function DashboardPage() {
   const [selectedKey, setSelectedKey] = useState<string>("all");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [songs, setSongs] = useState<Song[]>(mockSongs);
-  const [filteredSongs, setFilteredSongs] = useState<Song[]>(mockSongs);
+  const [songs, setSongs] = useState<ClientSong[]>(mockClientSongs);
+  const [filteredSongs, setFilteredSongs] = useState<ClientSong[]>(mockClientSongs);
 
   useEffect(() => {
     let filtered = songs;
