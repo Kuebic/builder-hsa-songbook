@@ -1,15 +1,10 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import {
   Sheet,
   SheetContent,
@@ -41,24 +36,16 @@ export default function Layout({ children }: LayoutProps) {
   const [isOffline] = useState(false);
   const location = useLocation();
 
-  const navigation = [
+  const navigation = useMemo(() => [
     { name: "Dashboard", href: "/", icon: Home },
     { name: "Songs", href: "/songs", icon: Music },
     { name: "Setlists", href: "/setlists", icon: List },
     { name: "Arrangements", href: "/arrangements", icon: BookOpen },
-  ];
+  ], []);
 
-  const handleThemeChange = (newTheme: "light" | "dark" | "stage") => {
-    setTheme(newTheme);
-    document.documentElement.setAttribute("data-theme", newTheme);
-    if (newTheme === "dark" || newTheme === "stage") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  };
 
-  const ThemeIcon = () => {
+
+  const themeIcon = useMemo(() => {
     switch (theme) {
       case "dark":
         return <Moon className="h-4 w-4" />;
@@ -67,7 +54,23 @@ export default function Layout({ children }: LayoutProps) {
       default:
         return <Sun className="h-4 w-4" />;
     }
-  };
+  }, [theme]);
+
+  // Simple theme cycling handler
+  const cycleTheme = useCallback(() => {
+    const themes: ("light" | "dark" | "stage")[] = ["light", "dark", "stage"];
+    const currentIndex = themes.indexOf(theme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    const newTheme = themes[nextIndex];
+
+    setTheme(newTheme);
+    document.documentElement.setAttribute("data-theme", newTheme);
+    if (newTheme === "dark" || newTheme === "stage") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -170,49 +173,20 @@ export default function Layout({ children }: LayoutProps) {
               <PlusCircle className="h-4 w-4" />
             </Button>
 
-            {/* Theme switcher */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <ThemeIcon />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleThemeChange("light")}>
-                  <Sun className="mr-2 h-4 w-4" />
-                  Light
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleThemeChange("dark")}>
-                  <Moon className="mr-2 h-4 w-4" />
-                  Dark
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleThemeChange("stage")}>
-                  <Monitor className="mr-2 h-4 w-4" />
-                  Stage Mode
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Theme switcher - simple cycling button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={cycleTheme}
+              title={`Current: ${theme}. Click to cycle themes.`}
+            >
+              {themeIcon}
+            </Button>
 
-            {/* User menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <User className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Sign out</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* User menu - simplified for stability */}
+            <Button variant="ghost" size="icon" title="User Menu">
+              <User className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </header>

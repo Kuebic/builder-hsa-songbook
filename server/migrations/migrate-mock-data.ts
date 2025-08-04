@@ -80,7 +80,7 @@ Your [E]glory, God, is [A]what our hearts long [B]for
 To be over[C#m]come by Your [A]presence, Lord
 {end_of_chorus}`,
 
-  "Cornerstone": `{title: Cornerstone}
+  Cornerstone: `{title: Cornerstone}
 {artist: Hillsong}
 {key: C}
 {tempo: 95}
@@ -240,7 +240,7 @@ export async function migrateMockData() {
 
     // Create a default admin user for the songs
     const adminUserId = "admin_user_123";
-    
+
     // Check if admin user exists, create if not
     let adminUser = await User.findById(adminUserId);
     if (!adminUser) {
@@ -272,7 +272,8 @@ export async function migrateMockData() {
 
     // Migrate each song
     for (const mockSong of mockSongs) {
-      const chordData = mockChordProData[mockSong.title as keyof typeof mockChordProData] || 
+      const chordData =
+        mockChordProData[mockSong.title as keyof typeof mockChordProData] ||
         `{title: ${mockSong.title}}\n{artist: ${mockSong.artist}}\n{key: ${mockSong.key}}\n\n[${mockSong.key}]Sample chord progression\n[${mockSong.key}]More chords here`;
 
       const song = new Song({
@@ -292,7 +293,7 @@ export async function migrateMockData() {
           lastModifiedBy: adminUserId,
           isPublic: true,
           ratings: {
-            average: Math.random() * 2 + 3.5, // Random rating between 3.5-5.5
+            average: Math.random() * 1.5 + 3.5, // Random rating between 3.5-5.0
             count: Math.floor(Math.random() * 50) + 10, // Random count 10-60
           },
           views: Math.floor(Math.random() * 2000) + 100, // Random views 100-2100
@@ -313,14 +314,15 @@ export async function migrateMockData() {
 
     // Get storage stats
     const stats = await database.getStorageStats();
-    console.log(`💾 Database usage: ${stats.usage}MB / ${stats.limit}MB (${stats.percentage}%)`);
+    console.log(
+      `💾 Database usage: ${stats.usage}MB / ${stats.limit}MB (${stats.percentage}%)`,
+    );
 
     return {
       success: true,
       migrated: mockSongs.length,
       storageUsage: stats,
     };
-
   } catch (error) {
     console.error("❌ Migration failed:", error);
     throw error;

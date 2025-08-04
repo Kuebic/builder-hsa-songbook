@@ -32,8 +32,9 @@ export class DatabaseConnection {
       await mongoose.connect(mongoUri, {
         // Connection optimization for free tier
         maxPoolSize: 5, // Limit connection pool for free tier
-        serverSelectionTimeoutMS: 5000, // Keep short for faster failures
-        socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+        serverSelectionTimeoutMS: 3000, // Faster failures for fallback
+        socketTimeoutMS: 5000, // Shorter socket timeout
+        connectTimeoutMS: 3000, // Faster connection timeout
         bufferCommands: false, // Disable mongoose buffering
         
         // Compression settings - let MongoDB handle this

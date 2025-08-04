@@ -4,6 +4,7 @@ export { default as SongsPage } from "./components/SongsPage";
 
 // Hooks
 export { useSongSearch } from "./hooks/useSongSearch";
+export * from "./hooks/useSongsAPI";
 
 // Types and utilities
 export type { Song, ClientSong, ChordChart, SongFilters } from "./types/song.types";

@@ -2,18 +2,90 @@ import { Request, Response } from "express";
 import { Song } from "../database/models";
 import { z } from "zod";
 
+// Helper function to transform MongoDB song to client format
+function transformSongToClientFormat(song: any) {
+  // Extract basic chords from ChordPro data
+  const extractChordsFromChordPro = (chordPro: any): string[] => {
+    if (!chordPro) return [];
+
+    // Handle case where chordData might not be a string (compressed data, etc.)
+    let chordProString: string;
+    try {
+      if (typeof chordPro === "string") {
+        chordProString = chordPro;
+      } else {
+        // If it's not a string, it might be compressed or in another format
+        // For now, return empty array as we can't easily extract chords
+        return [];
+      }
+    } catch (error) {
+      console.warn("Error processing chord data:", error);
+      return [];
+    }
+
+    const chordRegex = /\[([A-G][#b]?[^\/\]]*)\]/g;
+    const matches = chordProString.match(chordRegex);
+
+    if (!matches) return [];
+
+    const chords = matches
+      .map((match) => match.slice(1, -1)) // Remove brackets
+      .filter((chord, index, array) => array.indexOf(chord) === index) // Remove duplicates
+      .slice(0, 5); // Take first 5 unique chords
+
+    return chords;
+  };
+
+  const basicChords = extractChordsFromChordPro(song.chordData);
+
+  return {
+    id: song._id.toString(),
+    title: song.title,
+    artist: song.artist,
+    key: song.key,
+    tempo: song.tempo,
+    difficulty: song.difficulty,
+    themes: song.themes || [],
+    viewCount: song.metadata?.views || 0,
+    avgRating: song.metadata?.ratings?.average || 0,
+    basicChords,
+    lastUsed: undefined, // Client-side only
+    isFavorite: false, // Client-side only
+    chordData: song.chordData,
+  };
+}
+
 // Validation schemas
 const createSongSchema = z.object({
   title: z.string().min(1).max(200),
   artist: z.string().max(100).optional(),
   chordData: z.string().min(1), // ChordPro format
-  key: z.enum([
-    "C", "C#", "Db", "D", "D#", "Eb", "E", "F", 
-    "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B",
-  ]).optional(),
+  key: z
+    .enum([
+      "C",
+      "C#",
+      "Db",
+      "D",
+      "D#",
+      "Eb",
+      "E",
+      "F",
+      "F#",
+      "Gb",
+      "G",
+      "G#",
+      "Ab",
+      "A",
+      "A#",
+      "Bb",
+      "B",
+    ])
+    .optional(),
   tempo: z.number().min(40).max(200).optional(),
   timeSignature: z.string().optional(),
-  difficulty: z.enum(["beginner", "intermediate", "advanced"]).default("intermediate"),
+  difficulty: z
+    .enum(["beginner", "intermediate", "advanced"])
+    .default("intermediate"),
   themes: z.array(z.string().max(50)).default([]),
   source: z.string().max(100),
   lyrics: z.string().max(10000).optional(),
@@ -29,49 +101,61 @@ const querySchema = z.object({
   key: z.string().optional(),
   difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
   themes: z.string().optional(), // Comma-separated
-  limit: z.string().transform(Number).pipe(z.number().min(1).max(50)).default("20"),
+  limit: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().min(1).max(50))
+    .default("20"),
   offset: z.string().transform(Number).pipe(z.number().min(0)).default("0"),
-  isPublic: z.string().transform(v => v === "true").default("true"),
+  isPublic: z
+    .string()
+    .transform((v) => v === "true")
+    .default("true"),
 });
 
 // Get all songs with optional filtering
 export async function getSongs(req: Request, res: Response) {
   try {
     const query = querySchema.parse(req.query);
-    
+
     // Build MongoDB query
     const filter: any = { "metadata.isPublic": query.isPublic };
-    
+
     if (query.search) {
       filter.$text = { $search: query.search };
     }
-    
+
     if (query.key) {
       filter.key = query.key;
     }
-    
+
     if (query.difficulty) {
       filter.difficulty = query.difficulty;
     }
-    
+
     if (query.themes) {
-      const themeArray = query.themes.split(",").map(t => t.trim());
+      const themeArray = query.themes.split(",").map((t) => t.trim());
       filter.themes = { $in: themeArray };
     }
 
     // Execute query with pagination
     const [songs, total] = await Promise.all([
       Song.find(filter)
-        .sort(query.search ? { score: { $meta: "textScore" } } : { createdAt: -1 })
+        .sort(
+          query.search ? { score: { $meta: "textScore" } } : { createdAt: -1 },
+        )
         .limit(query.limit)
         .skip(query.offset)
         .lean(),
       Song.countDocuments(filter),
     ]);
 
+    // Transform songs to client format
+    const transformedSongs = songs.map(transformSongToClientFormat);
+
     res.json({
       success: true,
-      data: songs,
+      data: transformedSongs,
       meta: {
         total,
         page: Math.floor(query.offset / query.limit) + 1,
@@ -80,10 +164,9 @@ export async function getSongs(req: Request, res: Response) {
         cacheHit: false,
       },
     });
-
   } catch (error) {
     console.error("Error fetching songs:", error);
-    
+
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -109,9 +192,9 @@ export async function getSongs(req: Request, res: Response) {
 export async function getSong(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    
+
     const song = await Song.findById(id);
-    
+
     if (!song) {
       return res.status(404).json({
         success: false,
@@ -137,18 +220,20 @@ export async function getSong(req: Request, res: Response) {
     // Update view count
     await song.updateViews();
 
+    // Transform song to client format
+    const transformedSong = transformSongToClientFormat(song);
+
     res.json({
       success: true,
-      data: song,
+      data: transformedSong,
       meta: {
         compressed: true,
         cacheHit: false,
       },
     });
-
   } catch (error) {
     console.error("Error fetching song:", error);
-    
+
     res.status(500).json({
       success: false,
       error: {
@@ -163,7 +248,7 @@ export async function getSong(req: Request, res: Response) {
 export async function createSong(req: Request, res: Response) {
   try {
     const songData = createSongSchema.parse(req.body);
-    
+
     const song = new Song({
       ...songData,
       metadata: {
@@ -187,10 +272,9 @@ export async function createSong(req: Request, res: Response) {
         compressed: true,
       },
     });
-
   } catch (error) {
     console.error("Error creating song:", error);
-    
+
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -228,9 +312,9 @@ export async function updateSong(req: Request, res: Response) {
   try {
     const { id } = req.params;
     const updateData = updateSongSchema.parse(req.body);
-    
+
     const song = await Song.findById(id);
-    
+
     if (!song) {
       return res.status(404).json({
         success: false,
@@ -242,10 +326,10 @@ export async function updateSong(req: Request, res: Response) {
     }
 
     // TODO: Add authorization check - only owner or admin can update
-    
+
     // Update fields
     Object.assign(song, updateData);
-    
+
     if (updateData.isPublic !== undefined) {
       song.metadata.isPublic = updateData.isPublic;
     }
@@ -259,10 +343,9 @@ export async function updateSong(req: Request, res: Response) {
         compressed: true,
       },
     });
-
   } catch (error) {
     console.error("Error updating song:", error);
-    
+
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -288,9 +371,9 @@ export async function updateSong(req: Request, res: Response) {
 export async function deleteSong(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    
+
     const song = await Song.findById(id);
-    
+
     if (!song) {
       return res.status(404).json({
         success: false,
@@ -302,17 +385,16 @@ export async function deleteSong(req: Request, res: Response) {
     }
 
     // TODO: Add authorization check - only owner or admin can delete
-    
+
     await Song.findByIdAndDelete(id);
 
     res.json({
       success: true,
       data: { id },
     });
-
   } catch (error) {
     console.error("Error deleting song:", error);
-    
+
     res.status(500).json({
       success: false,
       error: {
@@ -328,7 +410,7 @@ export async function rateSong(req: Request, res: Response) {
   try {
     const { id } = req.params;
     const { rating } = req.body;
-    
+
     if (!rating || rating < 1 || rating > 5) {
       return res.status(400).json({
         success: false,
@@ -340,7 +422,7 @@ export async function rateSong(req: Request, res: Response) {
     }
 
     const song = await Song.findById(id);
-    
+
     if (!song) {
       return res.status(404).json({
         success: false,
@@ -352,7 +434,7 @@ export async function rateSong(req: Request, res: Response) {
     }
 
     // TODO: Check if user already rated this song
-    
+
     await song.addRating(rating);
 
     res.json({
@@ -362,10 +444,9 @@ export async function rateSong(req: Request, res: Response) {
         totalRatings: song.metadata.ratings.count,
       },
     });
-
   } catch (error) {
     console.error("Error rating song:", error);
-    
+
     res.status(500).json({
       success: false,
       error: {
@@ -380,7 +461,7 @@ export async function rateSong(req: Request, res: Response) {
 export async function searchSongs(req: Request, res: Response) {
   try {
     const { q: query, limit = 20 } = req.query;
-    
+
     if (!query || typeof query !== "string") {
       return res.status(400).json({
         success: false,
@@ -392,28 +473,63 @@ export async function searchSongs(req: Request, res: Response) {
     }
 
     const searchLimit = Math.min(Number(limit), 50);
-    
+
     const songs = await Song.searchSongs(query, searchLimit);
+
+    // Transform songs to client format
+    const transformedSongs = songs.map(transformSongToClientFormat);
 
     res.json({
       success: true,
-      data: songs,
+      data: transformedSongs,
       meta: {
         query,
-        total: songs.length,
+        total: transformedSongs.length,
         limit: searchLimit,
         compressed: true,
       },
     });
-
   } catch (error) {
     console.error("Error searching songs:", error);
-    
+
     res.status(500).json({
       success: false,
       error: {
         code: "INTERNAL_ERROR",
         message: "Search failed",
+      },
+    });
+  }
+}
+
+// Get songs statistics for dashboard
+export async function getSongsStats(req: Request, res: Response) {
+  try {
+    const [totalSongs, recentSongs] = await Promise.all([
+      Song.countDocuments({ "metadata.isPublic": true }),
+      Song.countDocuments({
+        "metadata.isPublic": true,
+        createdAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }, // Last 7 days
+      }),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        totalSongs,
+        totalSetlists: 0, // TODO: Implement when setlists are connected
+        recentlyAdded: recentSongs,
+        topContributors: 0, // TODO: Implement user counting
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching songs stats:", error);
+
+    res.status(500).json({
+      success: false,
+      error: {
+        code: "INTERNAL_ERROR",
+        message: "Failed to fetch statistics",
       },
     });
   }
