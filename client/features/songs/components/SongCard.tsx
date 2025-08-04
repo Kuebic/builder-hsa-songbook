@@ -162,24 +162,26 @@ export default function SongCard({
           </div>
 
           {/* Chord preview */}
-          <div className="mb-3">
-            <p className="text-xs text-muted-foreground mb-1">Common chords:</p>
-            <div className="flex flex-wrap gap-1">
-              {song.basicChords.slice(0, 6).map((chord, index) => (
-                <span key={index} className="chord text-xs">
-                  {chord}
-                </span>
-              ))}
-              {song.basicChords.length > 6 && (
-                <span className="text-xs text-muted-foreground">
-                  +{song.basicChords.length - 6} more
-                </span>
-              )}
+          {song.basicChords && song.basicChords.length > 0 && (
+            <div className="mb-3">
+              <p className="text-xs text-muted-foreground mb-1">Common chords:</p>
+              <div className="flex flex-wrap gap-1">
+                {song.basicChords.slice(0, 6).map((chord, index) => (
+                  <span key={index} className="chord text-xs">
+                    {chord}
+                  </span>
+                ))}
+                {song.basicChords.length > 6 && (
+                  <span className="text-xs text-muted-foreground">
+                    +{song.basicChords.length - 6} more
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Themes */}
-          {song.themes.length > 0 && (
+          {song.themes && song.themes.length > 0 && (
             <div className="mb-3">
               <div className="flex flex-wrap gap-1">
                 {song.themes.slice(0, 3).map((theme, index) => (
