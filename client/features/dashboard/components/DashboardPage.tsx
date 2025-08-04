@@ -36,16 +36,31 @@ export default function DashboardPage() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  // Fetch songs from MongoDB with stable params
-  const songsQueryParams = useMemo(() => ({
-    limit: 50,
-    isPublic: true
-  }), []);
+  // Temporarily use mock data directly to prevent infinite renders
+  const [songs, setSongs] = useState<ClientSong[]>([]);
+  const [stats, setStats] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<any>(null);
 
-  const { data: songs = [], isLoading, error } = useSongs(songsQueryParams);
+  useEffect(() => {
+    // Simulate loading and fallback to mock data
+    const loadMockData = async () => {
+      try {
+        setIsLoading(true);
+        const { mockClientSongs, mockStats } = await import("@features/songs/utils/mockData");
+        setTimeout(() => {
+          setSongs(mockClientSongs);
+          setStats(mockStats);
+          setIsLoading(false);
+        }, 1000); // Brief loading time
+      } catch (err) {
+        setError(err);
+        setIsLoading(false);
+      }
+    };
 
-  // Fetch dashboard stats
-  const { data: stats } = useSongsStats();
+    loadMockData();
+  }, []);
 
   const [filteredSongs, setFilteredSongs] = useState<ClientSong[]>([]);
 
