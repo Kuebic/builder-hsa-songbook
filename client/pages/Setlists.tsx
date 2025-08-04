@@ -17,8 +17,8 @@ export default function Setlists() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">
-              This page will contain setlist creation and management tools. 
-              You can continue prompting to build out this page with drag-and-drop 
+              This page will contain setlist creation and management tools. You
+              can continue prompting to build out this page with drag-and-drop
               functionality, sharing options, and performance features.
             </p>
             <div className="space-y-2">

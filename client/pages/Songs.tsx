@@ -17,9 +17,9 @@ export default function Songs() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">
-              This page will contain the complete songs library with advanced search, 
-              filtering, and organization features. You can continue prompting to build 
-              out this page with specific functionality.
+              This page will contain the complete songs library with advanced
+              search, filtering, and organization features. You can continue
+              prompting to build out this page with specific functionality.
             </p>
             <div className="space-y-2">
               <p className="text-sm font-medium">Planned features:</p>

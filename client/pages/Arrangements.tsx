@@ -17,9 +17,10 @@ export default function Arrangements() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">
-              This page will contain all song arrangements including different keys, 
-              capo positions, and instrumental arrangements. You can continue prompting 
-              to build out this page with arrangement comparison and editing tools.
+              This page will contain all song arrangements including different
+              keys, capo positions, and instrumental arrangements. You can
+              continue prompting to build out this page with arrangement
+              comparison and editing tools.
             </p>
             <div className="space-y-2">
               <p className="text-sm font-medium">Planned features:</p>

@@ -132,30 +132,37 @@ export default function Index() {
 
     // Search filter
     if (searchQuery.trim()) {
-      filtered = filtered.filter(song =>
-        song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        song.artist.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        song.themes.some(theme => theme.toLowerCase().includes(searchQuery.toLowerCase()))
+      filtered = filtered.filter(
+        (song) =>
+          song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          song.artist.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          song.themes.some((theme) =>
+            theme.toLowerCase().includes(searchQuery.toLowerCase()),
+          ),
       );
     }
 
     // Key filter
     if (selectedKey !== "all") {
-      filtered = filtered.filter(song => song.key === selectedKey);
+      filtered = filtered.filter((song) => song.key === selectedKey);
     }
 
     // Difficulty filter
     if (selectedDifficulty !== "all") {
-      filtered = filtered.filter(song => song.difficulty === selectedDifficulty);
+      filtered = filtered.filter(
+        (song) => song.difficulty === selectedDifficulty,
+      );
     }
 
     setFilteredSongs(filtered);
   }, [searchQuery, selectedKey, selectedDifficulty, songs]);
 
   const handleToggleFavorite = (songId: string) => {
-    setSongs(prev => prev.map(song =>
-      song.id === songId ? { ...song, isFavorite: !song.isFavorite } : song
-    ));
+    setSongs((prev) =>
+      prev.map((song) =>
+        song.id === songId ? { ...song, isFavorite: !song.isFavorite } : song,
+      ),
+    );
   };
 
   const handleAddToSetlist = (songId: string) => {
@@ -163,9 +170,11 @@ export default function Index() {
     console.log("Adding song to setlist:", songId);
   };
 
-  const recentSongs = songs.filter(song => song.lastUsed).slice(0, 4);
-  const favoriteSongs = songs.filter(song => song.isFavorite).slice(0, 4);
-  const popularSongs = songs.sort((a, b) => b.viewCount - a.viewCount).slice(0, 4);
+  const recentSongs = songs.filter((song) => song.lastUsed).slice(0, 4);
+  const favoriteSongs = songs.filter((song) => song.isFavorite).slice(0, 4);
+  const popularSongs = songs
+    .sort((a, b) => b.viewCount - a.viewCount)
+    .slice(0, 4);
 
   return (
     <Layout>
@@ -175,7 +184,8 @@ export default function Index() {
           <div>
             <h1 className="title text-worship">Welcome to HSA Songbook</h1>
             <p className="subtitle mt-2">
-              Discover, organize, and share worship chord charts for your community
+              Discover, organize, and share worship chord charts for your
+              community
             </p>
           </div>
           <div className="flex items-center space-x-3 mt-4 lg:mt-0">
@@ -198,7 +208,9 @@ export default function Index() {
               <Music className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockStats.totalSongs.toLocaleString()}</div>
+              <div className="text-2xl font-bold">
+                {mockStats.totalSongs.toLocaleString()}
+              </div>
               <p className="text-xs text-muted-foreground">
                 +{mockStats.recentlyAdded} this week
               </p>
@@ -207,27 +219,31 @@ export default function Index() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Setlists</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Active Setlists
+              </CardTitle>
               <BookOpen className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockStats.totalSetlists}</div>
-              <p className="text-xs text-muted-foreground">
-                Across all users
-              </p>
+              <div className="text-2xl font-bold">
+                {mockStats.totalSetlists}
+              </div>
+              <p className="text-xs text-muted-foreground">Across all users</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Contributors</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Contributors
+              </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockStats.topContributors}</div>
-              <p className="text-xs text-muted-foreground">
-                Active this month
-              </p>
+              <div className="text-2xl font-bold">
+                {mockStats.topContributors}
+              </div>
+              <p className="text-xs text-muted-foreground">Active this month</p>
             </CardContent>
           </Card>
 
@@ -240,9 +256,7 @@ export default function Index() {
               <div className="text-2xl font-bold">
                 {popularSongs[0]?.title.split(" ")[0] || "N/A"}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Most viewed song
-              </p>
+              <p className="text-xs text-muted-foreground">Most viewed song</p>
             </CardContent>
           </Card>
         </div>
@@ -254,11 +268,17 @@ export default function Index() {
               <Clock className="h-4 w-4" />
               <span className="hidden sm:inline">Recent</span>
             </TabsTrigger>
-            <TabsTrigger value="favorites" className="flex items-center space-x-2">
+            <TabsTrigger
+              value="favorites"
+              className="flex items-center space-x-2"
+            >
               <Heart className="h-4 w-4" />
               <span className="hidden sm:inline">Favorites</span>
             </TabsTrigger>
-            <TabsTrigger value="popular" className="flex items-center space-x-2">
+            <TabsTrigger
+              value="popular"
+              className="flex items-center space-x-2"
+            >
               <TrendingUp className="h-4 w-4" />
               <span className="hidden sm:inline">Popular</span>
             </TabsTrigger>
@@ -351,7 +371,10 @@ export default function Index() {
                     </SelectContent>
                   </Select>
 
-                  <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
+                  <Select
+                    value={selectedDifficulty}
+                    onValueChange={setSelectedDifficulty}
+                  >
                     <SelectTrigger className="w-36">
                       <SelectValue placeholder="Difficulty" />
                     </SelectTrigger>
@@ -400,15 +423,20 @@ export default function Index() {
                 {filteredSongs.length === 0 && (
                   <div className="text-center py-12">
                     <Sparkles className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No songs found</h3>
+                    <h3 className="text-lg font-semibold mb-2">
+                      No songs found
+                    </h3>
                     <p className="text-muted-foreground mb-4">
                       Try adjusting your search or filters
                     </p>
-                    <Button variant="outline" onClick={() => {
-                      setSearchQuery("");
-                      setSelectedKey("all");
-                      setSelectedDifficulty("all");
-                    }}>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSearchQuery("");
+                        setSelectedKey("all");
+                        setSelectedDifficulty("all");
+                      }}
+                    >
                       Clear all filters
                     </Button>
                   </div>

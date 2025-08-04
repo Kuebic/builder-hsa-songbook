@@ -37,32 +37,32 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const [theme, setTheme] = useState<'light' | 'dark' | 'stage'>('light');
+  const [theme, setTheme] = useState<"light" | "dark" | "stage">("light");
   const [isOffline, setIsOffline] = useState(false);
   const location = useLocation();
 
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: Home },
-    { name: 'Songs', href: '/songs', icon: Music },
-    { name: 'Setlists', href: '/setlists', icon: List },
-    { name: 'Arrangements', href: '/arrangements', icon: BookOpen },
+    { name: "Dashboard", href: "/", icon: Home },
+    { name: "Songs", href: "/songs", icon: Music },
+    { name: "Setlists", href: "/setlists", icon: List },
+    { name: "Arrangements", href: "/arrangements", icon: BookOpen },
   ];
 
-  const handleThemeChange = (newTheme: 'light' | 'dark' | 'stage') => {
+  const handleThemeChange = (newTheme: "light" | "dark" | "stage") => {
     setTheme(newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
-    if (newTheme === 'dark' || newTheme === 'stage') {
-      document.documentElement.classList.add('dark');
+    document.documentElement.setAttribute("data-theme", newTheme);
+    if (newTheme === "dark" || newTheme === "stage") {
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark");
     }
   };
 
   const ThemeIcon = () => {
     switch (theme) {
-      case 'dark':
+      case "dark":
         return <Moon className="h-4 w-4" />;
-      case 'stage':
+      case "stage":
         return <Monitor className="h-4 w-4" />;
       default:
         return <Sun className="h-4 w-4" />;
@@ -98,8 +98,8 @@ export default function Layout({ children }: LayoutProps) {
                         to={item.href}
                         className={`flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground ${
                           location.pathname === item.href
-                            ? 'bg-accent text-accent-foreground'
-                            : 'text-muted-foreground'
+                            ? "bg-accent text-accent-foreground"
+                            : "text-muted-foreground"
                         }`}
                       >
                         <Icon className="h-4 w-4" />
@@ -113,7 +113,9 @@ export default function Layout({ children }: LayoutProps) {
 
             <Link to="/" className="flex items-center space-x-2">
               <Music className="h-8 w-8 text-worship" />
-              <span className="text-xl font-bold hidden sm:block">HSA Songbook</span>
+              <span className="text-xl font-bold hidden sm:block">
+                HSA Songbook
+              </span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -126,8 +128,8 @@ export default function Layout({ children }: LayoutProps) {
                     to={item.href}
                     className={`flex items-center space-x-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground ${
                       location.pathname === item.href
-                        ? 'bg-accent text-accent-foreground'
-                        : 'text-muted-foreground'
+                        ? "bg-accent text-accent-foreground"
+                        : "text-muted-foreground"
                     }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -176,15 +178,15 @@ export default function Layout({ children }: LayoutProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleThemeChange('light')}>
+                <DropdownMenuItem onClick={() => handleThemeChange("light")}>
                   <Sun className="mr-2 h-4 w-4" />
                   Light
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleThemeChange('dark')}>
+                <DropdownMenuItem onClick={() => handleThemeChange("dark")}>
                   <Moon className="mr-2 h-4 w-4" />
                   Dark
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleThemeChange('stage')}>
+                <DropdownMenuItem onClick={() => handleThemeChange("stage")}>
                   <Monitor className="mr-2 h-4 w-4" />
                   Stage Mode
                 </DropdownMenuItem>
@@ -208,9 +210,7 @@ export default function Layout({ children }: LayoutProps) {
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  Sign out
-                </DropdownMenuItem>
+                <DropdownMenuItem>Sign out</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -218,9 +218,7 @@ export default function Layout({ children }: LayoutProps) {
       </header>
 
       {/* Main content */}
-      <main className="container mx-auto px-4 py-6">
-        {children}
-      </main>
+      <main className="container mx-auto px-4 py-6">{children}</main>
     </div>
   );
 }
