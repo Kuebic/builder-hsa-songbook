@@ -179,23 +179,28 @@ export default function Layout({ children }: LayoutProps) {
               <PlusCircle className="h-4 w-4" />
             </Button>
 
-            {/* Theme switcher - simplified */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                const newTheme = theme === "light" ? "dark" : theme === "dark" ? "stage" : "light";
-                setTheme(newTheme);
-                document.documentElement.setAttribute("data-theme", newTheme);
-                if (newTheme === "dark" || newTheme === "stage") {
-                  document.documentElement.classList.add("dark");
-                } else {
-                  document.documentElement.classList.remove("dark");
-                }
-              }}
-            >
-              {themeIcon}
-            </Button>
+            {/* Theme switcher */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  {themeIcon}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={setLightTheme}>
+                  <Sun className="mr-2 h-4 w-4" />
+                  Light
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={setDarkTheme}>
+                  <Moon className="mr-2 h-4 w-4" />
+                  Dark
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={setStageTheme}>
+                  <Monitor className="mr-2 h-4 w-4" />
+                  Stage Mode
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* User menu - simplified */}
             <Button variant="ghost" size="icon">
