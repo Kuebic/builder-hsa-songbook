@@ -56,8 +56,13 @@ export default function Layout({ children }: LayoutProps) {
     }
   }, [theme]);
 
-  // Create stable theme change handlers
-  const handleThemeChange = useCallback((newTheme: "light" | "dark" | "stage") => {
+  // Simple theme cycling handler
+  const cycleTheme = useCallback(() => {
+    const themes: ("light" | "dark" | "stage")[] = ["light", "dark", "stage"];
+    const currentIndex = themes.indexOf(theme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    const newTheme = themes[nextIndex];
+
     setTheme(newTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
     if (newTheme === "dark" || newTheme === "stage") {
@@ -65,12 +70,7 @@ export default function Layout({ children }: LayoutProps) {
     } else {
       document.documentElement.classList.remove("dark");
     }
-  }, []);
-
-  // Create individual handlers that don't change on every render
-  const setLightTheme = useCallback(() => handleThemeChange("light"), [handleThemeChange]);
-  const setDarkTheme = useCallback(() => handleThemeChange("dark"), [handleThemeChange]);
-  const setStageTheme = useCallback(() => handleThemeChange("stage"), [handleThemeChange]);
+  }, [theme]);
 
   return (
     <div className="min-h-screen bg-background">
