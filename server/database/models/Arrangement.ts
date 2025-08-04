@@ -1,36 +1,54 @@
-import { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, Document, Model, Types } from "mongoose";
 import { compress, decompress } from "@mongodb-js/zstd";
+import { MusicalKey } from "./User.js"; // Import MusicalKey
+import { Difficulty } from "./Song.js"; // Import Difficulty from Song
 
-// Interface for Arrangement document
+// Interface for Arrangement document - Updated per PRD specifications
 export interface IArrangement extends Document {
-  _id: string;
-  name: string;
-  songIds: Types.ObjectId[]; // Array for mashups - multiple songs
-  createdBy: string;
-  chordData: Buffer; // Zstd compressed ChordPro
+  _id: Types.ObjectId;
+  name: string; // Required, max 200 chars
+  songIds: Types.ObjectId[]; // Array supports mashups
+  createdBy: Types.ObjectId; // Reference to User, indexed
+  chordData: Buffer; // Zstd compressed, max 100KB
+  key: MusicalKey;
+  tempo?: number; // 40-200 BPM
+  timeSignature: string; // Default "4/4"
+  difficulty: Difficulty;
+  description?: string; // Max 1,000 chars
+  tags: string[]; // Max 50 chars each
   metadata: {
-    key: string;
-    capo?: number;
-    tempo?: number;
-    timeSignature?: string;
-    difficulty: "beginner" | "intermediate" | "advanced";
-    instruments?: string[];
-    isMashup: boolean;
+    isMashup: boolean; // Auto-set if multiple songs
     mashupSections?: Array<{
       songId: Types.ObjectId;
-      title: string;
-      startBar: number;
-      endBar: number;
+      title: string; // Max 200 chars
+      startBar?: number;
+      endBar?: number;
     }>;
+    isPublic: boolean; // Indexed
+    ratings: {
+      average: number; // 0-5 scale
+      count: number;
+    };
+    views: number;
   };
-  stats: {
-    usageCount: number;
-    lastUsed?: Date;
-  };
-  isPublic: boolean;
   documentSize: number;
   createdAt: Date;
   updatedAt: Date;
+  
+  // Instance methods
+  updateViews(): Promise<IArrangement>;
+  addRating(rating: number): Promise<IArrangement>;
+  getDecompressedChordData(): Promise<string>;
+  getMashupDuration(): number;
+}
+
+// Interface for Arrangement model (static methods)
+export interface IArrangementModel extends Model<IArrangement> {
+  findBySong(songId: string): Promise<IArrangement[]>;
+  findMashups(limit?: number): Promise<IArrangement[]>;
+  findByDifficulty(difficulty: string): Promise<IArrangement[]>;
+  searchArrangements(query: string, limit?: number): Promise<IArrangement[]>;
+  findByTags(tags: string[], limit?: number): Promise<IArrangement[]>;
 }
 
 // Mashup section sub-schema
@@ -73,7 +91,8 @@ const arrangementSchema = new Schema<IArrangement>({
     index: true,
   }],
   createdBy: {
-    type: String,
+    type: Schema.Types.ObjectId,
+    ref: 'User',
     required: true,
     index: true,
   },
@@ -87,87 +106,99 @@ const arrangementSchema = new Schema<IArrangement>({
       message: "Compressed chord data exceeds 100KB limit",
     },
   },
+  key: {
+    type: String,
+    enum: ['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B'],
+    required: true,
+    index: true,
+  },
+  tempo: {
+    type: Number,
+    min: 40,
+    max: 200,
+  },
+  timeSignature: {
+    type: String,
+    default: "4/4",
+  },
+  difficulty: {
+    type: String,
+    enum: ["beginner", "intermediate", "advanced"],
+    default: "intermediate",
+    index: true,
+  },
+  description: {
+    type: String,
+    maxlength: 1000,
+    trim: true,
+  },
+  tags: [{
+    type: String,
+    maxlength: 50,
+    trim: true,
+  }],
   metadata: {
-    key: {
-      type: String,
-      enum: [
-        "C", "C#", "Db", "D", "D#", "Eb", "E", "F", 
-        "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B",
-      ],
-      index: true,
-    },
-    capo: {
-      type: Number,
-      min: 0,
-      max: 12,
-    },
-    tempo: {
-      type: Number,
-      min: 40,
-      max: 200,
-    },
-    timeSignature: {
-      type: String,
-      default: "4/4",
-    },
-    difficulty: {
-      type: String,
-      enum: ["beginner", "intermediate", "advanced"],
-      default: "intermediate",
-      index: true,
-    },
-    instruments: [{
-      type: String,
-      maxlength: 50,
-    }],
     isMashup: {
       type: Boolean,
       default: false,
       index: true,
     },
     mashupSections: [mashupSectionSchema],
-  },
-  stats: {
-    usageCount: {
+    isPublic: {
+      type: Boolean,
+      default: true,
+      index: true,
+    },
+    ratings: {
+      average: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5,
+      },
+      count: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+    },
+    views: {
       type: Number,
       default: 0,
       min: 0,
     },
-    lastUsed: {
-      type: Date,
-    },
-  },
-  isPublic: {
-    type: Boolean,
-    default: true,
-    index: true,
   },
   documentSize: {
     type: Number,
-    required: true,
+    default: 0,
   },
 }, {
   timestamps: true,
   collection: "arrangements",
 });
 
-// Create text index for search
+// Strategic indexes per PRD specifications
 arrangementSchema.index(
-  { name: "text" },
-  { weights: { name: 10 } },
+  { name: "text", description: "text", tags: "text" },
+  { weights: { name: 10, description: 6, tags: 4 } },
 );
 
 // Compound indexes for efficient queries
-arrangementSchema.index({ createdBy: 1, isPublic: 1 });
-arrangementSchema.index({ "songIds": 1, isPublic: 1 });
-arrangementSchema.index({ "metadata.difficulty": 1, isPublic: 1 });
+arrangementSchema.index({ songIds: 1, 'metadata.isPublic': 1 }); // Find arrangements for songs
+arrangementSchema.index({ 'metadata.isMashup': 1, 'metadata.isPublic': 1 }); // Mashup discovery
+arrangementSchema.index({ createdBy: 1, createdAt: -1 }); // User's arrangements
+arrangementSchema.index({ 'metadata.isPublic': 1, createdAt: -1 }); // Public arrangements
+arrangementSchema.index({ tags: 1, 'metadata.isPublic': 1 }); // Tag searches
 
 // Compression middleware - compress on save
-arrangementSchema.pre("save", async function (this: IArrangement) {
+arrangementSchema.pre("save", async function (this: IArrangement, next) {
   if (this.isModified("chordData") && typeof this.chordData === "string") {
     const buffer = Buffer.from(this.chordData as unknown as string, "utf8");
-    this.chordData = await compress(buffer, 6); // Zstd level 6
+    this.chordData = await compress(buffer, 3); // Zstd level 3
   }
+
+  // Auto-set isMashup based on songIds length
+  this.metadata.isMashup = this.songIds.length > 1;
 
   // Validate mashup data consistency
   if (this.metadata.isMashup) {
@@ -189,10 +220,22 @@ arrangementSchema.pre("save", async function (this: IArrangement) {
     if (this.songIds.length !== 1) {
       throw new Error("Non-mashup arrangements must reference exactly one song");
     }
+    // Clear mashup sections for single songs
+    this.metadata.mashupSections = undefined;
   }
 
-  // Calculate document size for monitoring
-  this.documentSize = Buffer.byteLength(JSON.stringify(this.toObject()));
+  // Document size will be calculated post-save to avoid circular dependencies
+  next();
+});
+
+// Post-save middleware to calculate document size
+arrangementSchema.post('save', async function(doc: IArrangement) {
+  if (doc.documentSize === 0) {
+    // Calculate and update document size after save
+    const docObject = doc.toObject();
+    const size = Buffer.byteLength(JSON.stringify(docObject));
+    await Arrangement.updateOne({ _id: doc._id }, { documentSize: size });
+  }
 });
 
 // Decompression middleware - decompress on find
@@ -223,10 +266,30 @@ arrangementSchema.post("findOne", async function (doc: IArrangement | null) {
 });
 
 // Utility methods
-arrangementSchema.methods.incrementUsage = function () {
-  this.stats.usageCount += 1;
-  this.stats.lastUsed = new Date();
+arrangementSchema.methods.updateViews = function () {
+  this.metadata.views += 1;
   return this.save();
+};
+
+arrangementSchema.methods.addRating = function (rating: number) {
+  const currentTotal = this.metadata.ratings.average * this.metadata.ratings.count;
+  this.metadata.ratings.count += 1;
+  this.metadata.ratings.average = (currentTotal + rating) / this.metadata.ratings.count;
+  return this.save();
+};
+
+arrangementSchema.methods.getDecompressedChordData = async function (): Promise<string> {
+  if (!this.chordData || !Buffer.isBuffer(this.chordData)) {
+    return '';
+  }
+  
+  try {
+    const decompressed = await decompress(this.chordData);
+    return decompressed.toString('utf8');
+  } catch (error) {
+    console.error('Error decompressing chord data for arrangement:', this._id, error);
+    return '';
+  }
 };
 
 arrangementSchema.methods.getMashupDuration = function () {
@@ -235,37 +298,52 @@ arrangementSchema.methods.getMashupDuration = function () {
   }
   
   return this.metadata.mashupSections.reduce((total: number, section: any) => {
-    return total + (section.endBar - section.startBar + 1);
+    if (section.startBar && section.endBar) {
+      return total + (section.endBar - section.startBar + 1);
+    }
+    return total;
   }, 0);
 };
 
-// Static methods
+// Static methods - Updated for new schema structure
 arrangementSchema.statics.findBySong = function (songId: string) {
-  return this.find({ songIds: songId, isPublic: true })
+  return this.find({ songIds: songId, 'metadata.isPublic': true })
     .populate("songIds", "title artist")
-    .sort({ "stats.usageCount": -1 });
+    .populate("createdBy", "name email")
+    .sort({ 'metadata.views': -1 });
 };
 
 arrangementSchema.statics.findMashups = function (limit = 20) {
-  return this.find({ "metadata.isMashup": true, isPublic: true })
+  return this.find({ "metadata.isMashup": true, 'metadata.isPublic': true })
     .populate("songIds", "title artist")
-    .sort({ "stats.usageCount": -1 })
+    .populate("createdBy", "name email")
+    .sort({ 'metadata.views': -1 })
     .limit(limit);
 };
 
 arrangementSchema.statics.findByDifficulty = function (difficulty: string) {
-  return this.find({ "metadata.difficulty": difficulty, isPublic: true })
-    .populate("songIds", "title artist");
+  return this.find({ difficulty: difficulty, 'metadata.isPublic': true })
+    .populate("songIds", "title artist")
+    .populate("createdBy", "name email");
 };
 
 arrangementSchema.statics.searchArrangements = function (query: string, limit = 20) {
   return this.find(
-    { $text: { $search: query }, isPublic: true },
+    { $text: { $search: query }, 'metadata.isPublic': true },
     { score: { $meta: "textScore" } },
   )
   .populate("songIds", "title artist")
+  .populate("createdBy", "name email")
   .sort({ score: { $meta: "textScore" } })
   .limit(limit);
 };
 
-export const Arrangement = model<IArrangement>("Arrangement", arrangementSchema);
+arrangementSchema.statics.findByTags = function (tags: string[], limit = 20) {
+  return this.find({ tags: { $in: tags }, 'metadata.isPublic': true })
+    .populate("songIds", "title artist")
+    .populate("createdBy", "name email")
+    .sort({ 'metadata.ratings.average': -1 })
+    .limit(limit);
+};
+
+export const Arrangement = model<IArrangement, IArrangementModel>("Arrangement", arrangementSchema);

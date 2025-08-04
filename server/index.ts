@@ -7,6 +7,9 @@ import { database } from "./database/connection";
 export async function createServer() {
   const app = express();
 
+  // Initialize database connection
+  await initializeServer();
+
   // Middleware
   app.use(cors());
   app.use(express.json());
@@ -17,6 +20,7 @@ export async function createServer() {
   const setlistsRoutes = await import("./routes/setlists");
   const storageRoutes = await import("./routes/storage");
   const syncRoutes = await import("./routes/sync");
+  const usersRoutes = await import("./routes/users");
 
   // Example API routes
   app.get("/api/ping", (_req, res) => {
@@ -55,6 +59,12 @@ export async function createServer() {
   app.post("/api/sync/batch", syncRoutes.batchSync);
   app.get("/api/sync/status", syncRoutes.getSyncStatus);
   app.post("/api/sync/resolve", syncRoutes.resolveConflicts);
+
+  // Users API
+  app.get("/api/users/:userId/favorites", usersRoutes.getUserFavorites);
+  app.post("/api/users/:userId/favorites/:songId", usersRoutes.addFavorite);
+  app.delete("/api/users/:userId/favorites/:songId", usersRoutes.removeFavorite);
+  app.get("/api/users/:userId/favorites/check/:songId", usersRoutes.checkFavorite);
 
   // Database status endpoint
   app.get("/api/health", async (_req, res) => {

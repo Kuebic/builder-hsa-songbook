@@ -5,10 +5,11 @@ import { Types } from "mongoose";
 
 // Validation schemas
 const setlistItemSchema = z.object({
-  arrangementId: z.string().min(1).transform(id => new Types.ObjectId(id)),
-  transposeBy: z.number().min(-12).max(12).default(0),
+  songId: z.string().min(1).transform(id => new Types.ObjectId(id)),
+  arrangementId: z.string().optional().transform(id => id ? new Types.ObjectId(id) : undefined),
+  transpose: z.number().min(-11).max(11).default(0),
   notes: z.string().max(500).optional(),
-  order: z.number().min(1),
+  order: z.number().min(0),
 });
 
 const createSetlistSchema = z.object({
@@ -17,8 +18,6 @@ const createSetlistSchema = z.object({
   createdBy: z.string().min(1),
   songs: z.array(setlistItemSchema).default([]),
   tags: z.array(z.string().max(50)).default([]),
-  date: z.string().datetime().optional(),
-  venue: z.string().max(200).optional(),
   isPublic: z.boolean().default(false),
 });
 
@@ -210,8 +209,6 @@ export async function createSetlist(req: Request, res: Response) {
       songs: setlistData.songs,
       tags: setlistData.tags,
       metadata: {
-        date: setlistData.date ? new Date(setlistData.date) : undefined,
-        venue: setlistData.venue,
         isPublic: setlistData.isPublic,
       },
     });
@@ -282,18 +279,15 @@ export async function updateSetlist(req: Request, res: Response) {
     if (updateData.tags) {setlist.tags = updateData.tags;}
     if (updateData.songs) {
       setlist.songs = updateData.songs.map(song => ({
-        arrangementId: song.arrangementId!,
-        transposeBy: song.transposeBy ?? 0,
+        songId: song.songId!,
+        arrangementId: song.arrangementId,
+        transpose: song.transpose ?? 0,
         notes: song.notes,
         order: song.order!,
       }));
     }
     
-    // Update metadata
-    if (updateData.date !== undefined) {
-      setlist.metadata.date = updateData.date ? new Date(updateData.date) : undefined;
-    }
-    if (updateData.venue !== undefined) {setlist.metadata.venue = updateData.venue;}
+    // Update metadata (removed date and venue as they're not in the schema)
     if (updateData.isPublic !== undefined) {setlist.metadata.isPublic = updateData.isPublic;}
 
     await setlist.save();

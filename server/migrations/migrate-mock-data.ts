@@ -257,9 +257,9 @@ export async function migrateMockData() {
           theme: "light",
         },
         stats: {
-          songsContributed: 0,
+          songsCreated: 0,
+          arrangementsCreated: 0,
           setlistsCreated: 0,
-          totalDownloads: 0,
         },
       });
       await adminUser.save();
@@ -289,6 +289,7 @@ export async function migrateMockData() {
         notes: `Sample arrangement notes for ${mockSong.title}`,
         metadata: {
           createdBy: adminUserId,
+          lastModifiedBy: adminUserId,
           isPublic: true,
           ratings: {
             average: Math.random() * 2 + 3.5, // Random rating between 3.5-5.5
@@ -304,7 +305,7 @@ export async function migrateMockData() {
     }
 
     // Update admin user stats
-    adminUser.stats.songsContributed = mockSongs.length;
+    adminUser.stats.songsCreated = mockSongs.length;
     await adminUser.save();
 
     console.log("✅ Migration completed successfully!");

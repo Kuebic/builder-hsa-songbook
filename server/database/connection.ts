@@ -152,6 +152,75 @@ export class DatabaseConnection {
       indexSize: Math.round(stats.indexSize / (1024 * 1024)),
     };
   }
+
+  /**
+   * Completely reset the database - DROP all data and recreate clean
+   * WARNING: This will permanently delete ALL data in the database
+   */
+  public async resetDatabase(): Promise<{ dropped: boolean; recreated: boolean }> {
+    if (!this.isConnectedToDatabase()) {
+      throw new Error("Database must be connected before reset");
+    }
+
+    const db = mongoose.connection.db;
+    if (!db) {
+      throw new Error("Database connection not available");
+    }
+
+    const dbName = db.databaseName;
+    console.log(`🗑️  Starting complete database reset for: ${dbName}`);
+
+    try {
+      // Get initial stats for logging
+      const initialStats = await this.getStorageStats();
+      console.log(`📊 Initial database size: ${initialStats.usage}MB (${initialStats.percentage}%)`);
+
+      // Drop the entire database
+      console.log("🗑️  Dropping entire database...");
+      await db.dropDatabase();
+      console.log("✅ Database dropped successfully");
+
+      // The database will be automatically recreated when we write to it
+      // Verify clean state
+      const collections = await db.listCollections().toArray();
+      const isClean = collections.length === 0;
+
+      if (isClean) {
+        console.log("✅ Database reset complete - clean state verified");
+      } else {
+        console.warn(`⚠️  Database may not be completely clean - found ${collections.length} collections`);
+      }
+
+      return {
+        dropped: true,
+        recreated: true
+      };
+
+    } catch (error) {
+      console.error("❌ Database reset failed:", error);
+      throw new Error(`Database reset failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  /**
+   * Get database connection state and basic info
+   */
+  public getConnectionInfo(): {
+    isConnected: boolean;
+    readyState: number;
+    host?: string;
+    port?: number;
+    name?: string;
+  } {
+    const connection = mongoose.connection;
+    return {
+      isConnected: this.isConnected,
+      readyState: connection.readyState,
+      host: connection.host,
+      port: connection.port,
+      name: connection.name
+    };
+  }
 }
 
 // Export singleton instance

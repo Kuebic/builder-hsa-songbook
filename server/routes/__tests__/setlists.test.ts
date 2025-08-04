@@ -408,15 +408,14 @@ describe("Setlists API Routes", () => {
       createdBy: "user123",
       songs: [
         {
+          songId: "60f7b1c3e4b0c72a1a123455", // Valid ObjectId string format
           arrangementId: "60f7b1c3e4b0c72a1a123456", // Valid ObjectId string format
-          transposeBy: 0,
+          transpose: 0,
           notes: "Test notes",
           order: 1,
         },
       ],
       tags: ["test"],
-      date: "2024-02-01T10:00:00.000Z",
-      venue: "Test Venue",
       isPublic: true,
     };
 
@@ -425,8 +424,8 @@ describe("Setlists API Routes", () => {
 
       const mockSetlistInstance = {
         ...mockSetlist,
-        save: vi.fn().mockResolvedValue(undefined),
-        populate: vi.fn().mockResolvedValue(undefined),
+        save: vi.fn().mockResolvedValue(mockSetlist), // Return the instance for chaining
+        populate: vi.fn().mockResolvedValue(mockSetlist), // Return the instance for chaining
       };
 
       // Mock the Setlist constructor to return our mock instance
@@ -472,6 +471,7 @@ describe("Setlists API Routes", () => {
 
       const mockSetlistInstance = {
         save: vi.fn().mockRejectedValue(new Error("Database error")),
+        populate: vi.fn(), // Include populate method to avoid errors
       };
 
       (Setlist as any).mockImplementation(() => mockSetlistInstance);
@@ -892,24 +892,34 @@ describe("Setlists API Routes", () => {
       expect(mockQuery.skip).toHaveBeenCalledWith(5);
     });
 
-    it("handles setlist updates with date and venue", async () => {
+    it("handles setlist updates with metadata", async () => {
       const updateData = {
-        date: "2024-03-01T10:00:00.000Z",
-        venue: "New Venue",
+        name: "Updated Setlist Name",
         isPublic: false,
       };
       const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a654321" }, updateData);
 
+      // Create a mutable mock setlist instance
       const mockSetlistInstance = {
         ...mockSetlist,
+        name: mockSetlist.name,
+        metadata: { ...mockSetlist.metadata },
+        save: vi.fn().mockResolvedValue(undefined),
         populate: vi.fn().mockResolvedValue(mockSetlist),
       };
+
       (Setlist as any).findById.mockResolvedValue(mockSetlistInstance);
 
       await updateSetlist(req as Request, res as Response);
 
-      expect(mockSetlistInstance.metadata.venue).toBe("New Venue");
+      // Verify the setlist properties were updated
+      expect(mockSetlistInstance.name).toBe("Updated Setlist Name");
       expect(mockSetlistInstance.metadata.isPublic).toBe(false);
+      expect(mockSetlistInstance.save).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        data: mockSetlistInstance,
+      });
     });
   });
 });

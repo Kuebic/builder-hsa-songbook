@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, memo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +28,25 @@ import {
 } from "lucide-react";
 import { ClientSong } from "../types/song.types";
 
+// Constants moved outside component to prevent recreation
+const DIFFICULTY_COLORS = {
+  beginner: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+  intermediate: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300", 
+  advanced: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+} as const;
+
+// Utility functions moved outside component to prevent recreation
+const formatCount = (count: number): string => {
+  if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}k`;
+  }
+  return count.toString();
+};
+
+const formatLastUsedDate = (date: Date): string => {
+  return new Date(date).toLocaleDateString();
+};
+
 interface SongCardProps {
   song: ClientSong;
   onAddToSetlist?: (songId: string) => void;
@@ -36,7 +55,7 @@ interface SongCardProps {
   variant?: "default" | "compact";
 }
 
-export default function SongCard({
+function SongCard({
   song,
   onAddToSetlist,
   onToggleFavorite,
@@ -45,20 +64,10 @@ export default function SongCard({
 }: SongCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
-  const difficultyColors = {
-    beginner:
-      "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-    intermediate:
-      "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-    advanced: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-  };
-
-  const formatCount = (count: number) => {
-    if (count >= 1000) {
-      return `${(count / 1000).toFixed(1)}k`;
-    }
-    return count.toString();
-  };
+  // Memoize expensive date formatting
+  const formattedLastUsed = useMemo(() => {
+    return song.lastUsed ? formatLastUsedDate(song.lastUsed) : null;
+  }, [song.lastUsed]);
 
   if (variant === "compact") {
     return (
@@ -155,7 +164,7 @@ export default function SongCard({
             {song.tempo && <Badge variant="outline">{song.tempo} BPM</Badge>}
             <Badge
               variant="secondary"
-              className={difficultyColors[song.difficulty]}
+              className={DIFFICULTY_COLORS[song.difficulty]}
             >
               {song.difficulty}
             </Badge>
@@ -208,8 +217,8 @@ export default function SongCard({
             <Star className="h-3 w-3 fill-current" />
             <span>{song.avgRating.toFixed(1)}</span>
           </div>
-          {song.lastUsed && (
-            <span>Used {new Date(song.lastUsed).toLocaleDateString()}</span>
+          {formattedLastUsed && (
+            <span>Used {formattedLastUsed}</span>
           )}
         </div>
 
@@ -246,3 +255,60 @@ export default function SongCard({
     </Card>
   );
 }
+
+// Custom comparison function for React.memo
+const arePropsEqual = (prevProps: SongCardProps, nextProps: SongCardProps): boolean => {
+  const { song: prevSong, onAddToSetlist: prevOnAdd, onToggleFavorite: prevOnToggle, ...prevRest } = prevProps;
+  const { song: nextSong, onAddToSetlist: nextOnAdd, onToggleFavorite: nextOnToggle, ...nextRest } = nextProps;
+
+  // Compare primitive props
+  if (prevRest.showActions !== nextRest.showActions || prevRest.variant !== nextRest.variant) {
+    return false;
+  }
+
+  // Compare callback functions by reference (parent should use useCallback)
+  if (prevOnAdd !== nextOnAdd || prevOnToggle !== nextOnToggle) {
+    return false;
+  }
+
+  // Compare song object properties that affect rendering
+  if (
+    prevSong.id !== nextSong.id ||
+    prevSong.title !== nextSong.title ||
+    prevSong.artist !== nextSong.artist ||
+    prevSong.key !== nextSong.key ||
+    prevSong.tempo !== nextSong.tempo ||
+    prevSong.difficulty !== nextSong.difficulty ||
+    prevSong.viewCount !== nextSong.viewCount ||
+    prevSong.avgRating !== nextSong.avgRating ||
+    prevSong.isFavorite !== nextSong.isFavorite ||
+    prevSong.lastUsed !== nextSong.lastUsed
+  ) {
+    return false;
+  }
+
+  // Compare basicChords array
+  if (prevSong.basicChords.length !== nextSong.basicChords.length) {
+    return false;
+  }
+  for (let i = 0; i < prevSong.basicChords.length; i++) {
+    if (prevSong.basicChords[i] !== nextSong.basicChords[i]) {
+      return false;
+    }
+  }
+
+  // Compare themes array
+  if (prevSong.themes.length !== nextSong.themes.length) {
+    return false;
+  }
+  for (let i = 0; i < prevSong.themes.length; i++) {
+    if (prevSong.themes[i] !== nextSong.themes[i]) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+// Export memoized component
+export default memo(SongCard, arePropsEqual);

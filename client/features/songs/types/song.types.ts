@@ -223,10 +223,29 @@ export function songToClientFormat(song: Song): ClientSong {
 
 // Helper function to extract chords from ChordPro data
 function extractChordsFromChordPro(chordPro: string): string[] {
-  const chordRegex = /\[([A-G][#b]?[^/\]]*)\]/g;
-  const matches = chordPro.match(chordRegex);
+  if (!chordPro) {
+    return [];
+  }
   
-  if (!matches) {return [];}
+  // Check if the chordData is base64 encoded (proper base64 pattern validation)
+  let actualChordData = chordPro;
+  try {
+    // More accurate Base64 validation: ensures proper length and padding
+    if (/^[A-Za-z0-9+/]{4,}(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(chordPro) && chordPro.length >= 8) {
+      actualChordData = atob(chordPro);
+    }
+  } catch (error) {
+    // If decoding fails, use original data
+    console.warn('Failed to decode base64 chord data, using raw data');
+    actualChordData = chordPro;
+  }
+  
+  const chordRegex = /\[([A-G][#b]?[^/\]]*)\]/g;
+  const matches = actualChordData.match(chordRegex);
+  
+  if (!matches) {
+    return [];
+  }
   
   const chords = matches
     .map(match => match.slice(1, -1)) // Remove brackets
