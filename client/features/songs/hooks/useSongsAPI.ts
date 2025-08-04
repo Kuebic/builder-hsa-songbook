@@ -272,13 +272,13 @@ export function useSongsStats() {
     queryFn: async () => {
       try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
 
         const response = await fetch('/api/songs/stats', {
           signal: controller.signal
         });
 
-        clearTimeout(timeout);
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
           // Fallback to mock stats if endpoint doesn't exist yet
