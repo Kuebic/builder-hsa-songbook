@@ -48,7 +48,7 @@ export default function Layout({ children }: LayoutProps) {
     { name: "Arrangements", href: "/arrangements", icon: BookOpen },
   ];
 
-  const handleThemeChange = (newTheme: "light" | "dark" | "stage") => {
+  const handleThemeChange = useCallback((newTheme: "light" | "dark" | "stage") => {
     setTheme(newTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
     if (newTheme === "dark" || newTheme === "stage") {
@@ -56,9 +56,9 @@ export default function Layout({ children }: LayoutProps) {
     } else {
       document.documentElement.classList.remove("dark");
     }
-  };
+  }, []);
 
-  const ThemeIcon = () => {
+  const themeIcon = useMemo(() => {
     switch (theme) {
       case "dark":
         return <Moon className="h-4 w-4" />;
@@ -67,7 +67,7 @@ export default function Layout({ children }: LayoutProps) {
       default:
         return <Sun className="h-4 w-4" />;
     }
-  };
+  }, [theme]);
 
   return (
     <div className="min-h-screen bg-background">
