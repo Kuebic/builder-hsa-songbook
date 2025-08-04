@@ -92,6 +92,45 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* HSA Songbook Dark Theme */
+    --worship: 25 95% 53%;
+    --worship-foreground: 0 0% 100%;
+    --worship-gold: 45 100% 51%;
+    --worship-gold-foreground: 0 0% 0%;
+    --chord: 217.2 32.6% 17.5%;
+    --chord-foreground: 210 40% 98%;
+    --chord-background: 222.2 84% 4.9%;
+  }
+
+  /* Stage Mode Theme */
+  [data-theme="stage"] {
+    --background: 210.9 9.09% 7.06%;
+    --foreground: 0 0% 100%;
+    --card: 210.9 9.09% 7.06%;
+    --card-foreground: 0 0% 100%;
+    --popover: 210.9 9.09% 7.06%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 210.9 9.09% 7.06%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --worship: 25 95% 53%;
+    --worship-foreground: 0 0% 100%;
+    --worship-gold: 45 100% 51%;
+    --worship-gold-foreground: 0 0% 0%;
+    --chord: 240 3.7% 15.9%;
+    --chord-foreground: 0 0% 100%;
+    --chord-background: 210.9 9.09% 7.06%;
   }
 }
 
