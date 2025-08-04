@@ -107,9 +107,12 @@ export async function getSongs(req: Request, res: Response) {
       Song.countDocuments(filter),
     ]);
 
+    // Transform songs to client format
+    const transformedSongs = songs.map(transformSongToClientFormat);
+
     res.json({
       success: true,
-      data: songs,
+      data: transformedSongs,
       meta: {
         total,
         page: Math.floor(query.offset / query.limit) + 1,
