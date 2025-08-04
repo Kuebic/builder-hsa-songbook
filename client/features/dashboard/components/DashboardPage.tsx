@@ -131,10 +131,10 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {mockStats.totalSongs.toLocaleString()}
+                {(stats?.totalSongs || songs.length).toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">
-                +{mockStats.recentlyAdded} this week
+                +{stats?.recentlyAdded || 0} this week
               </p>
             </CardContent>
           </Card>
