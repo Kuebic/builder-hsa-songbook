@@ -82,21 +82,26 @@ export default function DashboardPage() {
     setFilteredSongs(filtered);
   }, [searchQuery, selectedKey, selectedDifficulty, songs]);
 
-  const handleToggleFavorite = (songId: string) => {
+  const handleToggleFavorite = useCallback((songId: string) => {
     // TODO: Implement API call for toggling favorites
     console.log("Toggle favorite for song:", songId);
-  };
+  }, []);
 
-  const handleAddToSetlist = (songId: string) => {
+  const handleAddToSetlist = useCallback((songId: string) => {
     // TODO: Implement add to setlist functionality
     console.log("Adding song to setlist:", songId);
-  };
+  }, []);
 
-  const recentSongs = songs.filter((song) => song.lastUsed).slice(0, 4);
-  const favoriteSongs = songs.filter((song) => song.isFavorite).slice(0, 4);
-  const popularSongs = songs
-    .sort((a, b) => b.viewCount - a.viewCount)
-    .slice(0, 4);
+  const recentSongs = useMemo(() =>
+    songs.filter((song) => song.lastUsed).slice(0, 4), [songs]);
+
+  const favoriteSongs = useMemo(() =>
+    songs.filter((song) => song.isFavorite).slice(0, 4), [songs]);
+
+  const popularSongs = useMemo(() =>
+    songs
+      .sort((a, b) => b.viewCount - a.viewCount)
+      .slice(0, 4), [songs]);
 
   // Show loading state
   if (isLoading) {
