@@ -2,6 +2,44 @@ import { Request, Response } from "express";
 import { Song } from "../database/models";
 import { z } from "zod";
 
+// Helper function to transform MongoDB song to client format
+function transformSongToClientFormat(song: any) {
+  // Extract basic chords from ChordPro data
+  const extractChordsFromChordPro = (chordPro: string): string[] => {
+    if (!chordPro) return [];
+
+    const chordRegex = /\[([A-G][#b]?[^\/\]]*)\]/g;
+    const matches = chordPro.match(chordRegex);
+
+    if (!matches) return [];
+
+    const chords = matches
+      .map(match => match.slice(1, -1)) // Remove brackets
+      .filter((chord, index, array) => array.indexOf(chord) === index) // Remove duplicates
+      .slice(0, 5); // Take first 5 unique chords
+
+    return chords;
+  };
+
+  const basicChords = extractChordsFromChordPro(song.chordData);
+
+  return {
+    id: song._id.toString(),
+    title: song.title,
+    artist: song.artist,
+    key: song.key,
+    tempo: song.tempo,
+    difficulty: song.difficulty,
+    themes: song.themes || [],
+    viewCount: song.metadata?.views || 0,
+    avgRating: song.metadata?.ratings?.average || 0,
+    basicChords,
+    lastUsed: undefined, // Client-side only
+    isFavorite: false, // Client-side only
+    chordData: song.chordData,
+  };
+}
+
 // Validation schemas
 const createSongSchema = z.object({
   title: z.string().min(1).max(200),
