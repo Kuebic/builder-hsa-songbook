@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
@@ -22,6 +21,7 @@ import {
   AlertCircle,
   Music,
 } from "lucide-react";
+import { ChordProPreviewErrorBoundary } from "./ChordProPreviewErrorBoundary";
 
 interface ChordProEditorProps {
   initialContent: string;
@@ -29,6 +29,7 @@ interface ChordProEditorProps {
   onSave: (content: string) => void;
   onCancel: () => void;
   isLoading?: boolean;
+  readOnly?: boolean;
 }
 
 export default function ChordProEditor({
@@ -37,11 +38,12 @@ export default function ChordProEditor({
   onSave,
   onCancel,
   isLoading = false,
+  readOnly = false,
 }: ChordProEditorProps) {
   const [content, setContent] = useState(initialContent);
   const [hasChanges, setHasChanges] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
+  const [showPreview, setShowPreview] = useState(true);
 
   useEffect(() => {
     setHasChanges(content !== initialContent);
@@ -104,13 +106,13 @@ export default function ChordProEditor({
             parts.push(
               <span key={`text-${index}-${lastIndex}`}>
                 {line.slice(lastIndex, match.index)}
-              </span>
+              </span>,
             );
           }
           parts.push(
-            <span key={`chord-${index}-${match.index}`} className="chord">
+            <span key={`chord-${index}-${match.index}`} className="text-primary font-bold">
               {match[1]}
-            </span>
+            </span>,
           );
           lastIndex = match.index + match[0].length;
         }
@@ -119,7 +121,7 @@ export default function ChordProEditor({
           parts.push(
             <span key={`text-${index}-${lastIndex}`}>
               {line.slice(lastIndex)}
-            </span>
+            </span>,
           );
         }
         
@@ -138,10 +140,10 @@ export default function ChordProEditor({
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              ChordPro Editor - {songTitle}
+              {readOnly ? "View Arrangement" : "ChordPro Editor"} - {songTitle}
             </CardTitle>
             <div className="flex items-center gap-2">
-              {hasChanges && (
+              {!readOnly && hasChanges && (
                 <Badge variant="secondary" className="gap-1">
                   <AlertCircle className="h-3 w-3" />
                   Unsaved changes
@@ -153,67 +155,81 @@ export default function ChordProEditor({
                 onClick={handleCancel}
               >
                 <X className="mr-2 h-4 w-4" />
-                Cancel
+                {readOnly ? "Close" : "Cancel"}
               </Button>
-              <Button
-                size="sm"
-                onClick={handleSave}
-                disabled={!hasChanges || isLoading}
-              >
-                <Save className="mr-2 h-4 w-4" />
-                {isLoading ? "Saving..." : "Save"}
-              </Button>
+              {!readOnly && (
+                <Button
+                  size="sm"
+                  onClick={handleSave}
+                  disabled={!hasChanges || isLoading}
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  {isLoading ? "Saving..." : "Save"}
+                </Button>
+              )}
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "edit" | "preview")}>
-            <TabsList className="w-full rounded-none border-b">
-              <TabsTrigger value="edit" className="flex-1 gap-2">
-                <FileText className="h-4 w-4" />
-                Edit
-              </TabsTrigger>
-              <TabsTrigger value="preview" className="flex-1 gap-2">
-                <Eye className="h-4 w-4" />
-                Preview
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="edit" className="p-4">
-              <div className="space-y-4">
-                <div className="bg-muted/50 rounded-md p-3 text-sm">
-                  <p className="font-medium mb-2">ChordPro Quick Reference:</p>
-                  <ul className="space-y-1 text-muted-foreground">
-                    <li>• Chords: [C] [G] [Am] [F]</li>
-                    <li>• Title: {"{title: Song Title}"}</li>
-                    <li>• Artist: {"{subtitle: Artist Name}"}</li>
-                    <li>• Comments: {"{comment: This is a comment}"}</li>
-                    <li>• Sections: {"{chorus}"} {"{verse: 1}"}</li>
-                  </ul>
-                </div>
-                
-                <Textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="font-mono text-sm min-h-[400px]"
-                  placeholder="Enter ChordPro formatted lyrics here..."
-                />
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="preview" className="p-4">
-              <div className="prose dark:prose-invert max-w-none">
-                {content ? (
-                  renderPreview()
-                ) : (
-                  <div className="text-center text-muted-foreground py-8">
-                    <Music className="h-12 w-12 mx-auto mb-2" />
-                    <p>No content to preview</p>
+          {!readOnly && (
+            <div className="border-b px-4 py-2 flex justify-end">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPreview(!showPreview)}
+                className="gap-2"
+              >
+                <Eye className={`h-4 w-4 ${!showPreview ? "opacity-50" : ""}`} />
+                {showPreview ? "Hide Preview" : "Show Preview"}
+              </Button>
+            </div>
+          )}
+          
+          <div className={`grid ${showPreview && !readOnly ? "md:grid-cols-2 divide-y md:divide-y-0 md:divide-x" : "grid-cols-1"}`}>
+            {/* Editor Panel */}
+            {!readOnly && (
+              <div className={`${showPreview ? "md:border-r" : ""} p-4`}>
+                <div className="space-y-4">
+                  <div className="bg-muted/50 rounded-md p-3 text-sm">
+                    <p className="font-medium mb-2">ChordPro Quick Reference:</p>
+                    <ul className="space-y-1 text-muted-foreground">
+                      <li>• Chords: [C] [G] [Am] [F]</li>
+                      <li>• Title: {"{title: Song Title}"}</li>
+                      <li>• Artist: {"{subtitle: Artist Name}"}</li>
+                      <li>• Comments: {"{comment: This is a comment}"}</li>
+                      <li>• Sections: {"{chorus}"} {"{verse: 1}"}</li>
+                    </ul>
                   </div>
-                )}
+                  
+                  <Textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    className="font-mono text-sm min-h-[500px] resize-none"
+                    placeholder="Enter ChordPro formatted lyrics here..."
+                    readOnly={readOnly}
+                  />
+                </div>
               </div>
-            </TabsContent>
-          </Tabs>
+            )}
+            
+            {/* Preview Panel */}
+            {(showPreview || readOnly) && (
+              <div className="p-4 overflow-auto max-h-[80vh]">
+                <ChordProPreviewErrorBoundary>
+                  <div className="prose dark:prose-invert max-w-none">
+                    {content ? (
+                      renderPreview()
+                    ) : (
+                      <div className="text-center text-muted-foreground py-8">
+                        <Music className="h-12 w-12 mx-auto mb-2" />
+                        <p>No content to preview</p>
+                      </div>
+                    )}
+                  </div>
+                </ChordProPreviewErrorBoundary>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
       

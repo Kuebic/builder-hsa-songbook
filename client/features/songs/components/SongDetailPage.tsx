@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Music, FileText, Star } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { useSongBySlug } from "../hooks/useSongsAPI";
 import { useArrangementsBySong, useUpdateArrangement } from "../hooks/useArrangements";
 import SongHeader from "./SongHeader";
@@ -66,16 +67,18 @@ function SongNotFound({ slug }: SongNotFoundProps): ReactElement {
 export default function SongDetailPage(): ReactElement {
   const { slug } = useParams<SongParams>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [editingArrangement, setEditingArrangement] = useState<ArrangementDetail | null>(null);
   const [showChordProEditor, setShowChordProEditor] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("info");
+  const [isViewMode, setIsViewMode] = useState(false);
   
-  const { data: song, isLoading: songLoading, error: songError } = useSongBySlug(slug!);
-  const { data: arrangements, isLoading: arrangementsLoading } = useArrangementsBySong(song?.id || '');
+  const { data: song, isLoading: songLoading, error: songError } = useSongBySlug(slug || "");
+  const { data: arrangements, isLoading: arrangementsLoading, refetch: refetchArrangements } = useArrangementsBySong(song?.id || "");
   const updateArrangementMutation = useUpdateArrangement();
 
   const handleToggleFavorite = () => {
     // TODO: Implement favorite toggle
-    console.log("Toggle favorite");
   };
 
   const handleEditSong = () => {
@@ -85,36 +88,39 @@ export default function SongDetailPage(): ReactElement {
 
   const handleDeleteSong = () => {
     // TODO: Implement delete
-    console.log("Delete song");
   };
 
   const handleShareSong = () => {
     // TODO: Implement share
-    console.log("Share song");
   };
 
   const handleExportSong = () => {
     // TODO: Implement export
-    console.log("Export song");
   };
 
-  const handleRateSong = async (rating: number) => {
+  const handleRateSong = async (_rating: number) => {
     // TODO: Implement rating
-    console.log("Rate song:", rating);
   };
 
   const handleArrangementView = (arrangement: ArrangementDetail) => {
     setEditingArrangement(arrangement);
     setShowChordProEditor(true);
+    setActiveTab("arrangements"); // Remember we're in arrangements tab
+    setIsViewMode(true); // Set read-only mode
   };
 
   const handleArrangementEdit = (arrangement: ArrangementDetail) => {
     setEditingArrangement(arrangement);
     setShowChordProEditor(true);
+    setActiveTab("arrangements"); // Remember we're in arrangements tab
+    setIsViewMode(false); // Set edit mode
   };
 
   const handleSaveArrangement = async (content: string) => {
-    if (!editingArrangement) return;
+    if (!editingArrangement) {
+      return;
+    }
+    
     
     try {
       await updateArrangementMutation.mutateAsync({
@@ -123,8 +129,23 @@ export default function SongDetailPage(): ReactElement {
       });
       setShowChordProEditor(false);
       setEditingArrangement(null);
+      setIsViewMode(false);
+      
+      // Show success toast
+      toast({
+        title: "Arrangement saved",
+        description: "Your changes have been saved successfully.",
+      });
+      
+      // Refresh arrangements list
+      refetchArrangements();
     } catch (error) {
-      console.error("Failed to save arrangement:", error);
+      // Keep the editor open on error so user doesn't lose their work
+      toast({
+        title: "Failed to save arrangement",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
     }
   };
 
@@ -155,8 +176,10 @@ export default function SongDetailPage(): ReactElement {
             onCancel={() => {
               setShowChordProEditor(false);
               setEditingArrangement(null);
+              setIsViewMode(false);
             }}
             isLoading={updateArrangementMutation.isPending}
+            readOnly={isViewMode}
           />
         </div>
       </Layout>
@@ -179,7 +202,7 @@ export default function SongDetailPage(): ReactElement {
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             {/* Tabs for content organization */}
-            <Tabs defaultValue="info" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="info" className="gap-2">
                   <Music className="h-4 w-4" />
@@ -210,6 +233,7 @@ export default function SongDetailPage(): ReactElement {
                     songId={song.id}
                     songChordData={song.chordData || ""}
                     arrangements={(arrangements || []) as ArrangementDetail[]}
+                    defaultArrangementId={song.defaultArrangementId}
                     onArrangementView={handleArrangementView}
                     onArrangementEdit={handleArrangementEdit}
                   />
