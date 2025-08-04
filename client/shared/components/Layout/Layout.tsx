@@ -17,7 +17,6 @@ import {
   Search,
   List,
   User,
-  Settings,
   Moon,
   Sun,
   Monitor,

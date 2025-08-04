@@ -72,7 +72,7 @@ function SongCard({
   if (variant === "compact") {
     return (
       <Card className="group hover:shadow-md transition-all duration-200 cursor-pointer">
-        <Link to={`/songs/${song.id}`}>
+        <Link to={`/songs/${song.slug}`}>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
@@ -104,7 +104,7 @@ function SongCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link to={`/songs/${song.id}`}>
+      <Link to={`/songs/${song.slug}`}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
@@ -155,7 +155,7 @@ function SongCard({
       </Link>
 
       <CardContent className="pt-0">
-        <Link to={`/songs/${song.id}`}>
+        <Link to={`/songs/${song.slug}`}>
           {/* Song metadata */}
           <div className="flex items-center space-x-3 mb-3">
             <Badge variant="outline" className="font-medium">
@@ -278,6 +278,7 @@ const arePropsEqual = (prevProps: SongCardProps, nextProps: SongCardProps): bool
   // Compare song object properties that affect rendering
   if (
     prevSong.id !== nextSong.id ||
+    prevSong.slug !== nextSong.slug ||
     prevSong.title !== nextSong.title ||
     prevSong.artist !== nextSong.artist ||
     prevSong.key !== nextSong.key ||

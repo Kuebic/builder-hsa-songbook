@@ -21,6 +21,7 @@ export async function createServer() {
   const storageRoutes = await import("./routes/storage");
   const syncRoutes = await import("./routes/sync");
   const usersRoutes = await import("./routes/users");
+  const arrangementsRoutes = await import("./routes/arrangements");
 
   // Example API routes
   app.get("/api/ping", (_req, res) => {
@@ -35,10 +36,18 @@ export async function createServer() {
   app.post("/api/songs", songsRoutes.createSong);
   app.get("/api/songs/search", songsRoutes.searchSongs);
   app.get("/api/songs/stats", songsRoutes.getSongsStats);
+  app.get("/api/songs/slug/:slug", songsRoutes.getSongBySlug);
   app.get("/api/songs/:id", songsRoutes.getSong);
   app.put("/api/songs/:id", songsRoutes.updateSong);
   app.delete("/api/songs/:id", songsRoutes.deleteSong);
   app.post("/api/songs/:id/rate", songsRoutes.rateSong);
+
+  // Arrangements API
+  app.get("/api/songs/:songId/arrangements", arrangementsRoutes.getArrangementsBySong);
+  app.post("/api/arrangements", arrangementsRoutes.createArrangement);
+  app.put("/api/arrangements/:id", arrangementsRoutes.updateArrangement);
+  app.delete("/api/arrangements/:id", arrangementsRoutes.deleteArrangement);
+  app.post("/api/arrangements/:id/rate", arrangementsRoutes.rateArrangement);
 
   // Setlists API
   app.get("/api/setlists", setlistsRoutes.getSetlists);
@@ -135,7 +144,7 @@ async function runInitialMigration() {
       console.log(`📊 Database already has ${songCount} songs`);
     }
   } catch (error) {
-    console.warn("⚠️  Could not run migration:", error.message);
+    console.warn("⚠️  Could not run migration:", error instanceof Error ? error.message : error);
     console.log("💡 The app will continue with an empty database");
   }
 }

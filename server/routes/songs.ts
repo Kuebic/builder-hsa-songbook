@@ -42,6 +42,7 @@ function transformSongToClientFormat(song: any) {
     id: song._id.toString(),
     title: song.title,
     artist: song.artist,
+    slug: song.slug,
     key: song.key,
     tempo: song.tempo,
     difficulty: song.difficulty,
@@ -233,6 +234,78 @@ export async function getSong(req: Request, res: Response) {
     });
   } catch (error) {
     console.error("Error fetching song:", error);
+
+    res.status(500).json({
+      success: false,
+      error: {
+        code: "INTERNAL_ERROR",
+        message: "Failed to fetch song",
+      },
+    });
+  }
+}
+
+// Get single song by slug
+export async function getSongBySlug(req: Request, res: Response) {
+  try {
+    const { slug } = req.params;
+
+    // Validate slug parameter
+    const slugSchema = z.string().min(1);
+    const validatedSlug = slugSchema.parse(slug);
+
+    // Query song by slug
+    const song = await Song.findOne({ slug: validatedSlug }).lean();
+
+    if (!song) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: "NOT_FOUND",
+          message: "Song not found",
+        },
+      });
+    }
+
+    // Check if song is public or user has access
+    if (!song.metadata.isPublic) {
+      // TODO: Add user authorization check
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: "FORBIDDEN",
+          message: "Access denied to private song",
+        },
+      });
+    }
+
+    // Update view count
+    await Song.findByIdAndUpdate(song._id, { $inc: { "metadata.views": 1 } });
+
+    // Transform song to client format
+    const transformedSong = transformSongToClientFormat(song);
+
+    res.json({
+      success: true,
+      data: transformedSong,
+      meta: {
+        compressed: true,
+        cacheHit: false,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching song by slug:", error);
+
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Invalid slug parameter",
+          details: error.errors,
+        },
+      });
+    }
 
     res.status(500).json({
       success: false,
@@ -503,7 +576,7 @@ export async function searchSongs(req: Request, res: Response) {
 }
 
 // Get songs statistics for dashboard
-export async function getSongsStats(req: Request, res: Response) {
+export async function getSongsStats(_req: Request, res: Response) {
   try {
     const [totalSongs, recentSongs] = await Promise.all([
       Song.countDocuments({ "metadata.isPublic": true }),

@@ -1,3 +1,20 @@
+import { z } from "zod";
+
+// Zod validation schemas
+export const songDetailSchema = z.object({
+  slug: z.string().min(1, "Song slug is required"),
+});
+
+export const arrangementCreateSchema = z.object({
+  name: z.string().min(1).max(200),
+  chordData: z.string().min(1, "ChordPro data is required"),
+  key: z.enum(['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B']),
+  tempo: z.number().min(40).max(200).optional(),
+  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).default('intermediate'),
+  description: z.string().max(1000).optional(),
+  tags: z.array(z.string().max(50)).default([]),
+});
+
 // Updated Song interface to match MongoDB schema
 export interface Song {
   _id: string;
@@ -32,6 +49,7 @@ export interface ClientSong {
   id: string; // Maps to _id
   title: string;
   artist?: string;
+  slug: string; // Added for slug-based routing
   key?: string;
   tempo?: number;
   difficulty: "beginner" | "intermediate" | "advanced";
@@ -199,6 +217,43 @@ export type ClientFormat<T> = Omit<T, "_id" | "createdAt" | "updatedAt"> & {
   updatedAt: Date;
 };
 
+// Extended song interface for detail page
+export interface SongDetail extends ClientSong {
+  source: string;
+  lyrics?: string;
+  notes?: string;
+  ccli?: string;
+  year?: number;
+  bibleVerses?: Array<{
+    reference: string;
+    text: string;
+    relevance: string;
+  }>;
+  comments: Comment[];
+  totalArrangements: number;
+}
+
+// Arrangement with detailed metadata
+export interface ArrangementDetail extends Arrangement {
+  songs: Pick<Song, '_id' | 'title' | 'artist'>[]; // For mashups
+  isDefault: boolean;
+  usageInSetlists: number;
+  lastUsedDate?: Date;
+}
+
+// Comment system
+export interface Comment {
+  _id: string;
+  userId: string;
+  userDisplayName: string;
+  content: string;
+  rating?: number; // 1-5 stars
+  isHelpful: number; // Vote count
+  isReported: boolean;
+  createdAt: Date;
+  arrangementId?: string; // Optional - arrangement-specific comments
+}
+
 // Transform functions
 export function songToClientFormat(song: Song): ClientSong {
   // Extract basic chords from ChordPro data (simplified)
@@ -208,6 +263,7 @@ export function songToClientFormat(song: Song): ClientSong {
     id: song._id,
     title: song.title,
     artist: song.artist,
+    slug: song.slug,
     key: song.key,
     tempo: song.tempo,
     difficulty: song.difficulty,

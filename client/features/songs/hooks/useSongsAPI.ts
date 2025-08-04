@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ClientSong, SongFilters } from '../types/song.types';
+import { ClientSong } from '../types/song.types';
 
 interface APIResponse<T> {
   success: boolean;
@@ -70,7 +70,7 @@ export function useSongs(params: SongQueryParams = {}) {
         return result.data;
       } catch (error) {
         // Fallback to mock data on any error (including timeouts)
-        if (error.name === 'AbortError') {
+        if (error instanceof Error && error.name === 'AbortError') {
           console.warn('API request timed out, using mock data');
         } else {
           console.warn('Using mock data due to error:', error);
@@ -107,6 +107,33 @@ export function useSong(id: string) {
     },
     enabled: !!id,
     staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+}
+
+// Fetch single song by slug
+export function useSongBySlug(slug: string) {
+  return useQuery({
+    queryKey: ['songs', 'slug', slug],
+    queryFn: async (): Promise<ClientSong> => {
+      if (!slug) throw new Error('Slug is required');
+      
+      const response = await fetch(`/api/songs/slug/${slug}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch song: ${response.statusText}`);
+      }
+      
+      const result: APIResponse<ClientSong> = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error?.message || 'Failed to fetch song');
+      }
+      
+      return result.data;
+    },
+    enabled: !!slug,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2,
   });
 }
 
@@ -197,7 +224,7 @@ export function useUpdateSong() {
     },
     onSuccess: (data) => {
       // Update the specific song in cache
-      queryClient.setQueryData(['songs', data._id], data);
+      queryClient.setQueryData(['songs', data.id], data);
       // Invalidate songs list to refresh
       queryClient.invalidateQueries({ queryKey: ['songs'] });
     },
@@ -298,7 +325,7 @@ export function useSongsStats() {
         return result.data;
       } catch (error) {
         // Fallback to mock stats on any error (including timeouts)
-        if (error.name === 'AbortError') {
+        if (error instanceof Error && error.name === 'AbortError') {
           console.warn('Stats API request timed out, using mock data');
         } else {
           console.warn('Using mock stats due to error:', error);

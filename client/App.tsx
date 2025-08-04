@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/shared/contexts/AuthContext";
 import { DashboardPage } from "@features/dashboard";
-import { SongsPage } from "@features/songs";
+import { SongsPage, SongDetailPage } from "@features/songs";
 import { SetlistsPage } from "@features/setlists";
 import { ArrangementsPage } from "@features/arrangements";
 import NotFound from "./pages/NotFound";
@@ -25,6 +25,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/songs" element={<SongsPage />} />
+            <Route path="/songs/:slug" element={<SongDetailPage />} />
             <Route path="/setlists" element={<SetlistsPage />} />
             <Route path="/arrangements" element={<ArrangementsPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

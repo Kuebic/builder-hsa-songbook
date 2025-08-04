@@ -34,6 +34,7 @@ const mockSong: ClientSong = {
   id: "1",
   title: "Amazing Grace",
   artist: "John Newton",
+  slug: "amazing-grace-jn-4k7p2",
   key: "G",
   tempo: 120,
   difficulty: "intermediate",
@@ -292,7 +293,7 @@ describe("SongCard Component", () => {
       
       const links = screen.getAllByRole("link");
       const mainLink = links.find(link => 
-        link.getAttribute("href") === "/songs/1"
+        link.getAttribute("href") === "/songs/amazing-grace-jn-4k7p2"
       );
       
       expect(mainLink).toBeInTheDocument();

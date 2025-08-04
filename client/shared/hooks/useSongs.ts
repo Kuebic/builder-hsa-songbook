@@ -88,6 +88,7 @@ function safeTransformAPISongToClientSong(
       id: apiSong._id,
       title: apiSong.title || 'Unknown Title',
       artist: apiSong.artist,
+      slug: apiSong.slug || '',
       key: apiSong.key,
       tempo: apiSong.tempo,
       difficulty: apiSong.difficulty || 'intermediate',
