@@ -267,17 +267,17 @@ export default function BrowseTabs() {
               Search: "{searchQuery}"
             </Badge>
           )}
-          {selectedKey && (
+          {selectedKey && selectedKey !== "all" && (
             <Badge variant="secondary">
               Key: {selectedKey}
             </Badge>
           )}
-          {selectedDifficulty && (
+          {selectedDifficulty && selectedDifficulty !== "all" && (
             <Badge variant="secondary">
               Difficulty: {selectedDifficulty}
             </Badge>
           )}
-          {selectedTheme && (
+          {selectedTheme && selectedTheme !== "all" && (
             <Badge variant="secondary">
               Theme: {selectedTheme}
             </Badge>
