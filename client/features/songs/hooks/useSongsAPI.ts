@@ -308,5 +308,7 @@ export function useSongsStats() {
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: false, // Disable retries to prevent infinite loops
+    refetchOnWindowFocus: false, // Disable refetch on window focus
   });
 }
