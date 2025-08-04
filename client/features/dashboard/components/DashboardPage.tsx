@@ -83,11 +83,8 @@ export default function DashboardPage() {
   }, [searchQuery, selectedKey, selectedDifficulty, songs]);
 
   const handleToggleFavorite = (songId: string) => {
-    setSongs((prev) =>
-      prev.map((song) =>
-        song.id === songId ? { ...song, isFavorite: !song.isFavorite } : song,
-      ),
-    );
+    // TODO: Implement API call for toggling favorites
+    console.log("Toggle favorite for song:", songId);
   };
 
   const handleAddToSetlist = (songId: string) => {
