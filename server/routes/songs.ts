@@ -178,9 +178,12 @@ export async function getSong(req: Request, res: Response) {
     // Update view count
     await song.updateViews();
 
+    // Transform song to client format
+    const transformedSong = transformSongToClientFormat(song);
+
     res.json({
       success: true,
-      data: song,
+      data: transformedSong,
       meta: {
         compressed: true,
         cacheHit: false,
