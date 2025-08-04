@@ -1,62 +1,423 @@
-import { DemoResponse } from "@shared/api";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import Layout from "@/components/Layout";
+import SongCard from "@/components/SongCard";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Music,
+  Search,
+  Filter,
+  Sparkles,
+  Clock,
+  Heart,
+  TrendingUp,
+  Users,
+  BookOpen,
+  PlusCircle,
+} from "lucide-react";
+
+// Mock data for demonstration
+const mockSongs = [
+  {
+    id: "1",
+    title: "Amazing Grace",
+    artist: "John Newton",
+    key: "G",
+    tempo: 85,
+    difficulty: "beginner" as const,
+    themes: ["grace", "salvation", "traditional"],
+    viewCount: 1524,
+    avgRating: 4.8,
+    basicChords: ["G", "C", "D", "Em", "Am"],
+    lastUsed: new Date("2024-01-15"),
+    isFavorite: true,
+  },
+  {
+    id: "2",
+    title: "How Great Is Our God",
+    artist: "Chris Tomlin",
+    key: "A",
+    tempo: 120,
+    difficulty: "intermediate" as const,
+    themes: ["worship", "praise", "contemporary"],
+    viewCount: 2341,
+    avgRating: 4.9,
+    basicChords: ["A", "E", "F#m", "D", "Bm"],
+    lastUsed: new Date("2024-01-10"),
+    isFavorite: false,
+  },
+  {
+    id: "3",
+    title: "Holy Spirit",
+    artist: "Francesca Battistelli",
+    key: "E",
+    tempo: 72,
+    difficulty: "intermediate" as const,
+    themes: ["holy spirit", "prayer", "worship"],
+    viewCount: 987,
+    avgRating: 4.7,
+    basicChords: ["E", "A", "B", "C#m", "F#m"],
+    lastUsed: new Date("2024-01-08"),
+    isFavorite: true,
+  },
+  {
+    id: "4",
+    title: "Cornerstone",
+    artist: "Hillsong",
+    key: "C",
+    tempo: 95,
+    difficulty: "advanced" as const,
+    themes: ["foundation", "hope", "contemporary"],
+    viewCount: 1876,
+    avgRating: 4.6,
+    basicChords: ["C", "F", "G", "Am", "Dm"],
+    isFavorite: false,
+  },
+  {
+    id: "5",
+    title: "Great Are You Lord",
+    artist: "All Sons & Daughters",
+    key: "D",
+    tempo: 130,
+    difficulty: "beginner" as const,
+    themes: ["praise", "worship", "contemporary"],
+    viewCount: 1432,
+    avgRating: 4.5,
+    basicChords: ["D", "A", "Bm", "G", "Em"],
+    isFavorite: false,
+  },
+  {
+    id: "6",
+    title: "In Christ Alone",
+    artist: "Keith Getty & Stuart Townend",
+    key: "F",
+    tempo: 80,
+    difficulty: "intermediate" as const,
+    themes: ["christ", "salvation", "hymn"],
+    viewCount: 2145,
+    avgRating: 4.9,
+    basicChords: ["F", "C", "Dm", "Bb", "Gm"],
+    lastUsed: new Date("2024-01-12"),
+    isFavorite: true,
+  },
+];
+
+const mockStats = {
+  totalSongs: 1247,
+  totalSetlists: 89,
+  recentlyAdded: 12,
+  topContributors: 45,
+};
 
 export default function Index() {
-  const [exampleFromServer, setExampleFromServer] = useState("");
-  // Fetch users on component mount
-  useEffect(() => {
-    fetchDemo();
-  }, []);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedKey, setSelectedKey] = useState<string>("all");
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [songs, setSongs] = useState(mockSongs);
+  const [filteredSongs, setFilteredSongs] = useState(mockSongs);
 
-  // Example of how to fetch data from the server (if needed)
-  const fetchDemo = async () => {
-    try {
-      const response = await fetch("/api/demo");
-      const data = (await response.json()) as DemoResponse;
-      setExampleFromServer(data.message);
-    } catch (error) {
-      console.error("Error fetching hello:", error);
+  useEffect(() => {
+    let filtered = songs;
+
+    // Search filter
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(song =>
+        song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        song.artist.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        song.themes.some(theme => theme.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
     }
+
+    // Key filter
+    if (selectedKey !== "all") {
+      filtered = filtered.filter(song => song.key === selectedKey);
+    }
+
+    // Difficulty filter
+    if (selectedDifficulty !== "all") {
+      filtered = filtered.filter(song => song.difficulty === selectedDifficulty);
+    }
+
+    setFilteredSongs(filtered);
+  }, [searchQuery, selectedKey, selectedDifficulty, songs]);
+
+  const handleToggleFavorite = (songId: string) => {
+    setSongs(prev => prev.map(song =>
+      song.id === songId ? { ...song, isFavorite: !song.isFavorite } : song
+    ));
   };
 
+  const handleAddToSetlist = (songId: string) => {
+    // TODO: Implement add to setlist functionality
+    console.log("Adding song to setlist:", songId);
+  };
+
+  const recentSongs = songs.filter(song => song.lastUsed).slice(0, 4);
+  const favoriteSongs = songs.filter(song => song.isFavorite).slice(0, 4);
+  const popularSongs = songs.sort((a, b) => b.viewCount - a.viewCount).slice(0, 4);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-      <div className="text-center">
-        {/* TODO: FUSION_GENERATION_APP_PLACEHOLDER replace everything here with the actual app! */}
-        <h1 className="text-2xl font-semibold text-slate-800 flex items-center justify-center gap-3">
-          <svg
-            className="animate-spin h-8 w-8 text-slate-400"
-            viewBox="0 0 50 50"
-          >
-            <circle
-              className="opacity-30"
-              cx="25"
-              cy="25"
-              r="20"
-              stroke="currentColor"
-              strokeWidth="5"
-              fill="none"
-            />
-            <circle
-              className="text-slate-600"
-              cx="25"
-              cy="25"
-              r="20"
-              stroke="currentColor"
-              strokeWidth="5"
-              fill="none"
-              strokeDasharray="100"
-              strokeDashoffset="75"
-            />
-          </svg>
-          Generating your app...
-        </h1>
-        <p className="mt-4 text-slate-600 max-w-md">
-          Watch the chat on the left for updates that might need your attention
-          to finish generating
-        </p>
-        <p className="mt-4 hidden max-w-md">{exampleFromServer}</p>
+    <Layout>
+      <div className="space-y-8">
+        {/* Welcome Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h1 className="title text-worship">Welcome to HSA Songbook</h1>
+            <p className="subtitle mt-2">
+              Discover, organize, and share worship chord charts for your community
+            </p>
+          </div>
+          <div className="flex items-center space-x-3 mt-4 lg:mt-0">
+            <Button className="bg-worship hover:bg-worship/90 text-worship-foreground">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add New Song
+            </Button>
+            <Button variant="outline">
+              <BookOpen className="mr-2 h-4 w-4" />
+              Create Setlist
+            </Button>
+          </div>
+        </div>
+
+        {/* Stats Overview */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Songs</CardTitle>
+              <Music className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{mockStats.totalSongs.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">
+                +{mockStats.recentlyAdded} this week
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Setlists</CardTitle>
+              <BookOpen className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{mockStats.totalSetlists}</div>
+              <p className="text-xs text-muted-foreground">
+                Across all users
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Contributors</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{mockStats.topContributors}</div>
+              <p className="text-xs text-muted-foreground">
+                Active this month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Trending</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {popularSongs[0]?.title.split(" ")[0] || "N/A"}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Most viewed song
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Access Tabs */}
+        <Tabs defaultValue="recent" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="recent" className="flex items-center space-x-2">
+              <Clock className="h-4 w-4" />
+              <span className="hidden sm:inline">Recent</span>
+            </TabsTrigger>
+            <TabsTrigger value="favorites" className="flex items-center space-x-2">
+              <Heart className="h-4 w-4" />
+              <span className="hidden sm:inline">Favorites</span>
+            </TabsTrigger>
+            <TabsTrigger value="popular" className="flex items-center space-x-2">
+              <TrendingUp className="h-4 w-4" />
+              <span className="hidden sm:inline">Popular</span>
+            </TabsTrigger>
+            <TabsTrigger value="all" className="flex items-center space-x-2">
+              <Music className="h-4 w-4" />
+              <span className="hidden sm:inline">Browse All</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="recent" className="mt-6">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Recently Used Songs</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {recentSongs.map((song) => (
+                  <SongCard
+                    key={song.id}
+                    song={song}
+                    onToggleFavorite={handleToggleFavorite}
+                    onAddToSetlist={handleAddToSetlist}
+                    variant="compact"
+                  />
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="favorites" className="mt-6">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Your Favorite Songs</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {favoriteSongs.map((song) => (
+                  <SongCard
+                    key={song.id}
+                    song={song}
+                    onToggleFavorite={handleToggleFavorite}
+                    onAddToSetlist={handleAddToSetlist}
+                    variant="compact"
+                  />
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="popular" className="mt-6">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Most Popular Songs</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {popularSongs.map((song) => (
+                  <SongCard
+                    key={song.id}
+                    song={song}
+                    onToggleFavorite={handleToggleFavorite}
+                    onAddToSetlist={handleAddToSetlist}
+                    variant="compact"
+                  />
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="all" className="mt-6">
+            <div className="space-y-6">
+              {/* Search and Filters */}
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search songs, artists, themes..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Select value={selectedKey} onValueChange={setSelectedKey}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue placeholder="Key" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Keys</SelectItem>
+                      <SelectItem value="C">C</SelectItem>
+                      <SelectItem value="D">D</SelectItem>
+                      <SelectItem value="E">E</SelectItem>
+                      <SelectItem value="F">F</SelectItem>
+                      <SelectItem value="G">G</SelectItem>
+                      <SelectItem value="A">A</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
+                    <SelectTrigger className="w-36">
+                      <SelectValue placeholder="Difficulty" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Levels</SelectItem>
+                      <SelectItem value="beginner">Beginner</SelectItem>
+                      <SelectItem value="intermediate">Intermediate</SelectItem>
+                      <SelectItem value="advanced">Advanced</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Button variant="outline" size="icon">
+                    <Filter className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Results */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    {filteredSongs.length} songs found
+                  </p>
+                  {searchQuery && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSearchQuery("")}
+                    >
+                      Clear search
+                    </Button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredSongs.map((song) => (
+                    <SongCard
+                      key={song.id}
+                      song={song}
+                      onToggleFavorite={handleToggleFavorite}
+                      onAddToSetlist={handleAddToSetlist}
+                    />
+                  ))}
+                </div>
+
+                {filteredSongs.length === 0 && (
+                  <div className="text-center py-12">
+                    <Sparkles className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No songs found</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Try adjusting your search or filters
+                    </p>
+                    <Button variant="outline" onClick={() => {
+                      setSearchQuery("");
+                      setSelectedKey("all");
+                      setSelectedDifficulty("all");
+                    }}>
+                      Clear all filters
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
-    </div>
+    </Layout>
   );
 }
