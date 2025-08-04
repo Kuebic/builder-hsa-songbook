@@ -167,7 +167,7 @@ export default function BrowseTabs() {
               <SelectValue placeholder="Key" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Keys</SelectItem>
+              <SelectItem value="all">All Keys</SelectItem>
               {availableKeys.map(key => (
                 <SelectItem key={key} value={key}>{key}</SelectItem>
               ))}
@@ -179,7 +179,7 @@ export default function BrowseTabs() {
               <SelectValue placeholder="Difficulty" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Levels</SelectItem>
+              <SelectItem value="all">All Levels</SelectItem>
               <SelectItem value="beginner">Beginner</SelectItem>
               <SelectItem value="intermediate">Intermediate</SelectItem>
               <SelectItem value="advanced">Advanced</SelectItem>
@@ -191,7 +191,7 @@ export default function BrowseTabs() {
               <SelectValue placeholder="Theme" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Themes</SelectItem>
+              <SelectItem value="all">All Themes</SelectItem>
               {availableThemes.map(theme => (
                 <SelectItem key={theme} value={theme}>{theme}</SelectItem>
               ))}
