@@ -439,12 +439,15 @@ export async function searchSongs(req: Request, res: Response) {
     
     const songs = await Song.searchSongs(query, searchLimit);
 
+    // Transform songs to client format
+    const transformedSongs = songs.map(transformSongToClientFormat);
+
     res.json({
       success: true,
-      data: songs,
+      data: transformedSongs,
       meta: {
         query,
-        total: songs.length,
+        total: transformedSongs.length,
         limit: searchLimit,
         compressed: true,
       },
