@@ -164,7 +164,9 @@ export default function SongCard({
           {/* Chord preview */}
           {song.basicChords && song.basicChords.length > 0 && (
             <div className="mb-3">
-              <p className="text-xs text-muted-foreground mb-1">Common chords:</p>
+              <p className="text-xs text-muted-foreground mb-1">
+                Common chords:
+              </p>
               <div className="flex flex-wrap gap-1">
                 {song.basicChords.slice(0, 6).map((chord, index) => (
                   <span key={index} className="chord text-xs">
