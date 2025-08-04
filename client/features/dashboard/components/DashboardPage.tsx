@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Layout } from "@/shared/components/Layout";
 import { SongCard } from "@features/songs";
 import { useSongs, useSongsStats } from "@features/songs/hooks/useSongsAPI";
