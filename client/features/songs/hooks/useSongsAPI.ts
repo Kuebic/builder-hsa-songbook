@@ -43,13 +43,13 @@ export function useSongs(params: SongQueryParams = {}) {
         });
 
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
 
         const response = await fetch(`/api/songs?${searchParams.toString()}`, {
           signal: controller.signal
         });
 
-        clearTimeout(timeout);
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
           // If API is not available, fallback to mock data
@@ -69,8 +69,12 @@ export function useSongs(params: SongQueryParams = {}) {
 
         return result.data;
       } catch (error) {
-        // Fallback to mock data on any error
-        console.warn('Using mock data due to error:', error);
+        // Fallback to mock data on any error (including timeouts)
+        if (error.name === 'AbortError') {
+          console.warn('API request timed out, using mock data');
+        } else {
+          console.warn('Using mock data due to error:', error);
+        }
         const { mockClientSongs } = await import('../utils/mockData');
         return mockClientSongs;
       }
