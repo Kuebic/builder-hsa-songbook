@@ -1,12 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Play, 
-  Edit, 
-  Star, 
-  Users, 
-  Music, 
+import {
+  Play,
+  Edit,
+  Users,
+  Music,
   Clock,
   Heart,
   Plus,
