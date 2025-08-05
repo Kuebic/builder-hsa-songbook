@@ -83,9 +83,8 @@ export function ChordProTextEditor({
   const [triggerPosition, setTriggerPosition] = useState<{ start: number; end: number } | null>(null);
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const [redoStack, setRedoStack] = useState<string[]>([]);
-
-  // For now, we'll focus on functionality over syntax highlighting to avoid alignment issues
-  // Syntax highlighting can be re-implemented later with a more robust solution
+  const [scrollTop, setScrollTop] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   // Handle auto-completion trigger
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
