@@ -225,26 +225,26 @@ export default function SongDetailPage(): ReactElement {
               className="w-full"
             >
               <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="info" className="gap-2">
+                <TabsTrigger value="overview" className="gap-2">
                   <Music className="h-4 w-4" />
-                  Song Info
+                  Song Overview
                 </TabsTrigger>
                 <TabsTrigger value="arrangements" className="gap-2">
                   <FileText className="h-4 w-4" />
                   Arrangements {arrangements && `(${arrangements.length})`}
                 </TabsTrigger>
-                <TabsTrigger value="notes" className="gap-2">
+                <TabsTrigger value="verses" className="gap-2">
                   <Book className="h-4 w-4" />
-                  Notes & Verses
+                  Bible Verses
                 </TabsTrigger>
-                <TabsTrigger value="rating" className="gap-2">
+                <TabsTrigger value="reviews" className="gap-2">
                   <Star className="h-4 w-4" />
-                  Rating & Reviews
+                  Community Reviews
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="info" className="mt-6">
-                <SongMetadata song={song} />
+              <TabsContent value="overview" className="mt-6">
+                <SongOverview song={song} />
               </TabsContent>
 
               <TabsContent value="arrangements" className="mt-6">
@@ -254,33 +254,55 @@ export default function SongDetailPage(): ReactElement {
                     <Skeleton className="h-32 w-full" />
                   </div>
                 ) : (
-                  <ArrangementsList
-                    songId={song.id}
-                    songChordData={song.chordData || ""}
+                  <ArrangementGrid
                     arrangements={(arrangements || []) as ArrangementDetail[]}
+                    onView={handleArrangementView}
+                    onEdit={handleArrangementEdit}
+                    onCreateNew={handleCreateArrangement}
                     defaultArrangementId={song.defaultArrangementId}
-                    onArrangementView={handleArrangementView}
-                    onArrangementEdit={handleArrangementEdit}
                   />
                 )}
               </TabsContent>
 
-              <TabsContent value="notes" className="mt-6">
-                <SongNotesTab
+              <TabsContent value="verses" className="mt-6">
+                <BibleVersesSection
                   songId={song.id}
                   songTitle={song.title}
-                  songNotes={song.notes}
+                  verses={mockBibleVerses} // Mock data for now
+                  onSubmitVerse={async (reference, text, relevanceNote) => {
+                    console.log("Submitting verse:", { reference, text, relevanceNote });
+                    // TODO: Implement verse submission
+                  }}
+                  onVote={(verseId, voteType) => {
+                    console.log("Voting on verse:", verseId, voteType);
+                    // TODO: Implement voting
+                  }}
+                  onReport={(verseId) => {
+                    console.log("Reporting verse:", verseId);
+                    // TODO: Implement reporting
+                  }}
                 />
               </TabsContent>
 
-              <TabsContent value="rating" className="mt-6">
-                <div className="max-w-md mx-auto">
-                  <SongRating
-                    currentRating={song.avgRating}
-                    totalRatings={100} // TODO: Get actual count from API
-                    onRate={handleRateSong}
-                  />
-                </div>
+              <TabsContent value="reviews" className="mt-6">
+                <SongReviewsSection
+                  songId={song.id}
+                  songTitle={song.title}
+                  averageRating={song.avgRating}
+                  totalReviews={23} // Mock data
+                  onSubmitReview={async (rating, comment) => {
+                    console.log("Submitting review:", { rating, comment });
+                    // TODO: Implement review submission
+                  }}
+                  onMarkHelpful={(reviewId) => {
+                    console.log("Marking helpful:", reviewId);
+                    // TODO: Implement helpful marking
+                  }}
+                  onReport={(reviewId) => {
+                    console.log("Reporting review:", reviewId);
+                    // TODO: Implement reporting
+                  }}
+                />
               </TabsContent>
             </Tabs>
           </div>
