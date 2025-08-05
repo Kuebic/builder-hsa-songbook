@@ -109,17 +109,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       try {
         // Get auth token for API calls
-        await getToken(); // Ready for future backend API calls
+        const token = await getToken();
         
-        // TODO: Fetch user data from backend API
-        // const token = await getToken();
-        // const response = await fetch('/api/users/me', {
-        //   headers: { Authorization: `Bearer ${token}` }
-        // });
-        // const userData = await response.json();
+        // Sync user with backend
+        const syncResponse = await fetch('/api/users/sync', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            clerkId: clerkUser.id,
+            email: clerkUser.primaryEmailAddress?.emailAddress,
+            name: clerkUser.fullName || clerkUser.firstName || "User",
+          })
+        });
         
-        // For now, create user from Clerk data
-        const user = createUserFromClerk(clerkUser, backendUser || undefined);
+        let backendUserData = undefined;
+        if (syncResponse.ok) {
+          const result = await syncResponse.json();
+          backendUserData = result.data;
+        }
+        
+        // Create user from Clerk data, enhanced with backend data if available
+        const user = createUserFromClerk(clerkUser, backendUserData || backendUser || undefined);
         
         setAuthState({
           currentUser: user,

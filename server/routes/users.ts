@@ -4,7 +4,7 @@ import { z } from "zod";
 
 // Validation schemas
 const userParamsSchema = z.object({
-  userId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid user ID format"),
+  userId: z.string().min(1), // Accept any non-empty string to support both MongoDB ObjectIds and Clerk IDs
 });
 
 const songParamsSchema = z.object({
@@ -19,13 +19,28 @@ const favoritesQuerySchema = z.object({
   type: z.enum(["songs", "arrangements", "both"]).optional().default("both"),
 });
 
+// Helper function to find user by either MongoDB _id or Clerk ID
+async function findUserByIdOrClerkId(userId: string) {
+  // Check if it's a valid MongoDB ObjectId (24 hex characters)
+  const isObjectId = /^[0-9a-fA-F]{24}$/.test(userId);
+  
+  if (isObjectId) {
+    // Try to find by MongoDB _id first
+    const user = await User.findById(userId);
+    if (user) return user;
+  }
+  
+  // If not found or not an ObjectId, try to find by Clerk ID
+  return await User.findByClerkId(userId);
+}
+
 // GET /api/users/:userId/favorites - Get user's favorites (songs, arrangements, or both)
 export const getFavorites = async (req: Request, res: Response) => {
   try {
     const { userId } = userParamsSchema.parse(req.params);
     const { type } = favoritesQuerySchema.parse(req.query);
 
-    const user = await User.findById(userId);
+    const user = await findUserByIdOrClerkId(userId);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -41,7 +56,7 @@ export const getFavorites = async (req: Request, res: Response) => {
 
     // Fetch song favorites
     if (type === "songs" || type === "both") {
-      const populatedUser = await User.findById(userId).populate({
+      const populatedUser = await User.findById(user._id).populate({
         path: "favoriteSongs",
         model: "Song",
         select: "_id title artist slug themes compositionYear ccli metadata.ratings.average metadata.views createdAt updatedAt",
@@ -54,7 +69,7 @@ export const getFavorites = async (req: Request, res: Response) => {
 
     // Fetch arrangement favorites
     if (type === "arrangements" || type === "both") {
-      const populatedUser = await User.findById(userId).populate({
+      const populatedUser = await User.findById(user._id).populate({
         path: "favoriteArrangements",
         model: "Arrangement",
         populate: {
@@ -76,7 +91,7 @@ export const getFavorites = async (req: Request, res: Response) => {
         arrangements: type === "songs" ? undefined : arrangements,
       },
       meta: {
-        userId: userId,
+        userId: user._id.toString(),
         type: type,
         totalSongs: songs.length,
         totalArrangements: arrangements.length,
@@ -113,7 +128,7 @@ export const addSongFavorite = async (req: Request, res: Response) => {
     const { songId } = songParamsSchema.parse(req.params);
 
     // Check if user exists
-    const user = await User.findById(userId);
+    const user = await findUserByIdOrClerkId(userId);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -189,7 +204,7 @@ export const removeSongFavorite = async (req: Request, res: Response) => {
     const { songId } = songParamsSchema.parse(req.params);
 
     // Check if user exists
-    const user = await User.findById(userId);
+    const user = await findUserByIdOrClerkId(userId);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -253,7 +268,7 @@ export const addArrangementFavorite = async (req: Request, res: Response) => {
     const { arrangementId } = arrangementParamsSchema.parse(req.params);
 
     // Check if user exists
-    const user = await User.findById(userId);
+    const user = await findUserByIdOrClerkId(userId);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -329,7 +344,7 @@ export const removeArrangementFavorite = async (req: Request, res: Response) => 
     const { arrangementId } = arrangementParamsSchema.parse(req.params);
 
     // Check if user exists
-    const user = await User.findById(userId);
+    const user = await findUserByIdOrClerkId(userId);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -410,7 +425,7 @@ export const checkFavorite = async (req: Request, res: Response) => {
     const { userId } = userParamsSchema.parse(req.params);
     const { songId } = songParamsSchema.parse(req.params);
 
-    const user = await User.findById(userId);
+    const user = await findUserByIdOrClerkId(userId);
     if (!user) {
       return res.status(404).json({
         success: false,
