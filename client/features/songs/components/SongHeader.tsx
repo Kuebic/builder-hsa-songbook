@@ -65,25 +65,25 @@ export default function SongHeader({
             )}
             
             <div className="flex items-center gap-2 mt-3">
-              <Badge variant="outline" className="font-medium">
-                Key: {song.key}
-              </Badge>
-              {song.tempo && (
-                <Badge variant="outline">
-                  {song.tempo} BPM
-                </Badge>
+              {song.themes && song.themes.length > 0 && (
+                <>
+                  {song.themes.slice(0, 3).map((theme, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {theme}
+                    </Badge>
+                  ))}
+                  {song.themes.length > 3 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{song.themes.length - 3} more
+                    </Badge>
+                  )}
+                </>
               )}
-              <Badge 
-                variant="secondary" 
-                className={
-                  song.difficulty === "beginner" 
-                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                    : song.difficulty === "intermediate"
-                    ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                    : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                }
-              >
-                {song.difficulty}
+              <Badge variant="outline" className="text-xs">
+                Traditional Holy Song
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                1772
               </Badge>
             </div>
           </div>
