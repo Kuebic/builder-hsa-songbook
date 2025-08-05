@@ -1,26 +1,29 @@
 import { Schema, model, Document, Types, Model } from "mongoose";
 
 // Musical key enum for consistency
-export type MusicalKey = 'C' | 'C#' | 'Db' | 'D' | 'D#' | 'Eb' | 'E' | 'F' | 'F#' | 'Gb' | 'G' | 'G#' | 'Ab' | 'A' | 'A#' | 'Bb' | 'B';
+export type MusicalKey = "C" | "C#" | "Db" | "D" | "D#" | "Eb" | "E" | "F" | "F#" | "Gb" | "G" | "G#" | "Ab" | "A" | "A#" | "Bb" | "B";
 
-// Interface for User document - Updated per PRD specifications
+// Interface for User document - Updated for dual favorites system
 export interface IUser extends Document {
   _id: Types.ObjectId;
   clerkId?: string; // Optional until Clerk integration
   email: string; // Unique, lowercase, trimmed
   name: string; // Max 100 characters
-  role: 'USER' | 'ADMIN' | 'MODERATOR';
+  role: "USER" | "ADMIN" | "MODERATOR";
   preferences: {
     defaultKey?: MusicalKey;
     fontSize: number; // 12-32px range
-    theme: 'light' | 'dark' | 'stage';
+    theme: "light" | "dark" | "stage";
   };
   profile: {
     bio?: string; // Max 500 characters
     website?: string; // Max 200 characters
     location?: string; // Max 100 characters
   };
-  favorites: Types.ObjectId[]; // Array of song IDs user has favorited
+  favoriteSongs: Types.ObjectId[]; // Array of song IDs user has favorited
+  favoriteArrangements: Types.ObjectId[]; // Array of arrangement IDs user has favorited
+  submittedVerses: Types.ObjectId[]; // Array of verse IDs user has submitted
+  reviews: Types.ObjectId[]; // Array of review IDs user has written
   stats: {
     songsCreated: number;
     arrangementsCreated: number;
@@ -38,10 +41,22 @@ export interface IUser extends Document {
   updateLastLogin(): Promise<IUser>;
   deactivate(): Promise<IUser>;
   activate(): Promise<IUser>;
-  addFavorite(songId: string | Types.ObjectId): Promise<IUser>;
-  removeFavorite(songId: string | Types.ObjectId): Promise<IUser>;
+  
+  // Favorites methods - Songs
+  addFavoriteSong(songId: string | Types.ObjectId): Promise<IUser>;
+  removeFavoriteSong(songId: string | Types.ObjectId): Promise<IUser>;
   isFavoriteSong(songId: string | Types.ObjectId): boolean;
-  getFavorites(): Types.ObjectId[];
+  getFavoriteSongs(): Types.ObjectId[];
+  
+  // Favorites methods - Arrangements
+  addFavoriteArrangement(arrangementId: string | Types.ObjectId): Promise<IUser>;
+  removeFavoriteArrangement(arrangementId: string | Types.ObjectId): Promise<IUser>;
+  isFavoriteArrangement(arrangementId: string | Types.ObjectId): boolean;
+  getFavoriteArrangements(): Types.ObjectId[];
+  
+  // Community content methods
+  addSubmittedVerse(verseId: Types.ObjectId): Promise<IUser>;
+  addReview(reviewId: Types.ObjectId): Promise<IUser>;
 }
 
 // Interface for User model (static methods)
@@ -52,7 +67,7 @@ export interface IUserModel extends Model<IUser> {
   findByClerkId(clerkId: string): Promise<IUser | null>;
 }
 
-// Create the schema - Updated per PRD specifications
+// Create the schema - Updated for dual favorites and community features
 const userSchema = new Schema<IUser>({
   clerkId: {
     type: String,
@@ -73,13 +88,13 @@ const userSchema = new Schema<IUser>({
   },
   role: {
     type: String,
-    enum: ['USER', 'ADMIN', 'MODERATOR'],
-    default: 'USER',
+    enum: ["USER", "ADMIN", "MODERATOR"],
+    default: "USER",
   },
   preferences: {
     defaultKey: {
       type: String,
-      enum: ['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B'],
+      enum: ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"],
     },
     fontSize: {
       type: Number,
@@ -89,8 +104,8 @@ const userSchema = new Schema<IUser>({
     },
     theme: {
       type: String,
-      enum: ['light', 'dark', 'stage'],
-      default: 'light',
+      enum: ["light", "dark", "stage"],
+      default: "light",
     },
   },
   profile: {
@@ -110,10 +125,23 @@ const userSchema = new Schema<IUser>({
       trim: true,
     },
   },
-  favorites: [{
+  favoriteSongs: [{
     type: Schema.Types.ObjectId,
-    ref: 'Song',
+    ref: "Song",
     index: true,
+  }],
+  favoriteArrangements: [{
+    type: Schema.Types.ObjectId,
+    ref: "Arrangement",
+    index: true,
+  }],
+  submittedVerses: [{
+    type: Schema.Types.ObjectId,
+    ref: "Verse",
+  }],
+  reviews: [{
+    type: Schema.Types.ObjectId,
+    ref: "Review",
   }],
   stats: {
     songsCreated: {
@@ -182,30 +210,71 @@ userSchema.methods.activate = function () {
   return this.save();
 };
 
-// Favorites methods
-userSchema.methods.addFavorite = function (songId: string | Types.ObjectId) {
-  const objectId = typeof songId === 'string' ? new Types.ObjectId(songId) : songId;
+// Song favorites methods
+userSchema.methods.addFavoriteSong = function (songId: string | Types.ObjectId) {
+  const objectId = typeof songId === "string" ? new Types.ObjectId(songId) : songId;
   
-  if (!this.favorites.some((id: Types.ObjectId) => id.equals(objectId))) {
-    this.favorites.push(objectId);
+  if (!this.favoriteSongs.some((id: Types.ObjectId) => id.equals(objectId))) {
+    this.favoriteSongs.push(objectId);
   }
   return this.save();
 };
 
-userSchema.methods.removeFavorite = function (songId: string | Types.ObjectId) {
-  const objectId = typeof songId === 'string' ? new Types.ObjectId(songId) : songId;
+userSchema.methods.removeFavoriteSong = function (songId: string | Types.ObjectId) {
+  const objectId = typeof songId === "string" ? new Types.ObjectId(songId) : songId;
   
-  this.favorites = this.favorites.filter((id: Types.ObjectId) => !id.equals(objectId));
+  this.favoriteSongs = this.favoriteSongs.filter((id: Types.ObjectId) => !id.equals(objectId));
   return this.save();
 };
 
 userSchema.methods.isFavoriteSong = function (songId: string | Types.ObjectId) {
-  const objectId = typeof songId === 'string' ? new Types.ObjectId(songId) : songId;
-  return this.favorites.some((id: Types.ObjectId) => id.equals(objectId));
+  const objectId = typeof songId === "string" ? new Types.ObjectId(songId) : songId;
+  return this.favoriteSongs.some((id: Types.ObjectId) => id.equals(objectId));
 };
 
-userSchema.methods.getFavorites = function () {
-  return this.favorites;
+userSchema.methods.getFavoriteSongs = function () {
+  return this.favoriteSongs;
+};
+
+// Arrangement favorites methods
+userSchema.methods.addFavoriteArrangement = function (arrangementId: string | Types.ObjectId) {
+  const objectId = typeof arrangementId === "string" ? new Types.ObjectId(arrangementId) : arrangementId;
+  
+  if (!this.favoriteArrangements.some((id: Types.ObjectId) => id.equals(objectId))) {
+    this.favoriteArrangements.push(objectId);
+  }
+  return this.save();
+};
+
+userSchema.methods.removeFavoriteArrangement = function (arrangementId: string | Types.ObjectId) {
+  const objectId = typeof arrangementId === "string" ? new Types.ObjectId(arrangementId) : arrangementId;
+  
+  this.favoriteArrangements = this.favoriteArrangements.filter((id: Types.ObjectId) => !id.equals(objectId));
+  return this.save();
+};
+
+userSchema.methods.isFavoriteArrangement = function (arrangementId: string | Types.ObjectId) {
+  const objectId = typeof arrangementId === "string" ? new Types.ObjectId(arrangementId) : arrangementId;
+  return this.favoriteArrangements.some((id: Types.ObjectId) => id.equals(objectId));
+};
+
+userSchema.methods.getFavoriteArrangements = function () {
+  return this.favoriteArrangements;
+};
+
+// Community content methods
+userSchema.methods.addSubmittedVerse = function (verseId: Types.ObjectId) {
+  if (!this.submittedVerses.some((id: Types.ObjectId) => id.equals(verseId))) {
+    this.submittedVerses.push(verseId);
+  }
+  return this.save();
+};
+
+userSchema.methods.addReview = function (reviewId: Types.ObjectId) {
+  if (!this.reviews.some((id: Types.ObjectId) => id.equals(reviewId))) {
+    this.reviews.push(reviewId);
+  }
+  return this.save();
 };
 
 // Static methods - Updated for new schema
