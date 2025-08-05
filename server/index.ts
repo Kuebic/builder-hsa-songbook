@@ -22,6 +22,8 @@ export async function createServer() {
   const syncRoutes = await import("./routes/sync");
   const usersRoutes = await import("./routes/users");
   const arrangementsRoutes = await import("./routes/arrangements");
+  const versesRoutes = await import("./routes/verses");
+  const reviewsRoutes = await import("./routes/reviews");
 
   // Example API routes
   app.get("/api/ping", (_req, res) => {
@@ -37,6 +39,7 @@ export async function createServer() {
   app.get("/api/songs/search", songsRoutes.searchSongs);
   app.get("/api/songs/stats", songsRoutes.getSongsStats);
   app.get("/api/songs/slug/:slug", songsRoutes.getSongBySlug);
+  app.get("/api/songs/ccli/:ccli", songsRoutes.getSongByCCLI);
   app.get("/api/songs/:id", songsRoutes.getSong);
   app.put("/api/songs/:id", songsRoutes.updateSong);
   app.delete("/api/songs/:id", songsRoutes.deleteSong);
@@ -48,6 +51,22 @@ export async function createServer() {
   app.put("/api/arrangements/:id", arrangementsRoutes.updateArrangement);
   app.delete("/api/arrangements/:id", arrangementsRoutes.deleteArrangement);
   app.post("/api/arrangements/:id/rate", arrangementsRoutes.rateArrangement);
+
+  // Verses API
+  app.get("/api/songs/:songId/verses", versesRoutes.getVersesBySong);
+  app.post("/api/songs/:songId/verses", versesRoutes.submitVerse);
+  app.post("/api/verses/:id/upvote", versesRoutes.upvoteVerse);
+  app.put("/api/verses/:id", versesRoutes.updateVerse);
+  app.delete("/api/verses/:id", versesRoutes.deleteVerse);
+
+  // Reviews API
+  app.get("/api/arrangements/:arrangementId/reviews", reviewsRoutes.getReviews);
+  app.post("/api/arrangements/:arrangementId/reviews", reviewsRoutes.createOrUpdateReview);
+  app.post("/api/reviews/:id/helpful", reviewsRoutes.markHelpful);
+  app.post("/api/reviews/:id/report", reviewsRoutes.reportReview);
+  app.get("/api/reviews/reported", reviewsRoutes.getReportedReviews);
+  app.put("/api/reviews/:id/clear-report", reviewsRoutes.clearReport);
+  app.delete("/api/reviews/:id", reviewsRoutes.deleteReview);
 
   // Setlists API
   app.get("/api/setlists", setlistsRoutes.getSetlists);
@@ -70,8 +89,14 @@ export async function createServer() {
   app.get("/api/sync/status", syncRoutes.getSyncStatus);
   app.post("/api/sync/resolve", syncRoutes.resolveConflicts);
 
-  // Users API
-  app.get("/api/users/:userId/favorites", usersRoutes.getUserFavorites);
+  // Users API - Enhanced favorites with dual support
+  app.get("/api/users/:userId/favorites", usersRoutes.getFavorites); // New endpoint with type parameter
+  app.post("/api/users/:userId/favorites/songs/:songId", usersRoutes.addSongFavorite);
+  app.delete("/api/users/:userId/favorites/songs/:songId", usersRoutes.removeSongFavorite);
+  app.post("/api/users/:userId/favorites/arrangements/:arrangementId", usersRoutes.addArrangementFavorite);
+  app.delete("/api/users/:userId/favorites/arrangements/:arrangementId", usersRoutes.removeArrangementFavorite);
+  
+  // Legacy favorites endpoints for backward compatibility
   app.post("/api/users/:userId/favorites/:songId", usersRoutes.addFavorite);
   app.delete("/api/users/:userId/favorites/:songId", usersRoutes.removeFavorite);
   app.get("/api/users/:userId/favorites/check/:songId", usersRoutes.checkFavorite);

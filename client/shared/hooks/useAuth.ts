@@ -36,10 +36,10 @@ export function useUserId(): string | null {
 export function useUserPreferences() {
   const { currentUser, updateUser } = useAuth();
   
-  const updatePreferences = (preferences: Partial<User['preferences']>) => {
+  const updatePreferences = (preferences: Partial<User["preferences"]>) => {
     if (currentUser) {
       updateUser({
-        preferences: { ...currentUser.preferences, ...preferences }
+        preferences: { ...currentUser.preferences, ...preferences },
       });
     }
   };
@@ -54,10 +54,10 @@ export function useUserPreferences() {
 export function useUserProfile() {
   const { currentUser, updateUser } = useAuth();
   
-  const updateProfile = (profile: Partial<User['profile']>) => {
+  const updateProfile = (profile: Partial<User["profile"]>) => {
     if (currentUser) {
       updateUser({
-        profile: { ...currentUser.profile, ...profile }
+        profile: { ...currentUser.profile, ...profile },
       });
     }
   };

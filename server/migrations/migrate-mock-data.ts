@@ -1,5 +1,5 @@
 import { database } from "../database/connection";
-import { Song, User } from "../database/models";
+import { Song, User, Arrangement } from "../database/models";
 
 // Mock ChordPro data for each song
 const mockChordProData = {
@@ -246,13 +246,13 @@ export async function migrateMockData() {
     if (!adminUser) {
       adminUser = new User({
         _id: adminUserId,
+        email: "admin@hsasongbook.com",
+        name: "HSA Admin",
+        role: "ADMIN",
         profile: {
-          displayName: "HSA Admin",
-          isPublic: false,
-          publicFields: [],
+          bio: "Default admin user for HSA Songbook",
         },
         preferences: {
-          notation: "english",
           fontSize: 16,
           theme: "light",
         },
@@ -305,12 +305,83 @@ export async function migrateMockData() {
       console.log(`✅ Migrated: ${song.title} (${song.slug})`);
     }
 
+    // Create sample arrangements for the first few songs
+    console.log("🎵 Creating sample arrangements...");
+    const createdSongs = await Song.find({}).limit(3); // Get first 3 songs
+    let arrangementsCreated = 0;
+    
+    for (const song of createdSongs) {
+      // Create 2 arrangements per song (different keys/styles)
+      const arrangements = [
+        {
+          name: `${song.title} - Original Key`,
+          songIds: [song._id],
+          createdBy: adminUserId,
+          chordData: (mockChordProData as Record<string, string>)[song.title] || `{title: ${song.title}}
+{key: G}
+
+[G]Sample chord data for ${song.title}
+[C]This is a basic [G]arrangement
+[D]In the original [G]key`,
+          key: "G",
+          tempo: 85,
+          timeSignature: "4/4",
+          difficulty: "intermediate",
+          description: `Original key arrangement for ${song.title}`,
+          tags: ["worship", "traditional"],
+          metadata: {
+            isMashup: false,
+            isPublic: true,
+            ratings: {
+              average: 4.2,
+              count: 15,
+            },
+            views: 50,
+          },
+        },
+        {
+          name: `${song.title} - Capo Version`,
+          songIds: [song._id],
+          createdBy: adminUserId,
+          chordData: `{title: ${song.title} - Capo Version}
+{key: C}
+
+[C]Same song but with capo on 5th fret
+[F]Makes it easier for [C]beginners
+[G]Simple chord [C]progression`,
+          key: "C",
+          tempo: 80,
+          timeSignature: "4/4",
+          difficulty: "beginner",
+          description: `Beginner-friendly capo arrangement for ${song.title}`,
+          tags: ["worship", "beginner", "capo"],
+          metadata: {
+            isMashup: false,
+            isPublic: true,
+            ratings: {
+              average: 4.5,
+              count: 8,
+            },
+            views: 25,
+          },
+        },
+      ];
+
+      for (const arrangementData of arrangements) {
+        const arrangement = new Arrangement(arrangementData);
+        await arrangement.save();
+        arrangementsCreated++;
+        console.log(`✅ Created arrangement: ${arrangement.name}`);
+      }
+    }
+
     // Update admin user stats
     adminUser.stats.songsCreated = mockSongs.length;
+    adminUser.stats.arrangementsCreated = arrangementsCreated;
     await adminUser.save();
 
     console.log("✅ Migration completed successfully!");
-    console.log(`📊 Migrated ${mockSongs.length} songs with ChordPro content`);
+    console.log(`📊 Migrated ${mockSongs.length} songs and ${arrangementsCreated} arrangements`);
 
     // Get storage stats
     const stats = await database.getStorageStats();

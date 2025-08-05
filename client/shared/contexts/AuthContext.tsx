@@ -7,11 +7,11 @@ export interface User {
   clerkId?: string;
   email: string;
   name: string;
-  role: 'USER' | 'ADMIN' | 'MODERATOR';
+  role: "USER" | "ADMIN" | "MODERATOR";
   preferences: {
     defaultKey?: string;
     fontSize: number;
-    theme: 'light' | 'dark' | 'stage';
+    theme: "light" | "dark" | "stage";
   };
   profile: {
     bio?: string;
@@ -55,13 +55,13 @@ function createUserFromClerk(clerkUser: any, backendUser?: Partial<User>): User 
   return {
     _id: backendUser?._id || clerkUser.id,
     clerkId: clerkUser.id,
-    email: clerkUser.primaryEmailAddress?.emailAddress || '',
-    name: clerkUser.fullName || clerkUser.firstName || 'User',
-    role: backendUser?.role || 'USER',
+    email: clerkUser.primaryEmailAddress?.emailAddress || "",
+    name: clerkUser.fullName || clerkUser.firstName || "User",
+    role: backendUser?.role || "USER",
     preferences: backendUser?.preferences || {
-      defaultKey: 'G',
+      defaultKey: "G",
       fontSize: 16,
-      theme: 'light',
+      theme: "light",
     },
     profile: backendUser?.profile || {},
     favorites: backendUser?.favorites || [],
@@ -131,7 +131,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setAuthState(prev => ({
           ...prev,
           isLoading: false,
-          error: error instanceof Error ? error.message : 'Failed to sync user data',
+          error: error instanceof Error ? error.message : "Failed to sync user data",
         }));
       }
     };
@@ -164,7 +164,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const refreshUser = async (): Promise<void> => {
-    if (!clerkUser || !isSignedIn) return;
+    if (!clerkUser || !isSignedIn) {return;}
 
     setAuthState(prev => ({ ...prev, isLoading: true }));
     
@@ -189,7 +189,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setAuthState(prev => ({
         ...prev,
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to refresh user data',
+        error: error instanceof Error ? error.message : "Failed to refresh user data",
       }));
     }
   };

@@ -1,6 +1,6 @@
 // API client for interacting with the backend server
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.host}/api` : '/api');
+  (typeof window !== "undefined" ? `${window.location.protocol}//${window.location.host}/api` : "/api");
 
 export interface APISong {
   _id: string;
@@ -11,7 +11,7 @@ export interface APISong {
   key?: string;
   tempo?: number;
   timeSignature?: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  difficulty: "beginner" | "intermediate" | "advanced";
   themes: string[];
   source?: string;
   lyrics?: string;
@@ -48,7 +48,7 @@ export interface APIResponse<T> {
 export interface SongFilters {
   search?: string;
   key?: string;
-  difficulty?: 'beginner' | 'intermediate' | 'advanced';
+  difficulty?: "beginner" | "intermediate" | "advanced";
   themes?: string;
   limit?: number;
   offset?: number;
@@ -64,13 +64,13 @@ class APIClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<APIResponse<T>> {
     const url = `${this.baseURL}${endpoint}`;
     
     const config: RequestInit = {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options.headers,
       },
       ...options,
@@ -86,7 +86,7 @@ class APIClient {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('API request error:', error);
+      console.error("API request error:", error);
       throw error;
     }
   }
@@ -101,7 +101,7 @@ class APIClient {
       }
     });
 
-    const endpoint = `/songs${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    const endpoint = `/songs${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
     return this.request<APISong[]>(endpoint);
   }
 
@@ -120,7 +120,7 @@ class APIClient {
 
   // Health check
   async healthCheck(): Promise<APIResponse<{ status: string; database: any }>> {
-    return this.request<{ status: string; database: any }>('/health');
+    return this.request<{ status: string; database: any }>("/health");
   }
 
   // User favorites methods
@@ -131,20 +131,20 @@ class APIClient {
   async addFavorite(userId: string, songId: string): Promise<APIResponse<{ userId: string; songId: string; message: string }>> {
     return this.request<{ userId: string; songId: string; message: string }>(
       `/users/${userId}/favorites/${songId}`,
-      { method: 'POST' }
+      { method: "POST" },
     );
   }
 
   async removeFavorite(userId: string, songId: string): Promise<APIResponse<{ userId: string; songId: string; message: string }>> {
     return this.request<{ userId: string; songId: string; message: string }>(
       `/users/${userId}/favorites/${songId}`,
-      { method: 'DELETE' }
+      { method: "DELETE" },
     );
   }
 
   async checkFavorite(userId: string, songId: string): Promise<APIResponse<{ userId: string; songId: string; isFavorite: boolean }>> {
     return this.request<{ userId: string; songId: string; isFavorite: boolean }>(
-      `/users/${userId}/favorites/check/${songId}`
+      `/users/${userId}/favorites/check/${songId}`,
     );
   }
 }

@@ -194,7 +194,7 @@ export class DatabaseConnection {
 
       return {
         dropped: true,
-        recreated: true
+        recreated: true,
       };
 
     } catch (error) {
@@ -219,7 +219,7 @@ export class DatabaseConnection {
       readyState: connection.readyState,
       host: connection.host,
       port: connection.port,
-      name: connection.name
+      name: connection.name,
     };
   }
 }
