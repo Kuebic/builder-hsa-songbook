@@ -411,15 +411,18 @@ export default function ChordProEditor({
               {/* Preview Panel */}
               <ResizablePanel
                 defaultSize={readOnly ? 100 : 50}
-                minSize={20}
+                minSize={30}
                 className="min-w-[300px]"
               >
                 <div className="h-full p-4 overflow-auto">
                   <ChordDisplay
-                    content={content}
-                    theme="light"
-                    showControls={true}
+                    content={debouncedContent}
+                    transpose={transposition.transpositionLevel}
+                    theme={displayTheme}
+                    showChords={showChords}
+                    showControls={!readOnly}
                     className="max-w-none"
+                    onTranspose={transposition.transpose}
                   />
                 </div>
               </ResizablePanel>
