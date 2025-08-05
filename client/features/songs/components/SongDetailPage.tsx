@@ -71,6 +71,36 @@ function SongNotFound({ slug }: SongNotFoundProps): ReactElement {
   );
 }
 
+// Mock Bible verses data (would come from API in real implementation)
+const mockBibleVerses: BibleVerse[] = [
+  {
+    id: "1",
+    reference: "Ephesians 2:8-9",
+    text: "For by grace you have been saved through faith. And this is not your own doing; it is the gift of God, not a result of works, so that no one may boast.",
+    submittedBy: { name: "Sarah M.", id: "user1" },
+    submittedAt: "2024-01-15T10:30:00Z",
+    upvotes: 45,
+    downvotes: 2,
+    hasUpvoted: false,
+    hasDownvoted: false,
+    relevanceNote: "This verse perfectly captures the core message of Amazing Grace - that salvation is a gift from God, not earned through our works.",
+    status: "approved",
+  },
+  {
+    id: "2",
+    reference: "1 Chronicles 16:34",
+    text: "Oh give thanks to the Lord, for he is good; for his steadfast love endures forever!",
+    submittedBy: { name: "David L.", id: "user2" },
+    submittedAt: "2024-01-12T14:20:00Z",
+    upvotes: 28,
+    downvotes: 1,
+    hasUpvoted: true,
+    hasDownvoted: false,
+    relevanceNote: "The enduring nature of God's grace is beautifully reflected in both this verse and the song's message.",
+    status: "approved",
+  },
+];
+
 export default function SongDetailPage(): ReactElement {
   const { slug } = useParams<SongParams>();
   const navigate = useNavigate();
