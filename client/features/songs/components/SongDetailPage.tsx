@@ -17,7 +17,6 @@ import ArrangementGrid from "./ArrangementGrid";
 import SongReviewsSection from "./SongReviewsSection";
 import BibleVersesSection, { BibleVerse } from "./BibleVersesSection";
 import ChordProEditor from "./ChordProEditor";
-import SongNotesTab from "./SongNotesTab";
 import { ArrangementDetail } from "../types/song.types";
 
 type SongParams = {
