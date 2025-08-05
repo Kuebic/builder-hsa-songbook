@@ -257,14 +257,24 @@ export function ChordProTextEditor({
 
   return (
     <div className={cn("relative w-full", className)}>
+      {/* Syntax highlighting overlay */}
+      <SyntaxHighlighter
+        content={value}
+        fontSize={fontSize}
+        theme="light" // TODO: Use actual theme from props
+        scrollTop={scrollTop}
+        scrollLeft={scrollLeft}
+      />
+
       {/* Main textarea */}
       <Textarea
         ref={textareaRef}
         value={value}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
+        onScroll={handleScroll}
         className={cn(
-          "font-mono resize-none",
+          "font-mono resize-none bg-transparent relative z-10",
           "min-h-[400px] w-full",
           readOnly && "cursor-default"
         )}
