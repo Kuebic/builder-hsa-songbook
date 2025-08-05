@@ -33,7 +33,10 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { useChordTransposition } from "../hooks/useChordTransposition";
 
 // Simple debounce implementation
-function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number,
+): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout;
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
@@ -50,7 +53,7 @@ export interface ChordProEditorProps {
   readOnly?: boolean;
   debounceMs?: number;
   fontSize?: number;
-  theme?: 'light' | 'dark' | 'stage';
+  theme?: "light" | "dark" | "stage";
 }
 
 /**
@@ -58,26 +61,31 @@ export interface ChordProEditorProps {
  * Common indicators: base64-like strings, binary data, unusual character patterns
  */
 function isCorruptedChordData(data: string): boolean {
-  if (!data || data.trim() === "") {return false;}
-  
+  if (!data || data.trim() === "") {
+    return false;
+  }
+
   // Check for base64-like patterns (long strings with only base64 characters)
   const base64Pattern = /^[A-Za-z0-9+/]{20,}={0,2}$/;
   if (base64Pattern.test(data.replace(/\s/g, ""))) {
     return true;
   }
-  
+
   // Check for excessive non-printable characters
   // eslint-disable-next-line no-control-regex
-  const nonPrintableCount = (data.match(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\xFF]/g) || []).length;
-  if (nonPrintableCount > data.length * 0.1) { // More than 10% non-printable
+  const nonPrintableCount = (
+    data.match(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\xFF]/g) || []
+  ).length;
+  if (nonPrintableCount > data.length * 0.1) {
+    // More than 10% non-printable
     return true;
   }
-  
+
   // Check for patterns that look like compressed data
   if (data.startsWith("�") || data.includes("\x00") || data.includes("\\x")) {
     return true;
   }
-  
+
   return false;
 }
 
@@ -90,7 +98,7 @@ const ChordProEditor = memo(function ChordProEditor({
   readOnly = false,
   debounceMs = 300,
   fontSize = 14,
-  theme = 'light',
+  theme = "light",
 }: ChordProEditorProps) {
   const [content, setContent] = useState(initialContent);
   const [debouncedContent, setDebouncedContent] = useState(initialContent);
@@ -106,21 +114,18 @@ const ChordProEditor = memo(function ChordProEditor({
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   // Debounced content update for live preview
-  const debouncedUpdateContent = useMemo(
-    () => {
-      let timeoutId: NodeJS.Timeout;
-      const debouncedFn = (newContent: string) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-          setDebouncedContent(newContent);
-        }, debounceMs);
-      };
+  const debouncedUpdateContent = useMemo(() => {
+    let timeoutId: NodeJS.Timeout;
+    const debouncedFn = (newContent: string) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setDebouncedContent(newContent);
+      }, debounceMs);
+    };
 
-      debouncedFn.cancel = () => clearTimeout(timeoutId);
-      return debouncedFn;
-    },
-    [debounceMs]
-  );
+    debouncedFn.cancel = () => clearTimeout(timeoutId);
+    return debouncedFn;
+  }, [debounceMs]);
 
   useEffect(() => {
     setHasChanges(content !== initialContent);
@@ -173,8 +178,8 @@ const ChordProEditor = memo(function ChordProEditor({
   const handleUndo = useCallback(() => {
     if (undoStack.length > 0) {
       const previousContent = undoStack[undoStack.length - 1];
-      setRedoStack(prev => [...prev, content]);
-      setUndoStack(prev => prev.slice(0, -1));
+      setRedoStack((prev) => [...prev, content]);
+      setUndoStack((prev) => prev.slice(0, -1));
       setContent(previousContent);
     }
   }, [content, undoStack]);
@@ -182,37 +187,39 @@ const ChordProEditor = memo(function ChordProEditor({
   const handleRedo = useCallback(() => {
     if (redoStack.length > 0) {
       const nextContent = redoStack[redoStack.length - 1];
-      setUndoStack(prev => [...prev, content]);
-      setRedoStack(prev => prev.slice(0, -1));
+      setUndoStack((prev) => [...prev, content]);
+      setRedoStack((prev) => prev.slice(0, -1));
       setContent(nextContent);
     }
   }, [content, redoStack]);
 
-  const handleContentChange = useCallback((newContent: string) => {
-    // Add to undo stack if significant change
-    if (Math.abs(newContent.length - content.length) > 1) {
-      setUndoStack(prev => [...prev.slice(-19), content]); // Keep last 20 states
-      setRedoStack([]);
-    }
-    setContent(newContent);
-  }, [content]);
+  const handleContentChange = useCallback(
+    (newContent: string) => {
+      // Add to undo stack if significant change
+      if (Math.abs(newContent.length - content.length) > 1) {
+        setUndoStack((prev) => [...prev.slice(-19), content]); // Keep last 20 states
+        setRedoStack([]);
+      }
+      setContent(newContent);
+    },
+    [content],
+  );
 
   const handleInsertAtCursor = useCallback((text: string) => {
     // This would need textarea ref to get cursor position
     // For now, append to end
-    setContent(prev => prev + text);
+    setContent((prev) => prev + text);
   }, []);
 
-  const handleExport = useCallback((format: 'pdf' | 'html' | 'txt') => {
+  const handleExport = useCallback((format: "pdf" | "html" | "txt") => {
     // TODO: Implement export functionality
-    console.log('Export as:', format);
+    console.log("Export as:", format);
   }, []);
 
   const handleShowHelp = useCallback(() => {
     // TODO: Implement help modal
-    console.log('Show help');
+    console.log("Show help");
   }, []);
-
 
   return (
     <>
@@ -230,11 +237,7 @@ const ChordProEditor = memo(function ChordProEditor({
                   Unsaved changes
                 </Badge>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCancel}
-              >
+              <Button variant="outline" size="sm" onClick={handleCancel}>
                 <X className="mr-2 h-4 w-4" />
                 {readOnly ? "Close" : "Cancel"}
               </Button>
@@ -251,7 +254,7 @@ const ChordProEditor = memo(function ChordProEditor({
             </div>
           </div>
         </CardHeader>
-        
+
         {/* Corrupted Data Warning */}
         {isCorrupted && (
           <div className="border-b bg-destructive/10 px-4 py-3">
@@ -259,8 +262,8 @@ const ChordProEditor = memo(function ChordProEditor({
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Corrupted Chord Data Detected</AlertTitle>
               <AlertDescription className="mt-2">
-                The chord data appears to be corrupted or encrypted. This may happen with older songs 
-                that had compression issues.
+                The chord data appears to be corrupted or encrypted. This may
+                happen with older songs that had compression issues.
                 <div className="mt-3 flex gap-2">
                   <Button
                     variant="outline"
@@ -294,7 +297,7 @@ const ChordProEditor = memo(function ChordProEditor({
           onInsertChord={handleInsertAtCursor}
           onInsertDirective={handleInsertAtCursor}
           onInsertSection={handleInsertAtCursor}
-          currentKey={transposition.currentKey || 'C'}
+          currentKey={transposition.currentKey || "C"}
           transpositionLevel={transposition.transpositionLevel}
           canTransposeUp={transposition.canTransposeUp}
           canTransposeDown={transposition.canTransposeDown}
@@ -323,25 +326,31 @@ const ChordProEditor = memo(function ChordProEditor({
                 onClick={() => setShowPreview(!showPreview)}
                 className="gap-2"
               >
-                <Eye className={`h-4 w-4 ${!showPreview ? "opacity-50" : ""}`} />
+                <Eye
+                  className={`h-4 w-4 ${!showPreview ? "opacity-50" : ""}`}
+                />
                 {showPreview ? "Hide Preview" : "Show Preview"}
               </Button>
             </div>
           )}
-          
+
           {/* Mobile Layout - Stacked */}
           {isMobile ? (
             <div className="h-full">
               {!readOnly && !showPreview && (
                 <div className="h-full p-4 overflow-auto">
                   <div className="bg-muted/50 rounded-md p-3 text-sm mb-4">
-                    <p className="font-medium mb-2">ChordPro Quick Reference:</p>
+                    <p className="font-medium mb-2">
+                      ChordPro Quick Reference:
+                    </p>
                     <ul className="space-y-1 text-muted-foreground">
                       <li>• Chords: [C] [G] [Am] [F]</li>
                       <li>• Title: {"{title: Song Title}"}</li>
                       <li>• Artist: {"{subtitle: Artist Name}"}</li>
                       <li>• Comments: {"{comment: This is a comment}"}</li>
-                      <li>• Sections: {"{chorus}"} {"{verse: 1}"}</li>
+                      <li>
+                        • Sections: {"{chorus}"} {"{verse: 1}"}
+                      </li>
                     </ul>
                   </div>
 
@@ -355,7 +364,7 @@ const ChordProEditor = memo(function ChordProEditor({
                   />
                 </div>
               )}
-              
+
               {(showPreview || readOnly) && (
                 <div className="h-full p-4 overflow-auto">
                   <ChordDisplay
@@ -372,10 +381,7 @@ const ChordProEditor = memo(function ChordProEditor({
             </div>
           ) : (
             /* Desktop Layout - Resizable Split Panes */
-            <ResizablePanelGroup
-              direction="horizontal"
-              className="h-full"
-            >
+            <ResizablePanelGroup direction="horizontal" className="h-full">
               {/* Editor Panel */}
               {!readOnly && (
                 <>
@@ -387,13 +393,19 @@ const ChordProEditor = memo(function ChordProEditor({
                     <div className="h-full flex flex-col">
                       <div className="p-4 border-b bg-muted/30">
                         <div className="bg-muted/50 rounded-md p-3 text-sm">
-                          <p className="font-medium mb-2">ChordPro Quick Reference:</p>
+                          <p className="font-medium mb-2">
+                            ChordPro Quick Reference:
+                          </p>
                           <ul className="space-y-1 text-muted-foreground">
                             <li>• Chords: [C] [G] [Am] [F]</li>
                             <li>• Title: {"{title: Song Title}"}</li>
                             <li>• Artist: {"{subtitle: Artist Name}"}</li>
-                            <li>• Comments: {"{comment: This is a comment}"}</li>
-                            <li>• Sections: {"{chorus}"} {"{verse: 1}"}</li>
+                            <li>
+                              • Comments: {"{comment: This is a comment}"}
+                            </li>
+                            <li>
+                              • Sections: {"{chorus}"} {"{verse: 1}"}
+                            </li>
                           </ul>
                         </div>
                       </div>
@@ -410,7 +422,7 @@ const ChordProEditor = memo(function ChordProEditor({
                       </div>
                     </div>
                   </ResizablePanel>
-                  
+
                   <ResizableHandle withHandle className="bg-border">
                     <div className="flex h-full w-full items-center justify-center">
                       <GripVertical className="h-4 w-4 text-muted-foreground" />
@@ -418,7 +430,7 @@ const ChordProEditor = memo(function ChordProEditor({
                   </ResizableHandle>
                 </>
               )}
-              
+
               {/* Preview Panel */}
               <ResizablePanel
                 defaultSize={readOnly ? 100 : 50}
@@ -441,7 +453,7 @@ const ChordProEditor = memo(function ChordProEditor({
           )}
         </CardContent>
       </Card>
-      
+
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -463,7 +475,10 @@ const ChordProEditor = memo(function ChordProEditor({
 });
 
 // Performance comparison function for React.memo
-const arePropsEqual = (prevProps: ChordProEditorProps, nextProps: ChordProEditorProps): boolean => {
+const arePropsEqual = (
+  prevProps: ChordProEditorProps,
+  nextProps: ChordProEditorProps,
+): boolean => {
   // Compare primitive props
   return (
     prevProps.initialContent === nextProps.initialContent &&

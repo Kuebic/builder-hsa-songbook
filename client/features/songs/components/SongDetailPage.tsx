@@ -7,7 +7,10 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Music, FileText, Star, Book } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSongBySlug } from "../hooks/useSongsAPI";
-import { useArrangementsBySong, useUpdateArrangement } from "../hooks/useArrangements";
+import {
+  useArrangementsBySong,
+  useUpdateArrangement,
+} from "../hooks/useArrangements";
 import SongHeader from "./SongHeader";
 import SongMetadata from "./SongMetadata";
 import ArrangementsList from "./ArrangementsList";
@@ -22,7 +25,10 @@ type SongParams = {
 
 function SongDetailSkeleton(): ReactElement {
   return (
-    <div className="max-w-6xl mx-auto space-y-6" data-testid="song-detail-skeleton">
+    <div
+      className="max-w-6xl mx-auto space-y-6"
+      data-testid="song-detail-skeleton"
+    >
       {/* Header skeleton */}
       <div className="space-y-4">
         <Skeleton className="h-10 w-3/4" />
@@ -33,7 +39,7 @@ function SongDetailSkeleton(): ReactElement {
           <Skeleton className="h-8 w-24" />
         </div>
       </div>
-      
+
       {/* Tabs skeleton */}
       <div className="space-y-4">
         <Skeleton className="h-10 w-full" />
@@ -54,11 +60,10 @@ function SongNotFound({ slug }: SongNotFoundProps): ReactElement {
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Song not found</AlertTitle>
         <AlertDescription>
-          {slug 
+          {slug
             ? `We couldn't find a song with the slug "${slug}".`
-            : "The requested song could not be found."
-          }
-          {" "}Please check the URL and try again, or return to the songs page.
+            : "The requested song could not be found."}{" "}
+          Please check the URL and try again, or return to the songs page.
         </AlertDescription>
       </Alert>
     </div>
@@ -69,13 +74,22 @@ export default function SongDetailPage(): ReactElement {
   const { slug } = useParams<SongParams>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [editingArrangement, setEditingArrangement] = useState<ArrangementDetail | null>(null);
+  const [editingArrangement, setEditingArrangement] =
+    useState<ArrangementDetail | null>(null);
   const [showChordProEditor, setShowChordProEditor] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("info");
   const [isViewMode, setIsViewMode] = useState(false);
-  
-  const { data: song, isLoading: songLoading, error: songError } = useSongBySlug(slug || "");
-  const { data: arrangements, isLoading: arrangementsLoading, refetch: refetchArrangements } = useArrangementsBySong(song?.id || "");
+
+  const {
+    data: song,
+    isLoading: songLoading,
+    error: songError,
+  } = useSongBySlug(slug || "");
+  const {
+    data: arrangements,
+    isLoading: arrangementsLoading,
+    refetch: refetchArrangements,
+  } = useArrangementsBySong(song?.id || "");
   const updateArrangementMutation = useUpdateArrangement();
 
   const handleToggleFavorite = () => {
@@ -121,8 +135,7 @@ export default function SongDetailPage(): ReactElement {
     if (!editingArrangement) {
       return;
     }
-    
-    
+
     try {
       await updateArrangementMutation.mutateAsync({
         id: editingArrangement._id,
@@ -131,20 +144,21 @@ export default function SongDetailPage(): ReactElement {
       setShowChordProEditor(false);
       setEditingArrangement(null);
       setIsViewMode(false);
-      
+
       // Show success toast
       toast({
         title: "Arrangement saved",
         description: "Your changes have been saved successfully.",
       });
-      
+
       // Refresh arrangements list
       refetchArrangements();
     } catch (error) {
       // Keep the editor open on error so user doesn't lose their work
       toast({
         title: "Failed to save arrangement",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
+        description:
+          error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
     }
@@ -169,7 +183,7 @@ export default function SongDetailPage(): ReactElement {
   if (showChordProEditor && editingArrangement) {
     return (
       <Layout>
-        <div className={`mx-auto ${isViewMode ? 'max-w-4xl' : 'max-w-7xl'}`}>
+        <div className={`mx-auto ${isViewMode ? "max-w-4xl" : "max-w-7xl"}`}>
           <ChordProEditor
             initialContent={editingArrangement.chordData}
             songTitle={`${song.title} - ${editingArrangement.name}`}
@@ -203,7 +217,11 @@ export default function SongDetailPage(): ReactElement {
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             {/* Tabs for content organization */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="info" className="gap-2">
                   <Music className="h-4 w-4" />
@@ -222,11 +240,11 @@ export default function SongDetailPage(): ReactElement {
                   Rating & Reviews
                 </TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="info" className="mt-6">
                 <SongMetadata song={song} />
               </TabsContent>
-              
+
               <TabsContent value="arrangements" className="mt-6">
                 {arrangementsLoading ? (
                   <div className="space-y-3">
@@ -244,7 +262,7 @@ export default function SongDetailPage(): ReactElement {
                   />
                 )}
               </TabsContent>
-              
+
               <TabsContent value="notes" className="mt-6">
                 <SongNotesTab
                   songId={song.id}
@@ -252,7 +270,7 @@ export default function SongDetailPage(): ReactElement {
                   songNotes={song.notes}
                 />
               </TabsContent>
-              
+
               <TabsContent value="rating" className="mt-6">
                 <div className="max-w-md mx-auto">
                   <SongRating

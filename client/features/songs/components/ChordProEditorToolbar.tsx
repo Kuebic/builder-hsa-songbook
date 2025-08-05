@@ -56,19 +56,19 @@ export interface ChordProEditorToolbarProps {
   onOpen?: () => void;
   onSave?: () => void;
   onSaveAs?: () => void;
-  onExport?: (format: 'pdf' | 'html' | 'txt') => void;
-  
+  onExport?: (format: "pdf" | "html" | "txt") => void;
+
   // Edit operations
   canUndo?: boolean;
   canRedo?: boolean;
   onUndo?: () => void;
   onRedo?: () => void;
-  
+
   // Insert operations
   onInsertChord?: (chord: string) => void;
   onInsertDirective?: (directive: string) => void;
   onInsertSection?: (section: string) => void;
-  
+
   // Transposition
   currentKey?: string;
   transpositionLevel?: number;
@@ -76,41 +76,41 @@ export interface ChordProEditorToolbarProps {
   canTransposeDown?: boolean;
   onTranspose?: (semitones: number) => void;
   onTransposeReset?: () => void;
-  
+
   // View options
   fontSize?: number;
   onFontSizeChange?: (size: number) => void;
-  theme?: 'light' | 'dark' | 'stage';
-  onThemeChange?: (theme: 'light' | 'dark' | 'stage') => void;
+  theme?: "light" | "dark" | "stage";
+  onThemeChange?: (theme: "light" | "dark" | "stage") => void;
   showChords?: boolean;
   onShowChordsChange?: (show: boolean) => void;
-  
+
   // State indicators
   hasUnsavedChanges?: boolean;
   isLoading?: boolean;
   readOnly?: boolean;
-  
+
   // Help
   onShowHelp?: () => void;
-  
+
   className?: string;
 }
 
 // Common insert options
-const COMMON_CHORDS = ['C', 'G', 'Am', 'F', 'D', 'Em', 'Dm', 'A', 'E', 'Bm'];
+const COMMON_CHORDS = ["C", "G", "Am", "F", "D", "Em", "Dm", "A", "E", "Bm"];
 const COMMON_DIRECTIVES = [
-  { value: '{title: }', label: 'Title' },
-  { value: '{subtitle: }', label: 'Subtitle/Artist' },
-  { value: '{key: }', label: 'Key' },
-  { value: '{tempo: }', label: 'Tempo' },
-  { value: '{comment: }', label: 'Comment' },
-  { value: '{capo: }', label: 'Capo' },
+  { value: "{title: }", label: "Title" },
+  { value: "{subtitle: }", label: "Subtitle/Artist" },
+  { value: "{key: }", label: "Key" },
+  { value: "{tempo: }", label: "Tempo" },
+  { value: "{comment: }", label: "Comment" },
+  { value: "{capo: }", label: "Capo" },
 ];
 const COMMON_SECTIONS = [
-  { value: '{start_of_chorus}\n\n{end_of_chorus}', label: 'Chorus' },
-  { value: '{start_of_verse}\n\n{end_of_verse}', label: 'Verse' },
-  { value: '{start_of_bridge}\n\n{end_of_bridge}', label: 'Bridge' },
-  { value: '{start_of_tab}\n\n{end_of_tab}', label: 'Tab' },
+  { value: "{start_of_chorus}\n\n{end_of_chorus}", label: "Chorus" },
+  { value: "{start_of_verse}\n\n{end_of_verse}", label: "Verse" },
+  { value: "{start_of_bridge}\n\n{end_of_bridge}", label: "Bridge" },
+  { value: "{start_of_tab}\n\n{end_of_tab}", label: "Tab" },
 ];
 
 /**
@@ -123,65 +123,71 @@ export function ChordProEditorToolbar({
   onSave,
   onSaveAs,
   onExport,
-  
+
   // Edit operations
   canUndo = false,
   canRedo = false,
   onUndo,
   onRedo,
-  
+
   // Insert operations
   onInsertChord,
   onInsertDirective,
   onInsertSection,
-  
+
   // Transposition
-  currentKey = 'C',
+  currentKey = "C",
   transpositionLevel = 0,
   canTransposeUp = true,
   canTransposeDown = true,
   onTranspose,
   onTransposeReset,
-  
+
   // View options
   fontSize = 14,
   onFontSizeChange,
-  theme = 'light',
+  theme = "light",
   onThemeChange,
   showChords = true,
   onShowChordsChange,
-  
+
   // State
   hasUnsavedChanges = false,
   isLoading = false,
   readOnly = false,
-  
+
   // Help
   onShowHelp,
-  
+
   className,
 }: ChordProEditorToolbarProps) {
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
 
-  const transpositionDisplay = transpositionLevel === 0 ? '0' : 
-    transpositionLevel > 0 ? `+${transpositionLevel}` : `${transpositionLevel}`;
+  const transpositionDisplay =
+    transpositionLevel === 0
+      ? "0"
+      : transpositionLevel > 0
+        ? `+${transpositionLevel}`
+        : `${transpositionLevel}`;
 
   const fontSizeOptions = [
-    { value: 12, label: 'XS' },
-    { value: 14, label: 'S' },
-    { value: 16, label: 'M' },
-    { value: 18, label: 'L' },
-    { value: 20, label: 'XL' },
-    { value: 24, label: 'XXL' },
+    { value: 12, label: "XS" },
+    { value: 14, label: "S" },
+    { value: 16, label: "M" },
+    { value: 18, label: "L" },
+    { value: 20, label: "XL" },
+    { value: 24, label: "XXL" },
   ];
 
   return (
     <TooltipProvider>
-      <div className={cn(
-        "flex items-center gap-1 p-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
-        "overflow-x-auto scrollbar-thin",
-        className
-      )}>
+      <div
+        className={cn(
+          "flex items-center gap-1 p-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+          "overflow-x-auto scrollbar-thin",
+          className,
+        )}
+      >
         {/* File Operations */}
         <div className="flex items-center gap-1">
           <Tooltip>
@@ -257,15 +263,15 @@ export function ChordProEditorToolbar({
             <DropdownMenuContent>
               <DropdownMenuLabel>Export As</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onExport?.('pdf')}>
+              <DropdownMenuItem onClick={() => onExport?.("pdf")}>
                 <Download className="h-4 w-4 mr-2" />
                 PDF
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onExport?.('html')}>
+              <DropdownMenuItem onClick={() => onExport?.("html")}>
                 <Download className="h-4 w-4 mr-2" />
                 HTML
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onExport?.('txt')}>
+              <DropdownMenuItem onClick={() => onExport?.("txt")}>
                 <Download className="h-4 w-4 mr-2" />
                 Plain Text
               </DropdownMenuItem>
@@ -323,7 +329,12 @@ export function ChordProEditorToolbar({
         {/* Insert Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" disabled={readOnly} className="h-8 px-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={readOnly}
+              className="h-8 px-2"
+            >
               <Plus className="h-4 w-4" />
               <span className="ml-1 hidden sm:inline">Insert</span>
               <ChevronDown className="h-3 w-3 ml-1" />
@@ -332,7 +343,7 @@ export function ChordProEditorToolbar({
           <DropdownMenuContent className="w-48">
             <DropdownMenuLabel>Chords</DropdownMenuLabel>
             <div className="grid grid-cols-5 gap-1 p-2">
-              {COMMON_CHORDS.map(chord => (
+              {COMMON_CHORDS.map((chord) => (
                 <Button
                   key={chord}
                   variant="outline"
@@ -344,10 +355,10 @@ export function ChordProEditorToolbar({
                 </Button>
               ))}
             </div>
-            
+
             <DropdownMenuSeparator />
             <DropdownMenuLabel>Directives</DropdownMenuLabel>
-            {COMMON_DIRECTIVES.map(directive => (
+            {COMMON_DIRECTIVES.map((directive) => (
               <DropdownMenuItem
                 key={directive.value}
                 onClick={() => onInsertDirective?.(directive.value)}
@@ -356,10 +367,10 @@ export function ChordProEditorToolbar({
                 {directive.label}
               </DropdownMenuItem>
             ))}
-            
+
             <DropdownMenuSeparator />
             <DropdownMenuLabel>Sections</DropdownMenuLabel>
-            {COMMON_SECTIONS.map(section => (
+            {COMMON_SECTIONS.map((section) => (
               <DropdownMenuItem
                 key={section.value}
                 onClick={() => onInsertSection?.(section.value)}
@@ -375,8 +386,10 @@ export function ChordProEditorToolbar({
 
         {/* Transpose Controls */}
         <div className="flex items-center gap-1">
-          <span className="text-sm font-medium hidden sm:inline">Transpose:</span>
-          
+          <span className="text-sm font-medium hidden sm:inline">
+            Transpose:
+          </span>
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -396,7 +409,10 @@ export function ChordProEditorToolbar({
             <Badge variant="secondary" className="min-w-[2rem] justify-center">
               {currentKey}
             </Badge>
-            <Badge variant="outline" className="min-w-[2rem] justify-center text-xs">
+            <Badge
+              variant="outline"
+              className="min-w-[2rem] justify-center text-xs"
+            >
               {transpositionDisplay}
             </Badge>
           </div>
@@ -440,13 +456,19 @@ export function ChordProEditorToolbar({
             <TooltipTrigger asChild>
               <div className="flex items-center gap-1">
                 <Type className="h-4 w-4" />
-                <Select value={fontSize.toString()} onValueChange={(value) => onFontSizeChange?.(parseInt(value))}>
+                <Select
+                  value={fontSize.toString()}
+                  onValueChange={(value) => onFontSizeChange?.(parseInt(value))}
+                >
                   <SelectTrigger className="w-16 h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {fontSizeOptions.map(option => (
-                      <SelectItem key={option.value} value={option.value.toString()}>
+                    {fontSizeOptions.map((option) => (
+                      <SelectItem
+                        key={option.value}
+                        value={option.value.toString()}
+                      >
                         {option.label}
                       </SelectItem>
                     ))}
@@ -456,7 +478,6 @@ export function ChordProEditorToolbar({
             </TooltipTrigger>
             <TooltipContent>Font Size</TooltipContent>
           </Tooltip>
-
 
           <Tooltip>
             <TooltipTrigger asChild>
@@ -474,7 +495,7 @@ export function ChordProEditorToolbar({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              {showChords ? 'Hide Chords' : 'Show Chords'}
+              {showChords ? "Hide Chords" : "Show Chords"}
             </TooltipContent>
           </Tooltip>
         </div>
@@ -544,7 +565,9 @@ export function ChordProEditorToolbar({
                 </div>
                 <div className="flex justify-between">
                   <span>Redo</span>
-                  <code className="bg-background px-1 rounded">Ctrl+Shift+Z</code>
+                  <code className="bg-background px-1 rounded">
+                    Ctrl+Shift+Z
+                  </code>
                 </div>
               </div>
             </div>
