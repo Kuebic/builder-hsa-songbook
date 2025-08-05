@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "./env"; // Load environment variables first
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
@@ -89,6 +89,10 @@ export async function createServer() {
   app.get("/api/sync/status", syncRoutes.getSyncStatus);
   app.post("/api/sync/resolve", syncRoutes.resolveConflicts);
 
+  // User sync endpoint for development/testing
+  const userSyncRoutes = await import("./routes/test-user-sync");
+  app.post("/api/users/sync", userSyncRoutes.syncUser);
+  
   // Users API - Enhanced favorites with dual support
   app.get("/api/users/:userId/favorites", usersRoutes.getFavorites); // New endpoint with type parameter
   app.post("/api/users/:userId/favorites/songs/:songId", usersRoutes.addSongFavorite);
@@ -135,23 +139,65 @@ export async function createServer() {
 
 // Initialize database connection
 export async function initializeServer() {
+  console.log("🚀 Starting server initialization...");
+  
   try {
+    // Check if MongoDB URI is available
+    if (!process.env.MONGODB_URI) {
+      throw new Error("MONGODB_URI environment variable is not set");
+    }
+    
+    // Log connection attempt (with masked URI)
+    const maskedUri = process.env.MONGODB_URI.replace(
+      /mongodb(?:\+srv)?:\/\/([^:]+):([^@]+)@/,
+      "mongodb://*****:*****@"
+    );
+    console.log(`🔌 Attempting to connect to MongoDB: ${maskedUri}`);
+    
     await database.connect();
-    console.log("🚀 Database initialized successfully");
+    console.log("✅ Database connection established");
+    
+    // Get connection info for debugging
+    const connInfo = database.getConnectionInfo();
+    console.log(`📊 Database info: ${connInfo.name || "default"} on ${connInfo.host}:${connInfo.port}`);
 
     // Check if we need to run migrations
     await runInitialMigration();
+    
+    console.log("✅ Server initialization complete");
 
   } catch (error) {
-    console.error("❌ Failed to initialize database:", error);
+    console.error("❌ Failed to initialize server:", error);
+    
+    // Provide specific error messages based on error type
+    if (error instanceof Error) {
+      if (error.message.includes("ECONNREFUSED")) {
+        console.error("💡 Connection refused - is MongoDB running?");
+        console.error("   For local MongoDB: ensure mongod is running");
+        console.error("   For MongoDB Atlas: check your connection string and IP whitelist");
+      } else if (error.message.includes("authentication failed")) {
+        console.error("💡 Authentication failed - check your MongoDB credentials");
+        console.error("   Ensure username and password in MONGODB_URI are correct");
+      } else if (error.message.includes("ETIMEDOUT")) {
+        console.error("💡 Connection timeout - check network and firewall settings");
+        console.error("   For MongoDB Atlas: ensure your IP is whitelisted");
+      } else if (error.message.includes("MONGODB_URI")) {
+        console.error("💡 Environment configuration issue");
+        console.error("   Create a .env file in your project root with:");
+        console.error("   MONGODB_URI=your_mongodb_connection_string");
+      }
+    }
 
-    // For development, continue without database
+    // For development, allow continuing without database but with warnings
     if (process.env.NODE_ENV === "development") {
-      console.warn("⚠️  Continuing in development mode without database");
+      console.warn("\n⚠️  WARNING: Continuing in development mode without database");
+      console.warn("⚠️  API endpoints will return errors");
+      console.warn("⚠️  Fix the database connection to restore full functionality\n");
       return;
     }
 
-    process.exit(1);
+    // In production, exit if database fails
+    throw error;
   }
 }
 

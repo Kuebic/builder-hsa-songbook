@@ -152,15 +152,93 @@ function expressPlugin(): Plugin {
     name: "express-plugin",
     apply: "serve", // Only apply during development (serve mode)
     async configureServer(server) {
-      // Import the initializeServer function
-      const { initializeServer } = await import("./server");
+      try {
+        // Load environment variables first
+        const envModule = await import("./server/env");
+        console.log("📋 Environment info:", envModule.envInfo);
+        
+        // Check if MongoDB URI is available before proceeding
+        if (!process.env.MONGODB_URI) {
+          console.error("❌ Cannot start server: MONGODB_URI is not configured");
+          console.error("Please check your .env file in the project root");
+          
+          // Create a minimal Express app that returns helpful errors
+          const express = await import("express");
+          const errorApp = express.default();
+          
+          errorApp.use((req, res) => {
+            if (req.path.startsWith("/api/")) {
+              res.status(503).json({
+                success: false,
+                error: {
+                  code: "ENV_CONFIG_ERROR",
+                  message: "Server is not properly configured. MONGODB_URI is missing.",
+                  details: "Please check the server console for setup instructions."
+                }
+              });
+            } else {
+              res.status(503).send(`
+                <h1>Configuration Error</h1>
+                <p>The server is not properly configured. Please check:</p>
+                <ul>
+                  <li>Your .env file exists in the project root</li>
+                  <li>MONGODB_URI is set in the .env file</li>
+                  <li>The MongoDB connection string is valid</li>
+                </ul>
+                <p>Check the server console for more details.</p>
+              `);
+            }
+          });
+          
+          server.middlewares.use(errorApp);
+          return;
+        }
+        
+        // Import the initializeServer function
+        const { initializeServer } = await import("./server");
 
-      // Initialize database connection first
-      await initializeServer();
+        // Initialize database connection with error handling
+        console.log("🔌 Initializing database connection...");
+        await initializeServer().catch((error) => {
+          console.error("❌ Failed to initialize database:", error);
+          throw error;
+        });
 
-      // Then create and add the Express app
-      const app = await createServer();
-      server.middlewares.use(app);
+        // Then create and add the Express app
+        const app = await createServer();
+        server.middlewares.use(app);
+        
+        console.log("✅ Express server configured successfully");
+        
+      } catch (error) {
+        console.error("❌ Failed to configure Express server:", error);
+        
+        // Create error handling middleware
+        const express = await import("express");
+        const errorApp = express.default();
+        
+        errorApp.use((req, res) => {
+          if (req.path.startsWith("/api/")) {
+            res.status(503).json({
+              success: false,
+              error: {
+                code: "SERVER_INIT_ERROR",
+                message: "Server initialization failed",
+                details: error instanceof Error ? error.message : "Unknown error"
+              }
+            });
+          } else {
+            res.status(503).send(`
+              <h1>Server Initialization Error</h1>
+              <p>The server failed to start properly.</p>
+              <p>Error: ${error instanceof Error ? error.message : "Unknown error"}</p>
+              <p>Check the server console for more details.</p>
+            `);
+          }
+        });
+        
+        server.middlewares.use(errorApp);
+      }
     },
   };
 }

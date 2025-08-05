@@ -35,3 +35,8 @@ coverage/
 .claude/
 claude/
 .env.local
+
+# Environment files
+.env
+.env.local
+.env.*.local
