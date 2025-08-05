@@ -32,10 +32,10 @@ export interface ArrangementGridProps {
  * Grid component that displays available arrangements for a song
  * with quick actions and metadata
  */
-export default function ArrangementGrid({ 
-  arrangements, 
-  onView, 
-  onEdit, 
+export default function ArrangementGrid({
+  arrangements,
+  onView,
+  onEdit,
   onCreateNew,
   defaultArrangementId,
 }: ArrangementGridProps) {
@@ -74,11 +74,11 @@ export default function ArrangementGrid({
       {/* Arrangements grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {arrangements.map((arrangement) => (
-          <Card 
-            key={arrangement._id} 
+          <Card
+            key={arrangement._id}
             className={`transition-all hover:shadow-md ${
-              arrangement._id === defaultArrangementId 
-                ? "ring-2 ring-primary/20 bg-primary/5" 
+              arrangement._id === defaultArrangementId
+                ? "ring-2 ring-primary/20 bg-primary/5"
                 : ""
             }`}
           >
@@ -120,7 +120,7 @@ export default function ArrangementGrid({
                 </DropdownMenu>
               </div>
             </CardHeader>
-            
+
             <CardContent className="space-y-3">
               {/* Musical details */}
               <div className="flex items-center gap-2 flex-wrap">
@@ -149,13 +149,18 @@ export default function ArrangementGrid({
               <div className="space-y-1 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Users className="h-3 w-3" />
-                  <span>{formatUsageCount(arrangement.stats?.usageCount || 0)}</span>
+                  <span>
+                    {formatUsageCount(arrangement.stats?.usageCount || 0)}
+                  </span>
                 </div>
                 {arrangement.stats?.lastUsed && (
                   <div className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     <span>
-                      Last used {new Date(arrangement.stats.lastUsed).toLocaleDateString()}
+                      Last used{" "}
+                      {new Date(
+                        arrangement.stats.lastUsed,
+                      ).toLocaleDateString()}
                     </span>
                   </div>
                 )}
@@ -163,17 +168,17 @@ export default function ArrangementGrid({
 
               {/* Action buttons */}
               <div className="flex gap-2 pt-2">
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   onClick={() => onView(arrangement)}
                   className="flex-1 gap-1"
                 >
                   <Play className="h-3 w-3" />
                   View
                 </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
+                <Button
+                  size="sm"
+                  variant="outline"
                   onClick={() => onEdit(arrangement)}
                   className="gap-1"
                 >
@@ -190,9 +195,12 @@ export default function ArrangementGrid({
           <Card className="col-span-full">
             <CardContent className="flex flex-col items-center justify-center py-8 text-center">
               <Music className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No Arrangements Yet</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                No Arrangements Yet
+              </h3>
               <p className="text-muted-foreground mb-4 max-w-sm">
-                This song doesn't have any arrangements yet. Create the first one to start playing this song!
+                This song doesn't have any arrangements yet. Create the first
+                one to start playing this song!
               </p>
               <Button onClick={onCreateNew} className="gap-2">
                 <Plus className="h-4 w-4" />

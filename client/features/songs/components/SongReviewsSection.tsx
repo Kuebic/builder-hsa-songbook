@@ -52,17 +52,19 @@ export default function SongReviewsSection({
       id: "1",
       user: { name: "Sarah M." },
       rating: 5,
-      comment: "This song has such a powerful message about grace. It really speaks to the heart of the gospel and our church loves singing it during communion services.",
+      comment:
+        "This song has such a powerful message about grace. It really speaks to the heart of the gospel and our church loves singing it during communion services.",
       createdAt: "2024-01-15T10:30:00Z",
       helpfulCount: 12,
       hasMarkedHelpful: false,
       reported: false,
     },
     {
-      id: "2", 
+      id: "2",
       user: { name: "David L." },
       rating: 4,
-      comment: "Beautiful lyrics and timeless message. The theological depth is amazing - it captures the essence of redemption so well.",
+      comment:
+        "Beautiful lyrics and timeless message. The theological depth is amazing - it captures the essence of redemption so well.",
       createdAt: "2024-01-10T14:20:00Z",
       helpfulCount: 8,
       hasMarkedHelpful: true,
@@ -72,7 +74,8 @@ export default function SongReviewsSection({
       id: "3",
       user: { name: "Michael K." },
       rating: 5,
-      comment: "One of the most moving songs about God's grace. The story behind John Newton's conversion adds so much meaning to every verse.",
+      comment:
+        "One of the most moving songs about God's grace. The story behind John Newton's conversion adds so much meaning to every verse.",
       createdAt: "2024-01-08T09:15:00Z",
       helpfulCount: 15,
       hasMarkedHelpful: false,
@@ -108,7 +111,7 @@ export default function SongReviewsSection({
     <div className="space-y-6">
       {/* Rating Summary */}
       {totalReviews > 0 && (
-        <ReviewsSummary 
+        <ReviewsSummary
           averageRating={averageRating}
           totalReviews={totalReviews}
         />
@@ -118,8 +121,9 @@ export default function SongReviewsSection({
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
-          These reviews are about the song "{songTitle}" itself - its message, lyrics, and spiritual significance. 
-          For arrangement-specific feedback (difficulty, chords, etc.), visit individual arrangement pages.
+          These reviews are about the song "{songTitle}" itself - its message,
+          lyrics, and spiritual significance. For arrangement-specific feedback
+          (difficulty, chords, etc.), visit individual arrangement pages.
         </AlertDescription>
       </Alert>
 
@@ -137,12 +141,13 @@ export default function SongReviewsSection({
               <div className="flex items-center gap-2">
                 <StarRating rating={userReview.rating} readOnly />
                 <span className="text-sm text-muted-foreground">
-                  Reviewed on {new Date(userReview.createdAt).toLocaleDateString()}
+                  Reviewed on{" "}
+                  {new Date(userReview.createdAt).toLocaleDateString()}
                 </span>
               </div>
               <p className="text-sm">{userReview.comment}</p>
               <Button
-                variant="outline" 
+                variant="outline"
                 size="sm"
                 onClick={() => setIsWritingReview(true)}
               >
@@ -155,10 +160,7 @@ export default function SongReviewsSection({
                 <label className="text-sm font-medium block mb-2">
                   Rate this song
                 </label>
-                <StarRating 
-                  rating={rating}
-                  onRate={setRating}
-                />
+                <StarRating rating={rating} onRate={setRating} />
               </div>
               <div>
                 <label className="text-sm font-medium block mb-2">
@@ -172,7 +174,7 @@ export default function SongReviewsSection({
                 />
               </div>
               <div className="flex gap-2">
-                <Button 
+                <Button
                   onClick={handleSubmitReview}
                   disabled={rating === 0 || !comment.trim() || isSubmitting}
                   className="gap-2"
@@ -188,10 +190,7 @@ export default function SongReviewsSection({
               </div>
             </div>
           ) : (
-            <Button 
-              onClick={() => setIsWritingReview(true)}
-              className="gap-2"
-            >
+            <Button onClick={() => setIsWritingReview(true)} className="gap-2">
               <Plus className="h-4 w-4" />
               Write a Review
             </Button>
@@ -216,7 +215,8 @@ export default function SongReviewsSection({
           {totalReviews > recentReviews.length && (
             <div className="text-center">
               <Button variant="outline">
-                Load More Reviews ({totalReviews - recentReviews.length} remaining)
+                Load More Reviews ({totalReviews - recentReviews.length}{" "}
+                remaining)
               </Button>
             </div>
           )}
@@ -230,12 +230,10 @@ export default function SongReviewsSection({
             <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Reviews Yet</h3>
             <p className="text-muted-foreground mb-4 max-w-sm">
-              Be the first to share your thoughts about this song's message and impact.
+              Be the first to share your thoughts about this song's message and
+              impact.
             </p>
-            <Button 
-              onClick={() => setIsWritingReview(true)}
-              className="gap-2"
-            >
+            <Button onClick={() => setIsWritingReview(true)} className="gap-2">
               <Plus className="h-4 w-4" />
               Write First Review
             </Button>

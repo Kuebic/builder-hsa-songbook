@@ -1,11 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  BookOpen, 
-  Calendar, 
-  Eye, 
-  Heart, 
-  Star, 
+import {
+  BookOpen,
+  Calendar,
+  Eye,
+  Heart,
+  Star,
   Clock,
   User,
   Globe,
@@ -103,7 +103,9 @@ export default function SongOverview({ song }: SongOverviewProps) {
               <Star className="h-3 w-3" />
               Song Rating
             </span>
-            <span className="font-medium">{song.avgRating.toFixed(1)} / 5.0</span>
+            <span className="font-medium">
+              {song.avgRating.toFixed(1)} / 5.0
+            </span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground flex items-center gap-1">
@@ -126,7 +128,9 @@ export default function SongOverview({ song }: SongOverviewProps) {
         <CardContent className="space-y-4">
           {song.themes && song.themes.length > 0 && (
             <div>
-              <span className="text-sm text-muted-foreground block mb-2">Themes</span>
+              <span className="text-sm text-muted-foreground block mb-2">
+                Themes
+              </span>
               <div className="flex flex-wrap gap-1">
                 {song.themes.map((theme, index) => (
                   <Badge key={index} variant="secondary" className="text-xs">
@@ -136,10 +140,12 @@ export default function SongOverview({ song }: SongOverviewProps) {
               </div>
             </div>
           )}
-          
+
           {/* Placeholder for Bible verses section */}
           <div>
-            <span className="text-sm text-muted-foreground block mb-2">Related Verses</span>
+            <span className="text-sm text-muted-foreground block mb-2">
+              Related Verses
+            </span>
             <div className="space-y-1">
               <Badge variant="outline" className="text-xs">
                 Ephesians 2:8-9 (45 upvotes)

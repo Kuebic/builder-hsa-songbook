@@ -5,12 +5,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Book, 
-  Plus, 
-  ThumbsUp, 
-  ThumbsDown, 
-  Flag, 
+import {
+  Book,
+  Plus,
+  ThumbsUp,
+  ThumbsDown,
+  Flag,
   Info,
   User,
   Quote,
@@ -44,7 +44,11 @@ export interface BibleVerse {
 export interface BibleVersesSectionProps {
   songTitle: string;
   verses: BibleVerse[];
-  onSubmitVerse?: (reference: string, text: string, relevanceNote: string) => Promise<void>;
+  onSubmitVerse?: (
+    reference: string,
+    text: string,
+    relevanceNote: string,
+  ) => Promise<void>;
   onVote?: (verseId: string, voteType: "up" | "down") => void;
   onReport?: (verseId: string) => void;
 }
@@ -124,7 +128,8 @@ export default function BibleVersesSection({
             <DialogHeader>
               <DialogTitle>Suggest a Bible Verse</DialogTitle>
               <DialogDescription>
-                Share a scripture that connects to "{songTitle}" and explain its relevance.
+                Share a scripture that connects to "{songTitle}" and explain its
+                relevance.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -161,15 +166,20 @@ export default function BibleVersesSection({
                 />
               </div>
               <div className="flex gap-2 pt-4">
-                <Button 
+                <Button
                   onClick={handleSubmit}
-                  disabled={!reference.trim() || !text.trim() || !relevanceNote.trim() || isSubmitting}
+                  disabled={
+                    !reference.trim() ||
+                    !text.trim() ||
+                    !relevanceNote.trim() ||
+                    isSubmitting
+                  }
                   className="flex-1"
                 >
                   Submit Verse
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setIsDialogOpen(false)}
                 >
                   Cancel
@@ -184,8 +194,8 @@ export default function BibleVersesSection({
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
-          Community members can suggest Bible verses that relate to this song. 
-          Vote up relevant connections and vote down those that don't fit. 
+          Community members can suggest Bible verses that relate to this song.
+          Vote up relevant connections and vote down those that don't fit.
           Moderators review submissions before they appear publicly.
         </AlertDescription>
       </Alert>
@@ -211,7 +221,9 @@ export default function BibleVersesSection({
                       <User className="h-3 w-3" />
                       <span>Suggested by {verse.submittedBy.name}</span>
                       <span>•</span>
-                      <span>{new Date(verse.submittedAt).toLocaleDateString()}</span>
+                      <span>
+                        {new Date(verse.submittedAt).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -243,7 +255,12 @@ export default function BibleVersesSection({
                       disabled={verse.hasDownvoted}
                     >
                       <ThumbsUp className="h-3 w-3" />
-                      <span className={getScoreColor(verse.upvotes, verse.downvotes)}>
+                      <span
+                        className={getScoreColor(
+                          verse.upvotes,
+                          verse.downvotes,
+                        )}
+                      >
                         {verse.upvotes}
                       </span>
                     </Button>
@@ -255,7 +272,12 @@ export default function BibleVersesSection({
                       disabled={verse.hasUpvoted}
                     >
                       <ThumbsDown className="h-3 w-3" />
-                      <span className={getScoreColor(verse.upvotes, verse.downvotes)}>
+                      <span
+                        className={getScoreColor(
+                          verse.upvotes,
+                          verse.downvotes,
+                        )}
+                      >
                         {verse.downvotes}
                       </span>
                     </Button>
@@ -281,8 +303,8 @@ export default function BibleVersesSection({
             <Book className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Bible Verses Yet</h3>
             <p className="text-muted-foreground mb-4 max-w-sm">
-              Help connect this song to Scripture by suggesting relevant Bible verses 
-              that relate to its themes and message.
+              Help connect this song to Scripture by suggesting relevant Bible
+              verses that relate to its themes and message.
             </p>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
@@ -295,7 +317,8 @@ export default function BibleVersesSection({
                 <DialogHeader>
                   <DialogTitle>Suggest a Bible Verse</DialogTitle>
                   <DialogDescription>
-                    Share a scripture that connects to "{songTitle}" and explain its relevance.
+                    Share a scripture that connects to "{songTitle}" and explain
+                    its relevance.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
@@ -332,15 +355,20 @@ export default function BibleVersesSection({
                     />
                   </div>
                   <div className="flex gap-2 pt-4">
-                    <Button 
+                    <Button
                       onClick={handleSubmit}
-                      disabled={!reference.trim() || !text.trim() || !relevanceNote.trim() || isSubmitting}
+                      disabled={
+                        !reference.trim() ||
+                        !text.trim() ||
+                        !relevanceNote.trim() ||
+                        isSubmitting
+                      }
                       className="flex-1"
                     >
                       Submit Verse
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={() => setIsDialogOpen(false)}
                     >
                       Cancel

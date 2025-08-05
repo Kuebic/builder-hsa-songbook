@@ -53,17 +53,17 @@ export default function SongHeader({
                 </Button>
               </Link>
             </div>
-            
+
             <h1 className="text-3xl font-bold tracking-tight truncate">
               {song.title}
             </h1>
-            
+
             {song.artist && (
               <p className="text-lg text-muted-foreground mt-1">
                 {song.artist}
               </p>
             )}
-            
+
             <div className="flex items-center gap-2 mt-3">
               {song.themes && song.themes.length > 0 && (
                 <>
@@ -87,7 +87,7 @@ export default function SongHeader({
               </Badge>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2 ml-4">
             <Button
               variant="outline"
@@ -97,14 +97,15 @@ export default function SongHeader({
             >
               <Heart
                 className={`h-5 w-5 ${
-                  song.isFavorite 
-                    ? "fill-red-500 text-red-500" 
-                    : ""
+                  song.isFavorite ? "fill-red-500 text-red-500" : ""
                 }`}
               />
             </Button>
-            
-            <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+
+            <DropdownMenu
+              open={isDropdownOpen}
+              onOpenChange={setIsDropdownOpen}
+            >
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon" className="h-10 w-10">
                   <MoreVertical className="h-5 w-5" />
@@ -128,7 +129,7 @@ export default function SongHeader({
                   Export
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={onDelete}
                   className="text-red-600 dark:text-red-400"
                 >
