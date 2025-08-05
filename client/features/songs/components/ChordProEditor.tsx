@@ -272,8 +272,38 @@ export default function ChordProEditor({
             </Alert>
           </div>
         )}
-        
-        <CardContent className="p-0 h-[calc(100vh-12rem)]">
+
+        {/* Enhanced Toolbar */}
+        <ChordProEditorToolbar
+          onSave={handleSave}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          canUndo={undoStack.length > 0}
+          canRedo={redoStack.length > 0}
+          onInsertChord={handleInsertAtCursor}
+          onInsertDirective={handleInsertAtCursor}
+          onInsertSection={handleInsertAtCursor}
+          currentKey={transposition.currentKey || 'C'}
+          transpositionLevel={transposition.transpositionLevel}
+          canTransposeUp={transposition.canTransposeUp}
+          canTransposeDown={transposition.canTransposeDown}
+          onTranspose={transposition.transpose}
+          onTransposeReset={transposition.reset}
+          fontSize={editorFontSize}
+          onFontSizeChange={setEditorFontSize}
+          theme={displayTheme}
+          onThemeChange={setDisplayTheme}
+          showChords={showChords}
+          onShowChordsChange={setShowChords}
+          hasUnsavedChanges={hasChanges}
+          isLoading={isLoading}
+          readOnly={readOnly}
+          onExport={handleExport}
+          onShowHelp={handleShowHelp}
+          className="border-b"
+        />
+
+        <CardContent className="p-0 h-[calc(100vh-16rem)]">
           {!readOnly && isMobile && (
             <div className="border-b px-4 py-2 flex justify-end">
               <Button
