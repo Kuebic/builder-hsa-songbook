@@ -31,7 +31,7 @@ dist-ssr
 coverage/
 
 .config/
-!.env
+.env
 .claude/
 claude/
 .env.local
