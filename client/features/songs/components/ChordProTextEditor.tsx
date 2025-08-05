@@ -120,6 +120,13 @@ export function ChordProTextEditor({
   }, [value, onChange]);
 
   // Handle keyboard shortcuts and navigation
+  // Handle scroll events for syntax highlighter synchronization
+  const handleScroll = useCallback((e: React.UIEvent<HTMLTextAreaElement>) => {
+    const target = e.target as HTMLTextAreaElement;
+    setScrollTop(target.scrollTop);
+    setScrollLeft(target.scrollLeft);
+  }, []);
+
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // Auto-completion navigation
     if (showAutoComplete) {
