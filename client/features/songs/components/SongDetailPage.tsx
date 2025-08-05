@@ -284,7 +284,7 @@ export default function SongDetailPage(): ReactElement {
                   </div>
                 ) : (
                   <ArrangementGrid
-                    arrangements={(arrangements || []) as ArrangementDetail[]}
+                    arrangements={arrangements || []}
                     onView={handleArrangementView}
                     onEdit={handleArrangementEdit}
                     onCreateNew={handleCreateArrangement}
