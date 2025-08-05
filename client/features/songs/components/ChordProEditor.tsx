@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/resizable";
 import {
   FileText,
+  Save,
   X,
   AlertCircle,
   GripVertical,
