@@ -114,8 +114,9 @@ export default function SongDetailPage(): ReactElement {
     // TODO: Implement export
   };
 
-  const handleRateSong = async (_rating: number) => {
-    // TODO: Implement rating
+  const handleCreateArrangement = () => {
+    // TODO: Navigate to create arrangement page
+    navigate(`/songs/${slug}/arrangements/new`);
   };
 
   const handleArrangementView = (arrangement: ArrangementDetail) => {
