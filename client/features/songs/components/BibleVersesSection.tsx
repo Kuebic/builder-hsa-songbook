@@ -42,7 +42,6 @@ export interface BibleVerse {
 }
 
 export interface BibleVersesSectionProps {
-  songId: string;
   songTitle: string;
   verses: BibleVerse[];
   onSubmitVerse?: (reference: string, text: string, relevanceNote: string) => Promise<void>;
