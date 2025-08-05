@@ -155,22 +155,108 @@
       "calt" 1;
   }
 
-  /* Chord display styles */
-  .chord {
-    @apply inline-block px-1 py-0.5 text-xs font-semibold bg-chord text-chord-foreground rounded-sm min-w-[2rem] text-center;
+  /* ChordSheetJS HTML formatter styles */
+  .chord-display-formatted .row {
+    @apply flex flex-wrap items-start;
   }
 
+  .chord-display-formatted .column {
+    @apply inline-flex flex-col min-w-0;
+  }
+  
+  /* Preserve whitespace in lyrics exactly as formatted */
+  .chord-display-formatted .lyrics {
+    white-space: pre;
+  }
+
+  .chord-display-formatted .chord {
+    @apply text-sm font-bold text-blue-600 dark:text-blue-400 h-5 leading-5 mb-0.5;
+  }
+
+  .chord-display-formatted .lyrics {
+    @apply text-base leading-normal;
+    white-space: pre;
+  }
+
+  .chord-display-formatted .paragraph {
+    @apply mb-4;
+  }
+
+  .chord-display-formatted .title {
+    @apply text-2xl md:text-3xl font-bold tracking-tight mb-4;
+  }
+
+  .chord-display-formatted .subtitle {
+    @apply text-lg md:text-xl font-medium text-muted-foreground mb-2;
+  }
+
+  /* Empty chord placeholders should maintain height */
+  .chord-display-formatted .chord:empty {
+    @apply h-5 block;
+  }
+
+  /* Hide chords when showChords is false */
+  .chord-display--no-chords .chord {
+    @apply hidden;
+  }
+
+  /* Font size adjustments - using custom classes to avoid Tailwind conflicts */
+  .chord-display.chord-size-sm .chord {
+    font-size: 0.75rem; /* 12px */
+    line-height: 1rem;
+  }
+  
+  .chord-display.chord-size-sm .lyrics {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.25rem;
+  }
+
+  .chord-display.chord-size-base .chord {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.25rem;
+  }
+  
+  .chord-display.chord-size-base .lyrics {
+    font-size: 1rem; /* 16px */
+    line-height: 1.5rem;
+  }
+
+  .chord-display.chord-size-lg .chord {
+    font-size: 1rem; /* 16px */
+    line-height: 1.5rem;
+  }
+  
+  .chord-display.chord-size-lg .lyrics {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.75rem;
+  }
+
+  .chord-display.chord-size-xl .chord {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.75rem;
+  }
+  
+  .chord-display.chord-size-xl .lyrics {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.75rem;
+  }
+
+  /* Legacy chord display styles (for backward compatibility) */
   .chord-line {
     @apply leading-relaxed;
   }
 
   .chord-sheet {
-    @apply font-mono whitespace-pre-line;
+    @apply font-mono;
   }
 
   /* Stage mode specific styles */
-  [data-theme="stage"] .chord {
-    @apply bg-gray-800 text-white border border-gray-600;
+  [data-theme="stage"] .chord-display-formatted .chord {
+    @apply text-yellow-400 font-bold;
+  }
+
+  [data-theme="stage"] .chord-display-formatted .lyrics {
+    @apply text-white text-lg;
   }
 
   [data-theme="stage"] body {
@@ -189,5 +275,14 @@
   /* Focus states for accessibility */
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
+  }
+
+  /* ChordPro Editor styles */
+  .chord-pro-editor-container {
+    @apply h-full flex flex-col;
+  }
+  
+  .chord-pro-editor-content {
+    @apply flex-1 min-h-0;
   }
 }

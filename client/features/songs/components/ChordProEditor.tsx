@@ -14,15 +14,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 import { 
   FileText, 
   Eye, 
   Save, 
   X,
   AlertCircle,
-  Music,
+  GripVertical,
 } from "lucide-react";
-import { ChordProPreviewErrorBoundary } from "./ChordProPreviewErrorBoundary";
+import { ChordDisplay } from "./ChordDisplay";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 interface ChordProEditorProps {
   initialContent: string;
@@ -74,6 +80,7 @@ export default function ChordProEditor({
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
   const [isCorrupted, setIsCorrupted] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   useEffect(() => {
     setHasChanges(content !== initialContent);
@@ -111,76 +118,10 @@ export default function ChordProEditor({
     setIsCorrupted(false);
   };
 
-  // Simple ChordPro preview renderer
-  const renderPreview = () => {
-    const lines = content.split("\n");
-    return lines.map((line, index) => {
-      // Handle ChordPro directives
-      if (line.startsWith("{") && line.endsWith("}")) {
-        const directive = line.slice(1, -1);
-        const [key, value] = directive.split(":");
-        
-        switch (key.toLowerCase()) {
-          case "title":
-          case "t":
-            return <h2 key={index} className="text-2xl font-bold mb-2">{value?.trim()}</h2>;
-          case "subtitle":
-          case "st":
-            return <h3 key={index} className="text-lg text-muted-foreground mb-4">{value?.trim()}</h3>;
-          case "comment":
-          case "c":
-            return <p key={index} className="text-sm italic text-muted-foreground my-2">{value?.trim()}</p>;
-          case "chorus":
-            return <div key={index} className="mt-4 mb-2 font-semibold">Chorus:</div>;
-          case "verse":
-            return <div key={index} className="mt-4 mb-2 font-semibold">Verse {value?.trim()}:</div>;
-          default:
-            return null;
-        }
-      }
-      
-      // Handle chord lines
-      const chordRegex = /\[([^\]]+)\]/g;
-      if (line.match(chordRegex)) {
-        const parts = [];
-        let lastIndex = 0;
-        let match;
-        
-        while ((match = chordRegex.exec(line)) !== null) {
-          if (match.index > lastIndex) {
-            parts.push(
-              <span key={`text-${index}-${lastIndex}`}>
-                {line.slice(lastIndex, match.index)}
-              </span>,
-            );
-          }
-          parts.push(
-            <span key={`chord-${index}-${match.index}`} className="text-primary font-bold">
-              {match[1]}
-            </span>,
-          );
-          lastIndex = match.index + match[0].length;
-        }
-        
-        if (lastIndex < line.length) {
-          parts.push(
-            <span key={`text-${index}-${lastIndex}`}>
-              {line.slice(lastIndex)}
-            </span>,
-          );
-        }
-        
-        return <div key={index} className="my-1">{parts}</div>;
-      }
-      
-      // Regular text line
-      return <div key={index} className="my-1">{line || <br />}</div>;
-    });
-  };
 
   return (
     <>
-      <Card>
+      <Card className="chord-pro-editor-container h-full">
         <CardHeader className="border-b">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
@@ -248,8 +189,8 @@ export default function ChordProEditor({
           </div>
         )}
         
-        <CardContent className="p-0">
-          {!readOnly && (
+        <CardContent className="p-0 h-[calc(100vh-12rem)]">
+          {!readOnly && isMobile && (
             <div className="border-b px-4 py-2 flex justify-end">
               <Button
                 variant="ghost"
@@ -263,51 +204,108 @@ export default function ChordProEditor({
             </div>
           )}
           
-          <div className={`grid ${showPreview && !readOnly ? "md:grid-cols-2 divide-y md:divide-y-0 md:divide-x" : "grid-cols-1"}`}>
-            {/* Editor Panel */}
-            {!readOnly && (
-              <div className={`${showPreview ? "md:border-r" : ""} p-4`}>
-                <div className="space-y-4">
-                  <div className="bg-muted/50 rounded-md p-3 text-sm">
-                    <p className="font-medium mb-2">ChordPro Quick Reference:</p>
-                    <ul className="space-y-1 text-muted-foreground">
-                      <li>• Chords: [C] [G] [Am] [F]</li>
-                      <li>• Title: {"{title: Song Title}"}</li>
-                      <li>• Artist: {"{subtitle: Artist Name}"}</li>
-                      <li>• Comments: {"{comment: This is a comment}"}</li>
-                      <li>• Sections: {"{chorus}"} {"{verse: 1}"}</li>
-                    </ul>
+          {/* Mobile Layout - Stacked */}
+          {isMobile ? (
+            <div className="h-full">
+              {!readOnly && !showPreview && (
+                <div className="h-full p-4 overflow-auto">
+                  <div className="space-y-4">
+                    <div className="bg-muted/50 rounded-md p-3 text-sm">
+                      <p className="font-medium mb-2">ChordPro Quick Reference:</p>
+                      <ul className="space-y-1 text-muted-foreground">
+                        <li>• Chords: [C] [G] [Am] [F]</li>
+                        <li>• Title: {"{title: Song Title}"}</li>
+                        <li>• Artist: {"{subtitle: Artist Name}"}</li>
+                        <li>• Comments: {"{comment: This is a comment}"}</li>
+                        <li>• Sections: {"{chorus}"} {"{verse: 1}"}</li>
+                      </ul>
+                    </div>
+                    
+                    <Textarea
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
+                      className="font-mono text-sm min-h-[400px] resize-none"
+                      placeholder="Enter ChordPro formatted lyrics here..."
+                      readOnly={readOnly}
+                    />
                   </div>
-                  
-                  <Textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    className="font-mono text-sm min-h-[500px] resize-none"
-                    placeholder="Enter ChordPro formatted lyrics here..."
-                    readOnly={readOnly}
+                </div>
+              )}
+              
+              {(showPreview || readOnly) && (
+                <div className="h-full p-4 overflow-auto">
+                  <ChordDisplay
+                    content={content}
+                    theme="light"
+                    showControls={true}
+                    className="max-w-none"
                   />
                 </div>
-              </div>
-            )}
-            
-            {/* Preview Panel */}
-            {(showPreview || readOnly) && (
-              <div className="p-4 overflow-auto max-h-[80vh]">
-                <ChordProPreviewErrorBoundary>
-                  <div className="prose dark:prose-invert max-w-none">
-                    {content ? (
-                      renderPreview()
-                    ) : (
-                      <div className="text-center text-muted-foreground py-8">
-                        <Music className="h-12 w-12 mx-auto mb-2" />
-                        <p>No content to preview</p>
+              )}
+            </div>
+          ) : (
+            /* Desktop Layout - Resizable Split Panes */
+            <ResizablePanelGroup
+              direction="horizontal"
+              className="h-full"
+            >
+              {/* Editor Panel */}
+              {!readOnly && (
+                <>
+                  <ResizablePanel
+                    defaultSize={50}
+                    minSize={20}
+                    className="min-w-[300px]"
+                  >
+                    <div className="h-full p-4 overflow-auto">
+                      <div className="space-y-4">
+                        <div className="bg-muted/50 rounded-md p-3 text-sm">
+                          <p className="font-medium mb-2">ChordPro Quick Reference:</p>
+                          <ul className="space-y-1 text-muted-foreground">
+                            <li>• Chords: [C] [G] [Am] [F]</li>
+                            <li>• Title: {"{title: Song Title}"}</li>
+                            <li>• Artist: {"{subtitle: Artist Name}"}</li>
+                            <li>• Comments: {"{comment: This is a comment}"}</li>
+                            <li>• Sections: {"{chorus}"} {"{verse: 1}"}</li>
+                          </ul>
+                        </div>
+                        
+                        <Textarea
+                          value={content}
+                          onChange={(e) => setContent(e.target.value)}
+                          className="font-mono text-sm min-h-[calc(100vh-20rem)] resize-none"
+                          placeholder="Enter ChordPro formatted lyrics here..."
+                          readOnly={readOnly}
+                        />
                       </div>
-                    )}
-                  </div>
-                </ChordProPreviewErrorBoundary>
-              </div>
-            )}
-          </div>
+                    </div>
+                  </ResizablePanel>
+                  
+                  <ResizableHandle withHandle className="bg-border">
+                    <div className="flex h-full w-full items-center justify-center">
+                      <GripVertical className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </ResizableHandle>
+                </>
+              )}
+              
+              {/* Preview Panel */}
+              <ResizablePanel
+                defaultSize={readOnly ? 100 : 50}
+                minSize={20}
+                className="min-w-[300px]"
+              >
+                <div className="h-full p-4 overflow-auto">
+                  <ChordDisplay
+                    content={content}
+                    theme="light"
+                    showControls={true}
+                    className="max-w-none"
+                  />
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          )}
         </CardContent>
       </Card>
       
