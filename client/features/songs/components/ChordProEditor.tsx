@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -19,16 +18,18 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { 
-  FileText, 
-  Eye, 
-  Save, 
+import {
+  FileText,
   X,
   AlertCircle,
   GripVertical,
 } from "lucide-react";
 import { ChordDisplay } from "./ChordDisplay";
+import { ChordProTextEditor } from "./ChordProTextEditor";
+import { ChordProEditorToolbar } from "./ChordProEditorToolbar";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { useChordTransposition } from "../hooks/useChordTransposition";
+import { debounce } from "lodash";
 
 export interface ChordProEditorProps {
   initialContent: string;
@@ -37,6 +38,9 @@ export interface ChordProEditorProps {
   onCancel: () => void;
   isLoading?: boolean;
   readOnly?: boolean;
+  debounceMs?: number;
+  fontSize?: number;
+  theme?: 'light' | 'dark' | 'stage';
 }
 
 /**
@@ -74,41 +78,69 @@ export default function ChordProEditor({
   onCancel,
   isLoading = false,
   readOnly = false,
+  debounceMs = 300,
+  fontSize = 14,
+  theme = 'light',
 }: ChordProEditorProps) {
   const [content, setContent] = useState(initialContent);
+  const [debouncedContent, setDebouncedContent] = useState(initialContent);
   const [hasChanges, setHasChanges] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
   const [isCorrupted, setIsCorrupted] = useState(false);
+  const [editorFontSize, setEditorFontSize] = useState(fontSize);
+  const [displayTheme, setDisplayTheme] = useState(theme);
+  const [showChords, setShowChords] = useState(true);
+  const [undoStack, setUndoStack] = useState<string[]>([]);
+  const [redoStack, setRedoStack] = useState<string[]>([]);
   const isMobile = useMediaQuery("(max-width: 768px)");
+
+  // Debounced content update for live preview
+  const debouncedUpdateContent = useMemo(
+    () => debounce((newContent: string) => {
+      setDebouncedContent(newContent);
+    }, debounceMs),
+    [debounceMs]
+  );
 
   useEffect(() => {
     setHasChanges(content !== initialContent);
-  }, [content, initialContent]);
+    debouncedUpdateContent(content);
+    return () => {
+      debouncedUpdateContent.cancel();
+    };
+  }, [content, initialContent, debouncedUpdateContent]);
 
   useEffect(() => {
     // Check if initial content appears corrupted
     setIsCorrupted(isCorruptedChordData(initialContent));
   }, [initialContent]);
 
-  const handleSave = () => {
-    onSave(content);
-  };
+  // Set up transposition hook
+  const transposition = useChordTransposition({
+    initialTranspose: 0,
+    content: debouncedContent,
+    enableKeyDetection: true,
+  });
 
-  const handleCancel = () => {
+  const handleSave = useCallback(() => {
+    onSave(content);
+  }, [content, onSave]);
+
+  const handleCancel = useCallback(() => {
     if (hasChanges) {
       setShowCancelDialog(true);
     } else {
       onCancel();
     }
-  };
+  }, [hasChanges, onCancel]);
 
-  const confirmCancel = () => {
+  const confirmCancel = useCallback(() => {
     setShowCancelDialog(false);
     onCancel();
-  };
+  }, [onCancel]);
 
-  const handleFixCorruptedData = () => {
+  const handleFixCorruptedData = useCallback(() => {
     // Clear corrupted data and replace with empty template
     const cleanTemplate = `{title: ${songTitle.split(" - ")[0]}}
 {key: C}
@@ -116,7 +148,51 @@ export default function ChordProEditor({
 [C]Add your lyrics and chords here...`;
     setContent(cleanTemplate);
     setIsCorrupted(false);
-  };
+  }, [songTitle]);
+
+  // Enhanced editor functions
+  const handleUndo = useCallback(() => {
+    if (undoStack.length > 0) {
+      const previousContent = undoStack[undoStack.length - 1];
+      setRedoStack(prev => [...prev, content]);
+      setUndoStack(prev => prev.slice(0, -1));
+      setContent(previousContent);
+    }
+  }, [content, undoStack]);
+
+  const handleRedo = useCallback(() => {
+    if (redoStack.length > 0) {
+      const nextContent = redoStack[redoStack.length - 1];
+      setUndoStack(prev => [...prev, content]);
+      setRedoStack(prev => prev.slice(0, -1));
+      setContent(nextContent);
+    }
+  }, [content, redoStack]);
+
+  const handleContentChange = useCallback((newContent: string) => {
+    // Add to undo stack if significant change
+    if (Math.abs(newContent.length - content.length) > 1) {
+      setUndoStack(prev => [...prev.slice(-19), content]); // Keep last 20 states
+      setRedoStack([]);
+    }
+    setContent(newContent);
+  }, [content]);
+
+  const handleInsertAtCursor = useCallback((text: string) => {
+    // This would need textarea ref to get cursor position
+    // For now, append to end
+    setContent(prev => prev + text);
+  }, []);
+
+  const handleExport = useCallback((format: 'pdf' | 'html' | 'txt') => {
+    // TODO: Implement export functionality
+    console.log('Export as:', format);
+  }, []);
+
+  const handleShowHelp = useCallback(() => {
+    // TODO: Implement help modal
+    console.log('Show help');
+  }, []);
 
 
   return (
