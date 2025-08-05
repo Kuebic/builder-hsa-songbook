@@ -83,31 +83,8 @@ export function ChordProTextEditor({
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const [redoStack, setRedoStack] = useState<string[]>([]);
 
-  // Create highlighted version of the text for display behind the textarea
-  const highlightedContent = useMemo(() => {
-    if (!value) return "";
-    
-    let highlighted = value;
-    
-    // Highlight chord brackets [Am], [G/B] in blue
-    highlighted = highlighted.replace(/(\[[\w#b/]+\])/g, '<span class="text-blue-600 dark:text-blue-400 font-bold">$1</span>');
-    
-    // Highlight directives {title:...}, {key:...} in green
-    highlighted = highlighted.replace(/(\{[^}]*\})/g, (match) => {
-      if (match.includes('comment') || match.includes('c:')) {
-        // Comments in gray
-        return `<span class="text-gray-500 dark:text-gray-400">${match}</span>`;
-      } else if (match.includes('start_of_') || match.includes('end_of_') || match.includes('soc') || match.includes('eoc') || match.includes('sov') || match.includes('eov')) {
-        // Sections in purple
-        return `<span class="text-purple-600 dark:text-purple-400 font-medium">${match}</span>`;
-      } else {
-        // Other directives in green
-        return `<span class="text-green-600 dark:text-green-400 font-medium">${match}</span>`;
-      }
-    });
-    
-    return highlighted;
-  }, [value]);
+  // For now, we'll focus on functionality over syntax highlighting to avoid alignment issues
+  // Syntax highlighting can be re-implemented later with a more robust solution
 
   // Handle auto-completion trigger
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
