@@ -292,22 +292,26 @@ const arePropsEqual = (prevProps: SongCardProps, nextProps: SongCardProps): bool
     return false;
   }
 
-  // Compare basicChords array
-  if (prevSong.basicChords.length !== nextSong.basicChords.length) {
+  // Compare basicChords array (with defensive check)
+  const prevChords = prevSong.basicChords || [];
+  const nextChords = nextSong.basicChords || [];
+  if (prevChords.length !== nextChords.length) {
     return false;
   }
-  for (let i = 0; i < prevSong.basicChords.length; i++) {
-    if (prevSong.basicChords[i] !== nextSong.basicChords[i]) {
+  for (let i = 0; i < prevChords.length; i++) {
+    if (prevChords[i] !== nextChords[i]) {
       return false;
     }
   }
 
-  // Compare themes array
-  if (prevSong.themes.length !== nextSong.themes.length) {
+  // Compare themes array (with defensive check)
+  const prevThemes = prevSong.themes || [];
+  const nextThemes = nextSong.themes || [];
+  if (prevThemes.length !== nextThemes.length) {
     return false;
   }
-  for (let i = 0; i < prevSong.themes.length; i++) {
-    if (prevSong.themes[i] !== nextSong.themes[i]) {
+  for (let i = 0; i < prevThemes.length; i++) {
+    if (prevThemes[i] !== nextThemes[i]) {
       return false;
     }
   }
