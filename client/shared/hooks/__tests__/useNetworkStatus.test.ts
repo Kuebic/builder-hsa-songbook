@@ -94,7 +94,7 @@ describe("useNetworkStatus Hook", () => {
           headers: {
             "Cache-Control": "no-cache",
           },
-        })
+        }),
       );
     });
 
@@ -109,7 +109,7 @@ describe("useNetworkStatus Hook", () => {
       expect(connectionResult).toBe(false);
       expect(mockConsole.warn).toHaveBeenCalledWith(
         "Connection check failed:",
-        expect.any(Error)
+        expect.any(Error),
       );
     });
 
@@ -165,7 +165,7 @@ describe("useNetworkStatus Hook", () => {
       expect(connectionResult).toBe(false);
       expect(mockConsole.warn).toHaveBeenCalledWith(
         "Connection check failed:",
-        expect.any(Error)
+        expect.any(Error),
       );
     });
 

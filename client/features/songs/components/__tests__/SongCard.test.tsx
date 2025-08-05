@@ -151,7 +151,7 @@ describe("SongCard Component", () => {
     it("calls onToggleFavorite when heart button is clicked", async () => {
       const onToggleFavorite = vi.fn();
       renderWithRouter(
-        <SongCard song={mockSong} onToggleFavorite={onToggleFavorite} />
+        <SongCard song={mockSong} onToggleFavorite={onToggleFavorite} />,
       );
       
       const heartButton = screen.getByTestId("heart-icon").closest("button");
@@ -172,7 +172,7 @@ describe("SongCard Component", () => {
     it("has dropdown menu button that can be clicked", () => {
       const onAddToSetlist = vi.fn();
       renderWithRouter(
-        <SongCard song={mockSong} onAddToSetlist={onAddToSetlist} />
+        <SongCard song={mockSong} onAddToSetlist={onAddToSetlist} />,
       );
       
       const moreButton = screen.getByTestId("more-horizontal-icon").closest("button");
@@ -293,7 +293,7 @@ describe("SongCard Component", () => {
       
       const links = screen.getAllByRole("link");
       const mainLink = links.find(link => 
-        link.getAttribute("href") === "/songs/amazing-grace-jn-4k7p2"
+        link.getAttribute("href") === "/songs/amazing-grace-jn-4k7p2",
       );
       
       expect(mainLink).toBeInTheDocument();

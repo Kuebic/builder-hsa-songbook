@@ -133,7 +133,7 @@ describe("useSongSearch Hook", () => {
     it("updates filtered songs when songs array changes", () => {
       const { result, rerender } = renderHook(
         ({ songs }) => useSongSearch(songs, defaultFilters),
-        { initialProps: { songs: mockSongs.slice(0, 2) } }
+        { initialProps: { songs: mockSongs.slice(0, 2) } },
       );
 
       expect(result.current).toHaveLength(2);
@@ -317,7 +317,7 @@ describe("useSongSearch Hook", () => {
       const filters: SongFilters = { 
         ...defaultFilters, 
         searchQuery: "worship", 
-        key: "G" 
+        key: "G", 
       };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
       
@@ -331,7 +331,7 @@ describe("useSongSearch Hook", () => {
       const filters: SongFilters = { 
         ...defaultFilters, 
         searchQuery: "worship", 
-        difficulty: "beginner" 
+        difficulty: "beginner", 
       };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
       
@@ -344,7 +344,7 @@ describe("useSongSearch Hook", () => {
       const filters: SongFilters = { 
         ...defaultFilters, 
         key: "F", 
-        difficulty: "beginner" 
+        difficulty: "beginner", 
       };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
       
@@ -357,7 +357,7 @@ describe("useSongSearch Hook", () => {
         searchQuery: "worship", 
         key: "C", 
         difficulty: "beginner",
-        themes: ["praise"]
+        themes: ["praise"],
       };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
       
@@ -370,7 +370,7 @@ describe("useSongSearch Hook", () => {
         searchQuery: "worship", 
         key: "F", // No worship songs in key F
         difficulty: "all",
-        themes: []
+        themes: [],
       };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
       
@@ -382,7 +382,7 @@ describe("useSongSearch Hook", () => {
     it("updates results when filters change", () => {
       const { result, rerender } = renderHook(
         ({ filters }) => useSongSearch(mockSongs, filters),
-        { initialProps: { filters: defaultFilters } }
+        { initialProps: { filters: defaultFilters } },
       );
 
       // Initially should show all songs
@@ -399,7 +399,7 @@ describe("useSongSearch Hook", () => {
     it("handles rapid filter changes", () => {
       const { result, rerender } = renderHook(
         ({ filters }) => useSongSearch(mockSongs, filters),
-        { initialProps: { filters: defaultFilters } }
+        { initialProps: { filters: defaultFilters } },
       );
 
       // Apply search filter

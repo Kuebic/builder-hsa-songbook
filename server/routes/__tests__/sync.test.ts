@@ -59,7 +59,7 @@ vi.stubGlobal("console", mockConsole);
 const createMockReqRes = (
   query: any = {},
   params: any = {},
-  body: any = {}
+  body: any = {},
 ): { req: Partial<Request>; res: Partial<Response> } => {
   const req = {
     query,
@@ -439,7 +439,7 @@ describe("Sync API Routes", () => {
       // Mock operation that throws an error during processing
       const mockSongInstance = { 
         ...mockSong, 
-        save: vi.fn().mockRejectedValue(new Error("Save failed"))
+        save: vi.fn().mockRejectedValue(new Error("Save failed")),
       };
       (Song as any).mockImplementation(() => mockSongInstance);
 
@@ -521,10 +521,10 @@ describe("Sync API Routes", () => {
       const { req, res } = createMockReqRes({ operationIds: "op1" });
 
       // Force an error by making the query property throw
-      Object.defineProperty(req, 'query', {
+      Object.defineProperty(req, "query", {
         get() {
           throw new Error("System error");
-        }
+        },
       });
 
       await getSyncStatus(req as Request, res as Response);
@@ -693,10 +693,10 @@ describe("Sync API Routes", () => {
       const { req, res } = createMockReqRes({}, {}, { resolutions: [] });
 
       // Force an error by making the request body throw during processing
-      Object.defineProperty(req, 'body', {
+      Object.defineProperty(req, "body", {
         get() {
           throw new Error("System error");
-        }
+        },
       });
 
       await resolveConflicts(req as Request, res as Response);

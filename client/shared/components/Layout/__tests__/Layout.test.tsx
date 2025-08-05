@@ -97,7 +97,7 @@ const renderWithRouter = (component: React.ReactElement, initialRoute = "/") => 
   return render(
     <MemoryRouter initialEntries={[initialRoute]}>
       {component}
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 };
 
@@ -113,7 +113,7 @@ describe("Layout Component", () => {
     mockClassListRemove = vi.fn();
 
     document.documentElement.setAttribute = mockSetAttribute;
-    Object.defineProperty(document.documentElement, 'classList', {
+    Object.defineProperty(document.documentElement, "classList", {
       value: {
         add: mockClassListAdd,
         remove: mockClassListRemove,
@@ -126,7 +126,7 @@ describe("Layout Component", () => {
   afterEach(() => {
     // Restore original methods
     document.documentElement.setAttribute = originalSetAttribute;
-    Object.defineProperty(document.documentElement, 'classList', {
+    Object.defineProperty(document.documentElement, "classList", {
       value: originalClassList,
       writable: true,
       configurable: true,
@@ -138,7 +138,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Test Content</div>
-        </Layout>
+        </Layout>,
       );
 
       expect(screen.getByText("Test Content")).toBeInTheDocument();
@@ -148,7 +148,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       expect(screen.getAllByText("HSA Songbook")).toHaveLength(2); // Mobile and desktop
@@ -159,7 +159,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       const header = screen.getByRole("banner");
@@ -171,7 +171,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div data-testid="main-content">Content</div>
-        </Layout>
+        </Layout>,
       );
 
       const main = screen.getByRole("main");
@@ -185,7 +185,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       expect(screen.getAllByText("Dashboard")).toHaveLength(2); // Mobile and desktop
@@ -199,7 +199,7 @@ describe("Layout Component", () => {
         <Layout>
           <div>Content</div>
         </Layout>,
-        "/songs"
+        "/songs",
       );
 
       const songLinks = screen.getAllByText("Songs");
@@ -207,7 +207,7 @@ describe("Layout Component", () => {
       
       // At least one Songs link should have active styling
       const activeSongsLink = songLinks.find(link => 
-        link.closest("a")?.className.includes("bg-accent")
+        link.closest("a")?.className.includes("bg-accent"),
       );
       expect(activeSongsLink).toBeDefined();
     });
@@ -216,7 +216,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       expect(screen.getAllByTestId("home-icon")).toHaveLength(2); // Mobile and desktop
@@ -229,7 +229,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       const dashboardLinks = screen.getAllByRole("link", { name: /dashboard/i });
@@ -249,7 +249,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       expect(screen.getByTestId("sheet-trigger")).toBeInTheDocument();
@@ -260,7 +260,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       expect(screen.getByTestId("sheet")).toBeInTheDocument();
@@ -274,7 +274,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       const searchInput = screen.getByPlaceholderText("Search songs, artists, or themes...");
@@ -286,7 +286,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       const searchIcons = screen.getAllByTestId("search-icon");
@@ -297,7 +297,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       const searchButtons = screen.getAllByTestId("search-icon");
@@ -311,7 +311,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       expect(screen.getAllByTestId("sun-icon")).toHaveLength(2); // Button icon + dropdown option
@@ -322,7 +322,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       expect(screen.getByText("Light")).toBeInTheDocument();
@@ -334,7 +334,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       // Click on Dark theme
@@ -349,7 +349,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       // Click on Stage Mode theme
@@ -364,7 +364,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       // First switch to dark, then back to light
@@ -382,7 +382,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       // Initially should show sun icons (light theme)
@@ -403,7 +403,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       expect(screen.getAllByTestId("user-icon")).toHaveLength(2); // Button + dropdown option
@@ -413,7 +413,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       expect(screen.getByText("Profile")).toBeInTheDocument();
@@ -425,7 +425,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       expect(screen.getByTestId("dropdown-separator")).toBeInTheDocument();
@@ -437,7 +437,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       expect(screen.getByTestId("plus-circle-icon")).toBeInTheDocument();
@@ -447,7 +447,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       const addButton = screen.getByTestId("plus-circle-icon").closest("button");
@@ -461,7 +461,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       expect(screen.queryByText("Offline")).not.toBeInTheDocument();
@@ -476,13 +476,13 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       // Check for responsive classes - find the desktop brand element specifically
       const brandElements = screen.getAllByText("HSA Songbook");
       const desktopBrand = brandElements.find(el => 
-        el.className.includes("hidden") && el.className.includes("sm:block")
+        el.className.includes("hidden") && el.className.includes("sm:block"),
       );
       expect(desktopBrand).toHaveClass("hidden", "sm:block");
 
@@ -495,7 +495,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       // Desktop nav should have hidden md:flex classes
@@ -512,7 +512,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       const searchContainer = screen.getByPlaceholderText("Search songs, artists, or themes...").closest("div.hidden");
@@ -525,7 +525,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       expect(screen.getByRole("banner")).toBeInTheDocument(); // header
@@ -538,7 +538,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       const buttons = screen.getAllByRole("button");
@@ -554,7 +554,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Content</div>
-        </Layout>
+        </Layout>,
       );
 
       const links = screen.getAllByRole("link");
@@ -572,7 +572,7 @@ describe("Layout Component", () => {
         <Layout>
           <div>Content</div>
         </Layout>,
-        "/setlists"
+        "/setlists",
       );
 
       const setlistLinks = screen.getAllByText("Setlists");
@@ -584,7 +584,7 @@ describe("Layout Component", () => {
         <Layout>
           <div>Content</div>
         </Layout>,
-        "/songs/123"
+        "/songs/123",
       );
 
       // Should still show Songs as active for nested routes
@@ -597,7 +597,7 @@ describe("Layout Component", () => {
       renderWithRouter(
         <Layout>
           <div>Test Content</div>
-        </Layout>
+        </Layout>,
       );
 
       expect(screen.getByText("Test Content")).toBeInTheDocument();

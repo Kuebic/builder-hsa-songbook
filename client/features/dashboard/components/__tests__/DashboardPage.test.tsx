@@ -85,7 +85,7 @@ vi.mock("@/shared/hooks/useSongs", () => ({
     transformationErrors: [],
     ...mockFunctions, // Use stable function references
     retryCount: 0,
-  }))
+  })),
 }));
 
 // Mock the Layout component

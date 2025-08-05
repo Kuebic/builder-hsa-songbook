@@ -34,7 +34,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary>
         <div>Test content</div>
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(screen.getByText("Test content")).toBeInTheDocument();
@@ -44,7 +44,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(screen.getByText("An error occurred")).toBeInTheDocument();
@@ -59,7 +59,7 @@ describe("ErrorBoundary", () => {
         errorDescription="Custom error description text"
       >
         <ThrowError shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(screen.getByText("Custom Error Title")).toBeInTheDocument();
@@ -72,14 +72,14 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary onError={onError}>
         <ThrowError shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(onError).toHaveBeenCalledWith(
       expect.objectContaining({
         message: "Test error message",
       }),
-      expect.any(Object)
+      expect.any(Object),
     );
   });
 
@@ -89,7 +89,7 @@ describe("ErrorBoundary", () => {
     const { rerender } = render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     // Verify error UI is shown
@@ -102,7 +102,7 @@ describe("ErrorBoundary", () => {
     rerender(
       <ErrorBoundary>
         <ThrowError shouldThrow={false} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     // Verify normal content is shown
@@ -122,7 +122,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary fallback={customFallback}>
         <ThrowError shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(screen.getByText("Custom fallback UI")).toBeInTheDocument();
@@ -132,14 +132,14 @@ describe("ErrorBoundary", () => {
 
   it("shows error stack trace in development mode", () => {
     // Skip this test if not in development
-    if (process.env.NODE_ENV !== 'development') {
+    if (process.env.NODE_ENV !== "development") {
       return;
     }
 
     render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(screen.getByText("Error details")).toBeInTheDocument();

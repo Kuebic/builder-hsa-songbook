@@ -39,7 +39,7 @@ vi.stubGlobal("console", mockConsole);
 const createMockReqRes = (
   query: any = {},
   params: any = {},
-  body: any = {}
+  body: any = {},
 ): { req: Partial<Request>; res: Partial<Response> } => {
   const req = {
     query,
@@ -247,7 +247,7 @@ describe("Songs API Routes", () => {
             page: 3, // (20 / 10) + 1
             limit: 10,
           }),
-        })
+        }),
       );
     });
 

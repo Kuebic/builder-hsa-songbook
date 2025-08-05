@@ -52,7 +52,7 @@ vi.stubGlobal("console", mockConsole);
 const createMockReqRes = (
   query: any = {},
   params: any = {},
-  body: any = {}
+  body: any = {},
 ): { req: Partial<Request>; res: Partial<Response> } => {
   const req = {
     query,
@@ -225,7 +225,7 @@ describe("Storage API Routes", () => {
               expect.stringContaining("CRITICAL"),
             ]),
           }),
-        })
+        }),
       );
     });
 

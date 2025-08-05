@@ -41,7 +41,7 @@ vi.stubGlobal("console", mockConsole);
 const createMockReqRes = (
   query: any = {},
   params: any = {},
-  body: any = {}
+  body: any = {},
 ): { req: Partial<Request>; res: Partial<Response> } => {
   const req = {
     query,
@@ -625,7 +625,7 @@ describe("Setlists API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "60f7b1c3e4b0c72a1a654321" },
-        { arrangementId: "arr123", transposeBy: 2, notes: "Test notes" }
+        { arrangementId: "arr123", transposeBy: 2, notes: "Test notes" },
       );
 
       const mockSetlistInstance = { ...mockSetlist };
@@ -645,7 +645,7 @@ describe("Setlists API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "60f7b1c3e4b0c72a1a654321" },
-        { transposeBy: 2 }
+        { transposeBy: 2 },
       );
 
       await addSongToSetlist(req as Request, res as Response);
@@ -664,7 +664,7 @@ describe("Setlists API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "nonexistent" },
-        { arrangementId: "arr123" }
+        { arrangementId: "arr123" },
       );
 
       (Setlist as any).findById.mockResolvedValue(null);
@@ -685,7 +685,7 @@ describe("Setlists API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "60f7b1c3e4b0c72a1a654321" },
-        { arrangementId: "arr123" }
+        { arrangementId: "arr123" },
       );
 
       (Setlist as any).findById.mockRejectedValue(new Error("Database error"));
@@ -707,7 +707,7 @@ describe("Setlists API Routes", () => {
     it("removes a song from setlist successfully", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { id: "60f7b1c3e4b0c72a1a654321", arrangementId: "arr123" }
+        { id: "60f7b1c3e4b0c72a1a654321", arrangementId: "arr123" },
       );
 
       const mockSetlistInstance = { ...mockSetlist };
@@ -726,7 +726,7 @@ describe("Setlists API Routes", () => {
     it("returns 404 for non-existent setlist", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { id: "nonexistent", arrangementId: "arr123" }
+        { id: "nonexistent", arrangementId: "arr123" },
       );
 
       (Setlist as any).findById.mockResolvedValue(null);
@@ -746,7 +746,7 @@ describe("Setlists API Routes", () => {
     it("handles database errors", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { id: "60f7b1c3e4b0c72a1a654321", arrangementId: "arr123" }
+        { id: "60f7b1c3e4b0c72a1a654321", arrangementId: "arr123" },
       );
 
       (Setlist as any).findById.mockRejectedValue(new Error("Database error"));
@@ -769,7 +769,7 @@ describe("Setlists API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "60f7b1c3e4b0c72a1a654321" },
-        { songOrder: ["arr2", "arr1", "arr3"] }
+        { songOrder: ["arr2", "arr1", "arr3"] },
       );
 
       const mockSetlistInstance = { ...mockSetlist };
@@ -789,7 +789,7 @@ describe("Setlists API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "60f7b1c3e4b0c72a1a654321" },
-        { songOrder: "not-an-array" }
+        { songOrder: "not-an-array" },
       );
 
       await reorderSetlistSongs(req as Request, res as Response);
@@ -808,7 +808,7 @@ describe("Setlists API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "nonexistent" },
-        { songOrder: ["arr1", "arr2"] }
+        { songOrder: ["arr1", "arr2"] },
       );
 
       (Setlist as any).findById.mockResolvedValue(null);
@@ -829,7 +829,7 @@ describe("Setlists API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "60f7b1c3e4b0c72a1a654321" },
-        { songOrder: ["arr1", "arr2"] }
+        { songOrder: ["arr1", "arr2"] },
       );
 
       (Setlist as any).findById.mockRejectedValue(new Error("Database error"));

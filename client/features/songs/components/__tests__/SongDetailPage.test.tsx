@@ -87,7 +87,7 @@ const renderWithRouter = (slug: string) => {
           <Route path="/songs/:slug" element={<SongDetailPage />} />
         </Routes>
       </MemoryRouter>
-    </QueryClientProvider>
+    </QueryClientProvider>,
   );
 };
 
