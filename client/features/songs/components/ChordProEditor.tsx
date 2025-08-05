@@ -21,6 +21,7 @@ import {
 import {
   FileText,
   Save,
+  Eye,
   X,
   AlertCircle,
   GripVertical,
