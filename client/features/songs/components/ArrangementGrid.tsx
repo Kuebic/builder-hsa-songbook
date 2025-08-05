@@ -21,9 +21,9 @@ import { Arrangement } from "../types/song.types";
 import { StarRating } from "./StarRating";
 
 export interface ArrangementGridProps {
-  arrangements: ArrangementDetail[];
-  onView: (arrangement: ArrangementDetail) => void;
-  onEdit: (arrangement: ArrangementDetail) => void;
+  arrangements: Arrangement[];
+  onView: (arrangement: Arrangement) => void;
+  onEdit: (arrangement: Arrangement) => void;
   onCreateNew: () => void;
   defaultArrangementId?: string;
 }
