@@ -250,7 +250,7 @@ export function ChordProEditorToolbar({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-8 px-2">
-                <SaveAs className="h-4 w-4" />
+                <Download className="h-4 w-4" />
                 <ChevronDown className="h-3 w-3 ml-1" />
               </Button>
             </DropdownMenuTrigger>
