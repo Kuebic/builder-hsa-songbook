@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Arrangement, arrangementCreateSchema } from '../types/song.types';
-import { z } from 'zod';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Arrangement, arrangementCreateSchema } from "../types/song.types";
+import { z } from "zod";
 
 interface APIResponse<T> {
   success: boolean;
@@ -18,9 +18,9 @@ interface APIResponse<T> {
 // Fetch arrangements for a specific song
 export function useArrangementsBySong(songId: string) {
   return useQuery({
-    queryKey: ['arrangements', 'song', songId],
+    queryKey: ["arrangements", "song", songId],
     queryFn: async (): Promise<Arrangement[]> => {
-      if (!songId) return [];
+      if (!songId) {return [];}
       
       const response = await fetch(`/api/songs/${songId}/arrangements`);
       
@@ -31,7 +31,7 @@ export function useArrangementsBySong(songId: string) {
       const result: APIResponse<Arrangement[]> = await response.json();
       
       if (!result.success) {
-        throw new Error(result.error?.message || 'Failed to fetch arrangements');
+        throw new Error(result.error?.message || "Failed to fetch arrangements");
       }
       
       return result.data;
@@ -51,10 +51,10 @@ export function useCreateArrangement() {
       createdBy: string;
       isPublic?: boolean;
     }): Promise<Arrangement> => {
-      const response = await fetch('/api/arrangements', {
-        method: 'POST',
+      const response = await fetch("/api/arrangements", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(arrangementData),
       });
@@ -66,7 +66,7 @@ export function useCreateArrangement() {
       const result: APIResponse<Arrangement> = await response.json();
       
       if (!result.success) {
-        throw new Error(result.error?.message || 'Failed to create arrangement');
+        throw new Error(result.error?.message || "Failed to create arrangement");
       }
 
       return result.data;
@@ -74,10 +74,10 @@ export function useCreateArrangement() {
     onSuccess: (data) => {
       // Invalidate arrangements for all songs this arrangement belongs to
       data.songIds.forEach((songId) => {
-        queryClient.invalidateQueries({ queryKey: ['arrangements', 'song', songId] });
+        queryClient.invalidateQueries({ queryKey: ["arrangements", "song", songId] });
       });
       // Also invalidate the general arrangements list
-      queryClient.invalidateQueries({ queryKey: ['arrangements'] });
+      queryClient.invalidateQueries({ queryKey: ["arrangements"] });
     },
   });
 }
@@ -92,9 +92,9 @@ export function useUpdateArrangement() {
       isPublic?: boolean;
     }>): Promise<Arrangement> => {
       const response = await fetch(`/api/arrangements/${id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(arrangementData),
       });
@@ -106,20 +106,20 @@ export function useUpdateArrangement() {
       const result: APIResponse<Arrangement> = await response.json();
       
       if (!result.success) {
-        throw new Error(result.error?.message || 'Failed to update arrangement');
+        throw new Error(result.error?.message || "Failed to update arrangement");
       }
 
       return result.data;
     },
     onSuccess: (data) => {
       // Invalidate the specific arrangement
-      queryClient.setQueryData(['arrangements', data._id], data);
+      queryClient.setQueryData(["arrangements", data._id], data);
       // Invalidate arrangements for all songs this arrangement belongs to
       data.songIds.forEach((songId) => {
-        queryClient.invalidateQueries({ queryKey: ['arrangements', 'song', songId] });
+        queryClient.invalidateQueries({ queryKey: ["arrangements", "song", songId] });
       });
       // Also invalidate the general arrangements list
-      queryClient.invalidateQueries({ queryKey: ['arrangements'] });
+      queryClient.invalidateQueries({ queryKey: ["arrangements"] });
     },
   });
 }
@@ -131,7 +131,7 @@ export function useDeleteArrangement() {
   return useMutation({
     mutationFn: async (id: string): Promise<{ id: string }> => {
       const response = await fetch(`/api/arrangements/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
@@ -141,16 +141,16 @@ export function useDeleteArrangement() {
       const result: APIResponse<{ id: string }> = await response.json();
       
       if (!result.success) {
-        throw new Error(result.error?.message || 'Failed to delete arrangement');
+        throw new Error(result.error?.message || "Failed to delete arrangement");
       }
 
       return result.data;
     },
     onSuccess: (_, id) => {
       // Remove from cache
-      queryClient.removeQueries({ queryKey: ['arrangements', id] });
+      queryClient.removeQueries({ queryKey: ["arrangements", id] });
       // Invalidate all related queries
-      queryClient.invalidateQueries({ queryKey: ['arrangements'] });
+      queryClient.invalidateQueries({ queryKey: ["arrangements"] });
     },
   });
 }
@@ -162,9 +162,9 @@ export function useRateArrangement() {
   return useMutation({
     mutationFn: async ({ id, rating }: { id: string; rating: number }) => {
       const response = await fetch(`/api/arrangements/${id}/rate`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ rating }),
       });
@@ -176,15 +176,15 @@ export function useRateArrangement() {
       const result = await response.json();
       
       if (!result.success) {
-        throw new Error(result.error?.message || 'Failed to rate arrangement');
+        throw new Error(result.error?.message || "Failed to rate arrangement");
       }
 
       return result.data;
     },
     onSuccess: (_, { id }) => {
       // Invalidate the specific arrangement to refresh its rating
-      queryClient.invalidateQueries({ queryKey: ['arrangements', id] });
-      queryClient.invalidateQueries({ queryKey: ['arrangements'] });
+      queryClient.invalidateQueries({ queryKey: ["arrangements", id] });
+      queryClient.invalidateQueries({ queryKey: ["arrangements"] });
     },
   });
 }

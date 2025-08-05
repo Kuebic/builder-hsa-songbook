@@ -1,17 +1,17 @@
-import { useState, useEffect, useCallback } from 'react';
-import { apiClient, APISong, SongFilters } from '@/shared/services/api';
-import { ClientSong, Song, songToClientFormat } from '@features/songs';
+import { useState, useEffect, useCallback } from "react";
+import { apiClient, APISong, SongFilters } from "@/shared/services/api";
+import { ClientSong, Song, songToClientFormat } from "@features/songs";
 
 // Error types for better error handling
 export interface TransformationError {
   songId: string;
   songTitle: string;
   error: string;
-  severity: 'warning' | 'error';
+  severity: "warning" | "error";
 }
 
 export interface APIError {
-  type: 'network' | 'validation' | 'transformation' | 'server';
+  type: "network" | "validation" | "transformation" | "server";
   message: string;
   details?: unknown;
   retryable: boolean;
@@ -31,7 +31,7 @@ function transformAPISongToClientSong(apiSong: APISong): ClientSong {
     timeSignature: apiSong.timeSignature,
     difficulty: apiSong.difficulty,
     themes: apiSong.themes,
-    source: apiSong.source || '',
+    source: apiSong.source || "",
     lyrics: apiSong.lyrics,
     notes: apiSong.notes,
     metadata: apiSong.metadata,
@@ -46,7 +46,7 @@ function transformAPISongToClientSong(apiSong: APISong): ClientSong {
 
 // Validate API song structure before transformation
 function validateAPISong(apiSong: unknown): apiSong is APISong {
-  if (!apiSong || typeof apiSong !== 'object') return false;
+  if (!apiSong || typeof apiSong !== "object") {return false;}
   
   const song = apiSong as Partial<APISong>;
   return !!(song._id && song.title && song.difficulty && Array.isArray(song.themes));
@@ -55,15 +55,15 @@ function validateAPISong(apiSong: unknown): apiSong is APISong {
 // Safe wrapper for transformation with error boundary
 function safeTransformAPISongToClientSong(
   apiSong: APISong, 
-  userFavorites: string[] = []
+  userFavorites: string[] = [],
 ): { song: ClientSong | null; error: TransformationError | null } {
   // First validate the API song structure
   if (!validateAPISong(apiSong)) {
     const validationError: TransformationError = {
-      songId: (apiSong as Partial<APISong>)?._id || 'unknown',
-      songTitle: (apiSong as Partial<APISong>)?.title || 'Unknown Song',
-      error: 'Invalid API song structure - missing required fields',
-      severity: 'error'
+      songId: (apiSong as Partial<APISong>)?._id || "unknown",
+      songTitle: (apiSong as Partial<APISong>)?.title || "Unknown Song",
+      error: "Invalid API song structure - missing required fields",
+      severity: "error",
     };
     return { song: null, error: validationError };
   }
@@ -79,26 +79,26 @@ function safeTransformAPISongToClientSong(
     const transformationError: TransformationError = {
       songId: apiSong._id,
       songTitle: apiSong.title,
-      error: error instanceof Error ? error.message : 'Unknown transformation error',
-      severity: 'warning'
+      error: error instanceof Error ? error.message : "Unknown transformation error",
+      severity: "warning",
     };
     
     // Return a fallback ClientSong with minimal safe data
     const fallbackSong: ClientSong = {
       id: apiSong._id,
-      title: apiSong.title || 'Unknown Title',
+      title: apiSong.title || "Unknown Title",
       artist: apiSong.artist,
-      slug: apiSong.slug || '',
+      slug: apiSong.slug || "",
       key: apiSong.key,
       tempo: apiSong.tempo,
-      difficulty: apiSong.difficulty || 'intermediate',
+      difficulty: apiSong.difficulty || "intermediate",
       themes: apiSong.themes || [],
       viewCount: apiSong.metadata?.views || 0,
       avgRating: apiSong.metadata?.ratings?.average || 0,
       basicChords: [], // Safe fallback for corrupted chord data
       lastUsed: undefined,
       isFavorite: userFavorites.includes(apiSong._id), // Set favorite status even for fallback
-      chordData: '', // Safe fallback to prevent further errors
+      chordData: "", // Safe fallback to prevent further errors
     };
     
     return { song: fallbackSong, error: transformationError };
@@ -156,7 +156,7 @@ export interface UseSongsResult {
 export function useSongs({ 
   filters = {}, 
   autoFetch = true,
-  userId 
+  userId, 
 }: UseSongsOptions = {}): UseSongsResult {
   const [songs, setSongs] = useState<ClientSong[]>([]);
   const [loading, setLoading] = useState(false);
@@ -189,7 +189,7 @@ export function useSongs({
       if (response.success) {
         // Validate response data structure
         if (!Array.isArray(response.data)) {
-          throw new Error('API returned invalid data structure - expected array of songs');
+          throw new Error("API returned invalid data structure - expected array of songs");
         }
         
         const { songs: transformedSongs, errors, successCount: transformSuccessCount } = safeTransformSongs(response.data, userFavorites);
@@ -213,22 +213,22 @@ export function useSongs({
         }
       } else {
         const apiError: APIError = {
-          type: 'server',
-          message: response.error || 'Server returned unsuccessful response',
-          retryable: true
+          type: "server",
+          message: response.error || "Server returned unsuccessful response",
+          retryable: true,
         };
         setError(apiError);
         return;
       }
     } catch (err) {
       const apiError: APIError = {
-        type: err instanceof TypeError ? 'network' : 'server',
-        message: err instanceof Error ? err.message : 'An unknown error occurred',
+        type: err instanceof TypeError ? "network" : "server",
+        message: err instanceof Error ? err.message : "An unknown error occurred",
         details: err,
-        retryable: true
+        retryable: true,
       };
       setError(apiError);
-      console.error('Error fetching songs:', err);
+      console.error("Error fetching songs:", err);
     } finally {
       setLoading(false);
     }
@@ -245,7 +245,7 @@ export function useSongs({
       if (response.success) {
         // Validate response data structure
         if (!Array.isArray(response.data)) {
-          throw new Error('Search API returned invalid data structure - expected array of songs');
+          throw new Error("Search API returned invalid data structure - expected array of songs");
         }
         
         const { songs: transformedSongs, errors, successCount: transformSuccessCount } = safeTransformSongs(response.data, userFavorites);
@@ -264,22 +264,22 @@ export function useSongs({
         }
       } else {
         const apiError: APIError = {
-          type: 'server',
-          message: response.error || 'Search request failed',
-          retryable: true
+          type: "server",
+          message: response.error || "Search request failed",
+          retryable: true,
         };
         setError(apiError);
         return;
       }
     } catch (err) {
       const apiError: APIError = {
-        type: err instanceof TypeError ? 'network' : 'server',
-        message: err instanceof Error ? err.message : 'Search failed',
+        type: err instanceof TypeError ? "network" : "server",
+        message: err instanceof Error ? err.message : "Search failed",
         details: err,
-        retryable: true
+        retryable: true,
       };
       setError(apiError);
-      console.error('Error searching songs:', err);
+      console.error("Error searching songs:", err);
     } finally {
       setLoading(false);
     }
@@ -291,7 +291,7 @@ export function useSongs({
 
   const toggleFavorite = useCallback(async (songId: string) => {
     if (!userId) {
-      console.warn('Cannot toggle favorite: No user ID provided');
+      console.warn("Cannot toggle favorite: No user ID provided");
       return;
     }
 
@@ -300,8 +300,8 @@ export function useSongs({
       prevSongs.map(song => 
         song.id === songId 
           ? { ...song, isFavorite: !song.isFavorite }
-          : song
-      )
+          : song,
+      ),
     );
 
     const isCurrentlyFavorite = userFavorites.includes(songId);
@@ -320,10 +320,10 @@ export function useSongs({
         prevSongs.map(song => 
           song.id === songId 
             ? { ...song, isFavorite: !song.isFavorite }
-            : song
-        )
+            : song,
+        ),
       );
-      console.error('Failed to toggle favorite:', error);
+      console.error("Failed to toggle favorite:", error);
     }
   }, [userId, userFavorites]);
 
@@ -342,16 +342,16 @@ export function useSongs({
             const favoriteIds = response.data.map(song => song._id);
             setUserFavorites(favoriteIds);
           } else {
-            console.warn('User favorites API returned invalid data structure');
+            console.warn("User favorites API returned invalid data structure");
             setUserFavorites([]);
           }
         
       } else {
-        console.warn('Failed to fetch user favorites: API returned unsuccessful response');
+        console.warn("Failed to fetch user favorites: API returned unsuccessful response");
         setUserFavorites([]);
       }
       } catch (error) {
-        console.error('Failed to fetch user favorites:', error);
+        console.error("Failed to fetch user favorites:", error);
         setUserFavorites([]);
       }
     };
@@ -369,7 +369,7 @@ export function useSongs({
   // Retry function with exponential backoff
   const retry = useCallback(async () => {
     if (!error?.retryable) {
-      console.warn('Current error is not retryable');
+      console.warn("Current error is not retryable");
       return;
     }
     

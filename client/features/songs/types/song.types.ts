@@ -8,9 +8,9 @@ export const songDetailSchema = z.object({
 export const arrangementCreateSchema = z.object({
   name: z.string().min(1).max(200),
   chordData: z.string().min(1, "ChordPro data is required"),
-  key: z.enum(['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B']),
+  key: z.enum(["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"]),
   tempo: z.number().min(40).max(200).optional(),
-  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).default('intermediate'),
+  difficulty: z.enum(["beginner", "intermediate", "advanced"]).default("intermediate"),
   description: z.string().max(1000).optional(),
   tags: z.array(z.string().max(50)).default([]),
 });
@@ -61,6 +61,7 @@ export interface ClientSong {
   isFavorite: boolean; // Client-side only
   chordData?: string; // Optional for display
   defaultArrangementId?: string; // ID of the default arrangement
+  notes?: string; // Song notes/description
 }
 
 // Arrangement interface matching MongoDB schema
@@ -236,10 +237,39 @@ export interface SongDetail extends ClientSong {
 
 // Arrangement with detailed metadata
 export interface ArrangementDetail extends Arrangement {
-  songs: Pick<Song, '_id' | 'title' | 'artist'>[]; // For mashups
+  songs: Pick<Song, "_id" | "title" | "artist">[]; // For mashups
   isDefault: boolean;
   usageInSetlists: number;
   lastUsedDate?: Date;
+  // Additional fields from updated model
+  key?: string;
+  tempo?: number;
+  difficulty?: string;
+  genreStyle?: string;
+  vocalRange?: {
+    low: string;
+    high: string;
+  };
+  metadata: {
+    key: string;
+    capo?: number;
+    tempo?: number;
+    timeSignature?: string;
+    difficulty: "beginner" | "intermediate" | "advanced";
+    instruments?: string[];
+    isMashup: boolean;
+    mashupSections?: Array<{
+      songId: string;
+      title: string;
+      startBar: number;
+      endBar: number;
+    }>;
+    ratings?: {
+      average: number;
+      count: number;
+    };
+    reviewCount?: number;
+  };
 }
 
 // Comment system
@@ -291,9 +321,9 @@ function extractChordsFromChordPro(chordPro: string): string[] {
     if (/^[A-Za-z0-9+/]{4,}(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(chordPro) && chordPro.length >= 8) {
       actualChordData = atob(chordPro);
     }
-  } catch (error) {
+  } catch {
     // If decoding fails, use original data
-    console.warn('Failed to decode base64 chord data, using raw data');
+    console.warn("Failed to decode base64 chord data, using raw data");
     actualChordData = chordPro;
   }
   
