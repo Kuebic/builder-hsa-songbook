@@ -1,8 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createServer, initializeServer } from "../server";
+import type { Application } from "express";
 
 // Cache the Express app instance
-let app: any;
+let app: Application | undefined;
 
 // Initialize the server once
 async function getApp() {
@@ -43,8 +44,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       error: {
         code: "SERVER_INIT_ERROR",
         message: "Server initialization failed",
-        details: error instanceof Error ? error.message : "Unknown error"
-      }
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
     });
   }
 }

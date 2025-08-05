@@ -201,12 +201,14 @@ export interface ApiResponse<T> {
 }
 
 // Sync-related types
+import type { SyncOperationData } from '../../../../shared/types/api.types';
+
 export interface SyncOperation {
   id: string;
   operation: "create" | "update" | "delete";
   entity: "song" | "setlist" | "arrangement" | "user";
   entityId: string;
-  data: any;
+  data: SyncOperationData;
   timestamp: number;
   retries: number;
   status: "pending" | "processing" | "failed" | "synced";

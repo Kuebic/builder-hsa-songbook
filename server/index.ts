@@ -24,6 +24,7 @@ export async function createServer() {
   const arrangementsRoutes = await import("./routes/arrangements");
   const versesRoutes = await import("./routes/verses");
   const reviewsRoutes = await import("./routes/reviews");
+  const categoriesRoutes = await import("./routes/categories");
 
   // Example API routes
   app.get("/api/ping", (_req, res) => {
@@ -44,6 +45,10 @@ export async function createServer() {
   app.put("/api/songs/:id", songsRoutes.updateSong);
   app.delete("/api/songs/:id", songsRoutes.deleteSong);
   app.post("/api/songs/:id/rate", songsRoutes.rateSong);
+
+  // Categories API
+  app.get("/api/categories/stats", categoriesRoutes.getCategoryStats);
+  app.get("/api/categories/:categoryId/songs", categoriesRoutes.getCategorySongs);
 
   // Arrangements API
   app.get("/api/songs/:songId/arrangements", arrangementsRoutes.getArrangementsBySong);
@@ -150,7 +155,7 @@ export async function initializeServer() {
     // Log connection attempt (with masked URI)
     const maskedUri = process.env.MONGODB_URI.replace(
       /mongodb(?:\+srv)?:\/\/([^:]+):([^@]+)@/,
-      "mongodb://*****:*****@"
+      "mongodb://*****:*****@",
     );
     console.log(`🔌 Attempting to connect to MongoDB: ${maskedUri}`);
     

@@ -15,6 +15,7 @@ import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
 const DashboardPage = lazy(() => import("@features/dashboard").then(m => ({ default: m.DashboardPage })));
 const SongsPage = lazy(() => import("@features/songs").then(m => ({ default: m.SongsPage })));
 const SongDetailPage = lazy(() => import("@features/songs").then(m => ({ default: m.SongDetailPage })));
+const CategoryBrowser = lazy(() => import("@features/categories").then(m => ({ default: m.CategoryBrowser })));
 const SetlistsPage = lazy(() => import("@features/setlists").then(m => ({ default: m.SetlistsPage })));
 const ArrangementsPage = lazy(() => import("@features/arrangements").then(m => ({ default: m.ArrangementsPage })));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -39,6 +40,7 @@ const App = () => (
                 <Route path="/" element={<DashboardPage />} />
                 <Route path="/songs" element={<SongsPage />} />
                 <Route path="/songs/:slug" element={<SongDetailPage />} />
+                <Route path="/categories/:categoryId" element={<CategoryBrowser />} />
                 <Route path="/setlists" element={<SetlistsPage />} />
                 <Route path="/arrangements" element={<ArrangementsPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

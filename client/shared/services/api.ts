@@ -1,4 +1,6 @@
 // API client for interacting with the backend server
+import type { DatabaseStatus } from '../../../shared/types/api.types';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
   (typeof window !== "undefined" ? `${window.location.protocol}//${window.location.host}/api` : "/api");
 
@@ -119,8 +121,8 @@ class APIClient {
   }
 
   // Health check
-  async healthCheck(): Promise<APIResponse<{ status: string; database: any }>> {
-    return this.request<{ status: string; database: any }>("/health");
+  async healthCheck(): Promise<APIResponse<{ status: string; database: DatabaseStatus }>> {
+    return this.request<{ status: string; database: DatabaseStatus }>("/health");
   }
 
   // User favorites methods

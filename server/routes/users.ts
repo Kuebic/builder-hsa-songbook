@@ -27,7 +27,7 @@ async function findUserByIdOrClerkId(userId: string) {
   if (isObjectId) {
     // Try to find by MongoDB _id first
     const user = await User.findById(userId);
-    if (user) return user;
+    if (user) {return user;}
   }
   
   // If not found or not an ObjectId, try to find by Clerk ID

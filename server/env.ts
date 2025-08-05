@@ -50,7 +50,7 @@ if (process.env.MONGODB_URI) {
   // Mask the MongoDB URI for security
   const maskedUri = process.env.MONGODB_URI.replace(
     /mongodb(?:\+srv)?:\/\/([^:]+):([^@]+)@/,
-    "mongodb://*****:*****@"
+    "mongodb://*****:*****@",
   );
   console.log(`✅ MONGODB_URI is available: ${maskedUri}`);
 } else {

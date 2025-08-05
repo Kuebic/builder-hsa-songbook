@@ -32,7 +32,7 @@ export const syncUser = async (req: Request, res: Response) => {
         user = await User.create({
           clerkId,
           email,
-          name: name || email.split('@')[0],
+          name: name || email.split("@")[0],
           role: "USER",
           preferences: {
             fontSize: 16,

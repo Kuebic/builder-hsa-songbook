@@ -112,17 +112,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const token = await getToken();
         
         // Sync user with backend
-        const syncResponse = await fetch('/api/users/sync', {
-          method: 'POST',
+        const syncResponse = await fetch("/api/users/sync", {
+          method: "POST",
           headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
           },
           body: JSON.stringify({
             clerkId: clerkUser.id,
             email: clerkUser.primaryEmailAddress?.emailAddress,
             name: clerkUser.fullName || clerkUser.firstName || "User",
-          })
+          }),
         });
         
         let backendUserData = undefined;

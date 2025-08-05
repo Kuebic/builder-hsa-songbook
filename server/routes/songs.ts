@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Song } from "../database/models";
 import { z } from "zod";
+import type { ISong } from '../database/models/Song';
 
 // Helper function to extract basic chords from ChordPro data
 function extractBasicChords(chordData: string): string[] {
@@ -24,15 +25,15 @@ function extractBasicChords(chordData: string): string[] {
 }
 
 // Helper function to transform MongoDB song to client format
-function transformSongToClientFormat(song: any) {
+function transformSongToClientFormat(song: ISong | any) {
   try {
-    // Extract arrangement data if available
-    const arrangement = song.defaultArrangement || song.arrangements?.[0];
-    
-    // Extract basic chords from arrangement if available
+    // For now, we don't have arrangement data populated
+    // This would need to be populated via .populate('defaultArrangement') in the query
     let basicChords: string[] = [];
-    if (arrangement?.chordData) {
-      basicChords = extractBasicChords(arrangement.chordData);
+    
+    // If defaultArrangement is populated and has chordData
+    if (song.defaultArrangement && typeof song.defaultArrangement === 'object' && 'chordData' in song.defaultArrangement) {
+      basicChords = extractBasicChords(song.defaultArrangement.chordData);
     }
   
   return {
@@ -49,16 +50,16 @@ function transformSongToClientFormat(song: any) {
     viewCount: song.metadata?.views || 0,
     avgRating: song.metadata?.ratings?.average || 0,
     ratingCount: song.metadata?.ratings?.count || 0,
-    defaultArrangementId: song.defaultArrangement?.toString() || arrangement?._id?.toString(),
+    defaultArrangementId: song.defaultArrangement?.toString(),
     createdBy: song.metadata?.createdBy?.toString(),
     lastModifiedBy: song.metadata?.lastModifiedBy?.toString(),
     isPublic: song.metadata?.isPublic ?? true,
     createdAt: song.createdAt,
     updatedAt: song.updatedAt,
-    // Add missing ClientSong fields
-    key: arrangement?.key,
-    tempo: arrangement?.tempo,
-    difficulty: arrangement?.difficulty || "intermediate",
+    // Add missing ClientSong fields - these come from arrangement if populated
+    key: song.defaultArrangement?.key,
+    tempo: song.defaultArrangement?.tempo,
+    difficulty: song.defaultArrangement?.difficulty || "intermediate",
     basicChords,
     lastUsed: undefined, // Client-side only field
     isFavorite: false, // Client-side only field
@@ -241,7 +242,7 @@ export async function getSongBySlug(req: Request, res: Response) {
         error: {
           code: "DATABASE_UNAVAILABLE",
           message: "Database connection is not available",
-          details: "The server is currently unable to connect to the database. Please try again later."
+          details: "The server is currently unable to connect to the database. Please try again later.",
         },
       });
     }
