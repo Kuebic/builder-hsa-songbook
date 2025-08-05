@@ -91,7 +91,7 @@ const setlistSchema = new Schema<ISetlist>({
   },
   createdBy: {
     type: Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true,
   },
   songs: [setlistItemSchema],
@@ -136,9 +136,9 @@ setlistSchema.index(
 
 // Compound indexes for efficient queries
 setlistSchema.index({ createdBy: 1, createdAt: -1 }); // User's setlists
-setlistSchema.index({ 'metadata.isPublic': 1, createdAt: -1 }); // Public setlists
-setlistSchema.index({ tags: 1, 'metadata.isPublic': 1 }); // Tag searches
-setlistSchema.index({ 'metadata.shareToken': 1 }, { sparse: true, unique: true }); // Public sharing
+setlistSchema.index({ "metadata.isPublic": 1, createdAt: -1 }); // Public setlists
+setlistSchema.index({ tags: 1, "metadata.isPublic": 1 }); // Tag searches
+setlistSchema.index({ "metadata.shareToken": 1 }, { sparse: true, unique: true }); // Public sharing
 
 // Pre-save middleware
 setlistSchema.pre("save", function (this: ISetlist) {

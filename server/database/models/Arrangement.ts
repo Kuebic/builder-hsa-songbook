@@ -1,6 +1,8 @@
 import { Schema, model, Document, Model, Types } from "mongoose";
 import { MusicalKey } from "./User.js"; // Import MusicalKey
-import { Difficulty } from "./Song.js"; // Import Difficulty from Song
+
+// Difficulty levels (moved from Song model)
+export type Difficulty = "beginner" | "intermediate" | "advanced";
 
 // Interface for Arrangement document - Updated per PRD specifications
 export interface IArrangement extends Document {
@@ -15,6 +17,14 @@ export interface IArrangement extends Document {
   difficulty: Difficulty;
   description?: string; // Max 1,000 chars
   tags: string[]; // Max 50 chars each
+  vocalRange?: {
+    low: string; // e.g., "C3"
+    high: string; // e.g., "G5"
+  };
+  structure?: string[]; // Song structure e.g., ["V1", "C", "V2", "C", "B", "C"]
+  genreStyle?: string; // e.g., "Contemporary", "Traditional", "Gospel"
+  demoUrl?: string; // URL to demo recording
+  sheetMusicUrl?: string; // URL to sheet music PDF
   metadata: {
     isMashup: boolean; // Auto-set if multiple songs
     mashupSections?: Array<{
@@ -29,6 +39,8 @@ export interface IArrangement extends Document {
       count: number;
     };
     views: number;
+    setlistCount: number; // How many setlists include this arrangement
+    reviewCount: number; // Total number of reviews
   };
   documentSize: number;
   createdAt: Date;
@@ -39,6 +51,8 @@ export interface IArrangement extends Document {
   addRating(rating: number): Promise<IArrangement>;
   getDecompressedChordData(): Promise<string>;
   getMashupDuration(): number;
+  incrementSetlistCount(): Promise<IArrangement>;
+  decrementSetlistCount(): Promise<IArrangement>;
 }
 
 // Interface for Arrangement model (static methods)
@@ -91,7 +105,7 @@ const arrangementSchema = new Schema<IArrangement>({
   }],
   createdBy: {
     type: Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true,
     index: true,
   },
@@ -107,7 +121,7 @@ const arrangementSchema = new Schema<IArrangement>({
   },
   key: {
     type: String,
-    enum: ['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B'],
+    enum: ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"],
     required: true,
     index: true,
   },
@@ -136,6 +150,59 @@ const arrangementSchema = new Schema<IArrangement>({
     maxlength: 50,
     trim: true,
   }],
+  vocalRange: {
+    low: {
+      type: String,
+      validate: {
+        validator: function(v: string) {
+          return !v || /^[A-G][#b]?\d$/.test(v); // e.g., C3, F#4, Bb2
+        },
+        message: "Vocal range must be in format like 'C3', 'F#4', 'Bb2'",
+      },
+    },
+    high: {
+      type: String,
+      validate: {
+        validator: function(v: string) {
+          return !v || /^[A-G][#b]?\d$/.test(v);
+        },
+        message: "Vocal range must be in format like 'C3', 'F#4', 'Bb2'",
+      },
+    },
+  },
+  structure: [{
+    type: String,
+    trim: true,
+    maxlength: 10, // e.g., "Verse 1", "Chorus", "Bridge"
+  }],
+  genreStyle: {
+    type: String,
+    trim: true,
+    maxlength: 50,
+    index: true,
+  },
+  demoUrl: {
+    type: String,
+    trim: true,
+    maxlength: 500,
+    validate: {
+      validator: function(v: string) {
+        return !v || /^https?:\/\/.+/.test(v);
+      },
+      message: "Demo URL must be a valid HTTP(S) URL",
+    },
+  },
+  sheetMusicUrl: {
+    type: String,
+    trim: true,
+    maxlength: 500,
+    validate: {
+      validator: function(v: string) {
+        return !v || /^https?:\/\/.+/.test(v);
+      },
+      message: "Sheet music URL must be a valid HTTP(S) URL",
+    },
+  },
   metadata: {
     isMashup: {
       type: Boolean,
@@ -166,6 +233,17 @@ const arrangementSchema = new Schema<IArrangement>({
       default: 0,
       min: 0,
     },
+    setlistCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+      index: true,
+    },
+    reviewCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   documentSize: {
     type: Number,
@@ -183,11 +261,11 @@ arrangementSchema.index(
 );
 
 // Compound indexes for efficient queries
-arrangementSchema.index({ songIds: 1, 'metadata.isPublic': 1 }); // Find arrangements for songs
-arrangementSchema.index({ 'metadata.isMashup': 1, 'metadata.isPublic': 1 }); // Mashup discovery
+arrangementSchema.index({ songIds: 1, "metadata.isPublic": 1 }); // Find arrangements for songs
+arrangementSchema.index({ "metadata.isMashup": 1, "metadata.isPublic": 1 }); // Mashup discovery
 arrangementSchema.index({ createdBy: 1, createdAt: -1 }); // User's arrangements
-arrangementSchema.index({ 'metadata.isPublic': 1, createdAt: -1 }); // Public arrangements
-arrangementSchema.index({ tags: 1, 'metadata.isPublic': 1 }); // Tag searches
+arrangementSchema.index({ "metadata.isPublic": 1, createdAt: -1 }); // Public arrangements
+arrangementSchema.index({ tags: 1, "metadata.isPublic": 1 }); // Tag searches
 
 // Pre-save middleware for validation
 arrangementSchema.pre("save", async function (this: IArrangement, next) {
@@ -224,7 +302,7 @@ arrangementSchema.pre("save", async function (this: IArrangement, next) {
 });
 
 // Post-save middleware to calculate document size
-arrangementSchema.post('save', async function(doc: IArrangement) {
+arrangementSchema.post("save", async function(doc: IArrangement) {
   if (doc.documentSize === 0) {
     // Calculate and update document size after save
     const docObject = doc.toObject();
@@ -252,7 +330,7 @@ arrangementSchema.methods.addRating = function (rating: number) {
 
 arrangementSchema.methods.getDecompressedChordData = async function (): Promise<string> {
   // Since chordData is now stored as plain text, just return it directly
-  return this.chordData || '';
+  return this.chordData || "";
 };
 
 arrangementSchema.methods.getMashupDuration = function () {
@@ -268,31 +346,43 @@ arrangementSchema.methods.getMashupDuration = function () {
   }, 0);
 };
 
+arrangementSchema.methods.incrementSetlistCount = function() {
+  this.metadata.setlistCount += 1;
+  return this.save();
+};
+
+arrangementSchema.methods.decrementSetlistCount = function() {
+  if (this.metadata.setlistCount > 0) {
+    this.metadata.setlistCount -= 1;
+  }
+  return this.save();
+};
+
 // Static methods - Updated for new schema structure
 arrangementSchema.statics.findBySong = function (songId: string) {
-  return this.find({ songIds: songId, 'metadata.isPublic': true })
+  return this.find({ songIds: songId, "metadata.isPublic": true })
     .populate("songIds", "title artist")
     .populate("createdBy", "name email")
-    .sort({ 'metadata.views': -1 });
+    .sort({ "metadata.views": -1 });
 };
 
 arrangementSchema.statics.findMashups = function (limit = 20) {
-  return this.find({ "metadata.isMashup": true, 'metadata.isPublic': true })
+  return this.find({ "metadata.isMashup": true, "metadata.isPublic": true })
     .populate("songIds", "title artist")
     .populate("createdBy", "name email")
-    .sort({ 'metadata.views': -1 })
+    .sort({ "metadata.views": -1 })
     .limit(limit);
 };
 
 arrangementSchema.statics.findByDifficulty = function (difficulty: string) {
-  return this.find({ difficulty: difficulty, 'metadata.isPublic': true })
+  return this.find({ difficulty: difficulty, "metadata.isPublic": true })
     .populate("songIds", "title artist")
     .populate("createdBy", "name email");
 };
 
 arrangementSchema.statics.searchArrangements = function (query: string, limit = 20) {
   return this.find(
-    { $text: { $search: query }, 'metadata.isPublic': true },
+    { $text: { $search: query }, "metadata.isPublic": true },
     { score: { $meta: "textScore" } },
   )
   .populate("songIds", "title artist")
@@ -302,10 +392,10 @@ arrangementSchema.statics.searchArrangements = function (query: string, limit = 
 };
 
 arrangementSchema.statics.findByTags = function (tags: string[], limit = 20) {
-  return this.find({ tags: { $in: tags }, 'metadata.isPublic': true })
+  return this.find({ tags: { $in: tags }, "metadata.isPublic": true })
     .populate("songIds", "title artist")
     .populate("createdBy", "name email")
-    .sort({ 'metadata.ratings.average': -1 })
+    .sort({ "metadata.ratings.average": -1 })
     .limit(limit);
 };
 
