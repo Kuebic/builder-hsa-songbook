@@ -12,9 +12,10 @@ import {
   useUpdateArrangement,
 } from "../hooks/useArrangements";
 import SongHeader from "./SongHeader";
-import SongMetadata from "./SongMetadata";
-import ArrangementsList from "./ArrangementsList";
-import SongRating from "./SongRating";
+import SongOverview from "./SongOverview";
+import ArrangementGrid from "./ArrangementGrid";
+import SongReviewsSection from "./SongReviewsSection";
+import BibleVersesSection, { BibleVerse } from "./BibleVersesSection";
 import ChordProEditor from "./ChordProEditor";
 import SongNotesTab from "./SongNotesTab";
 import { ArrangementDetail } from "../types/song.types";
