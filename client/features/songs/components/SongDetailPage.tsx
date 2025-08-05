@@ -148,14 +148,14 @@ export default function SongDetailPage(): ReactElement {
     navigate(`/songs/${slug}/arrangements/new`);
   };
 
-  const handleArrangementView = (arrangement: ArrangementDetail) => {
+  const handleArrangementView = (arrangement: Arrangement) => {
     setEditingArrangement(arrangement);
     setShowChordProEditor(true);
     setActiveTab("arrangements"); // Remember we're in arrangements tab
     setIsViewMode(true); // Set read-only mode
   };
 
-  const handleArrangementEdit = (arrangement: ArrangementDetail) => {
+  const handleArrangementEdit = (arrangement: Arrangement) => {
     setEditingArrangement(arrangement);
     setShowChordProEditor(true);
     setActiveTab("arrangements"); // Remember we're in arrangements tab
