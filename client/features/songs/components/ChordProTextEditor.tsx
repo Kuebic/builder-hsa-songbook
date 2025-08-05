@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ChevronDown, X } from "lucide-react";
+import { SyntaxHighlighter } from "./SyntaxHighlighter";
 
 interface ChordProTextEditorProps {
   value: string;
