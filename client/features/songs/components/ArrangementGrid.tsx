@@ -94,18 +94,8 @@ export default function ArrangementGrid({
                       </Badge>
                     )}
                   </CardTitle>
-                  {arrangement.metadata?.ratings && (
-                    <div className="flex items-center gap-1">
-                      <StarRating
-                        rating={Math.round(arrangement.metadata.ratings.average || 0)}
-                        readOnly
-                        size="small"
-                      />
-                      <span className="text-xs text-muted-foreground">
-                        ({arrangement.metadata.ratings.count || 0})
-                      </span>
-                    </div>
-                  )}
+                  {/* Ratings temporarily disabled - not available in base Arrangement type */}
+                  {/* TODO: Add ratings when ArrangementDetail support is implemented */}
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
