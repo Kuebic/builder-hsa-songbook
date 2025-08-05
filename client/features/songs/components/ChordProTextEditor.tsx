@@ -274,8 +274,10 @@ export function ChordProTextEditor({
         onKeyDown={handleKeyDown}
         onScroll={handleScroll}
         className={cn(
-          "font-mono resize-none bg-transparent relative z-10 text-transparent caret-current",
+          "font-mono resize-none bg-transparent relative z-10",
           "min-h-[400px] w-full",
+          "text-transparent caret-black dark:caret-white",
+          "[&::selection]:bg-blue-200 [&::selection]:text-transparent",
           readOnly && "cursor-default"
         )}
         style={editorStyle}
