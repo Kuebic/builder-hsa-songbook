@@ -94,15 +94,15 @@ export default function ArrangementGrid({
                       </Badge>
                     )}
                   </CardTitle>
-                  {arrangement.metadata.ratings && (
+                  {arrangement.metadata?.ratings && (
                     <div className="flex items-center gap-1">
-                      <StarRating 
-                        rating={Math.round(arrangement.metadata.ratings.average)} 
-                        readOnly 
-                        size="small" 
+                      <StarRating
+                        rating={Math.round(arrangement.metadata.ratings.average || 0)}
+                        readOnly
+                        size="small"
                       />
                       <span className="text-xs text-muted-foreground">
-                        ({arrangement.metadata.ratings.count})
+                        ({arrangement.metadata.ratings.count || 0})
                       </span>
                     </div>
                   )}
