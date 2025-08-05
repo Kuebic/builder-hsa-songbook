@@ -370,11 +370,11 @@ export default function ChordProEditor({
                 <>
                   <ResizablePanel
                     defaultSize={50}
-                    minSize={20}
+                    minSize={30}
                     className="min-w-[300px]"
                   >
-                    <div className="h-full p-4 overflow-auto">
-                      <div className="space-y-4">
+                    <div className="h-full flex flex-col">
+                      <div className="p-4 border-b bg-muted/30">
                         <div className="bg-muted/50 rounded-md p-3 text-sm">
                           <p className="font-medium mb-2">ChordPro Quick Reference:</p>
                           <ul className="space-y-1 text-muted-foreground">
@@ -385,13 +385,16 @@ export default function ChordProEditor({
                             <li>• Sections: {"{chorus}"} {"{verse: 1}"}</li>
                           </ul>
                         </div>
-                        
-                        <Textarea
+                      </div>
+
+                      <div className="flex-1 p-4">
+                        <ChordProTextEditor
                           value={content}
-                          onChange={(e) => setContent(e.target.value)}
-                          className="font-mono text-sm min-h-[calc(100vh-20rem)] resize-none"
-                          placeholder="Enter ChordPro formatted lyrics here..."
+                          onChange={handleContentChange}
+                          onSave={handleSave}
                           readOnly={readOnly}
+                          fontSize={editorFontSize}
+                          className="h-full"
                         />
                       </div>
                     </div>
