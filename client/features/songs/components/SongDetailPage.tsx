@@ -78,7 +78,7 @@ export default function SongDetailPage(): ReactElement {
   const [editingArrangement, setEditingArrangement] =
     useState<ArrangementDetail | null>(null);
   const [showChordProEditor, setShowChordProEditor] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("info");
+  const [activeTab, setActiveTab] = useState<string>("overview");
   const [isViewMode, setIsViewMode] = useState(false);
 
   const {
