@@ -106,9 +106,18 @@ export default function ChordProEditor({
 
   // Debounced content update for live preview
   const debouncedUpdateContent = useMemo(
-    () => debounce((newContent: string) => {
-      setDebouncedContent(newContent);
-    }, debounceMs),
+    () => {
+      let timeoutId: NodeJS.Timeout;
+      const debouncedFn = (newContent: string) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          setDebouncedContent(newContent);
+        }, debounceMs);
+      };
+
+      debouncedFn.cancel = () => clearTimeout(timeoutId);
+      return debouncedFn;
+    },
     [debounceMs]
   );
 
@@ -116,7 +125,7 @@ export default function ChordProEditor({
     setHasChanges(content !== initialContent);
     debouncedUpdateContent(content);
     return () => {
-      debouncedUpdateContent.cancel();
+      debouncedUpdateContent.cancel?.();
     };
   }, [content, initialContent, debouncedUpdateContent]);
 
