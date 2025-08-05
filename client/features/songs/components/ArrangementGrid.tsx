@@ -135,23 +135,23 @@ export default function ArrangementGrid({
               {/* Musical details */}
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="outline" className="text-xs">
-                  Key: {arrangement.metadata.key}
+                  Key: {arrangement.metadata?.key || "N/A"}
                 </Badge>
-                {arrangement.metadata.capo && (
+                {arrangement.metadata?.capo && (
                   <Badge variant="outline" className="text-xs">
                     Capo {arrangement.metadata.capo}
                   </Badge>
                 )}
-                {arrangement.metadata.tempo && (
+                {arrangement.metadata?.tempo && (
                   <Badge variant="outline" className="text-xs">
                     {arrangement.metadata.tempo} BPM
                   </Badge>
                 )}
-                <Badge 
-                  variant="secondary" 
-                  className={`text-xs ${getDifficultyColor(arrangement.metadata.difficulty)}`}
+                <Badge
+                  variant="secondary"
+                  className={`text-xs ${getDifficultyColor(arrangement.metadata?.difficulty || "intermediate")}`}
                 >
-                  {arrangement.metadata.difficulty}
+                  {arrangement.metadata?.difficulty || "intermediate"}
                 </Badge>
               </div>
 
