@@ -250,17 +250,6 @@ export function ChordProTextEditor({
 
   return (
     <div className={cn("relative w-full", className)}>
-      {/* Syntax highlighting backdrop */}
-      <div 
-        className="absolute inset-0 pointer-events-none overflow-hidden"
-        style={editorStyle}
-      >
-        <div 
-          className="font-mono whitespace-pre-wrap break-words p-3 text-transparent"
-          dangerouslySetInnerHTML={{ __html: highlightedContent }}
-        />
-      </div>
-
       {/* Main textarea */}
       <Textarea
         ref={textareaRef}
@@ -268,7 +257,7 @@ export function ChordProTextEditor({
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         className={cn(
-          "font-mono resize-none bg-transparent relative z-10",
+          "font-mono resize-none",
           "min-h-[400px] w-full",
           readOnly && "cursor-default"
         )}
