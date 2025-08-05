@@ -29,11 +29,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { 
+import {
   FileText,
   FolderOpen,
   Save,
-  SaveAs,
   Undo,
   Redo,
   Plus,
