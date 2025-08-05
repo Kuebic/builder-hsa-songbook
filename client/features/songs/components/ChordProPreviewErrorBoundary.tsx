@@ -49,7 +49,7 @@ export function ChordProPreviewErrorBoundary({ children }: { children: React.Rea
                 </p>
                 <ul className="text-xs space-y-1 text-muted-foreground">
                   <li>• Check that all chord brackets [ ] are properly closed</li>
-                  <li>• Ensure directives use format: {`{key: value}`}</li>
+                  <li>• Ensure directives use format: {"{key: value}"}</li>
                   <li>• Remove any special formatting characters</li>
                 </ul>
               </div>

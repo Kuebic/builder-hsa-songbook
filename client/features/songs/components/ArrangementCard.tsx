@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { 
   Card, 
   CardContent, 
@@ -25,10 +24,14 @@ import {
   Edit,
   Copy,
   Trash2,
-  Music2,
   Check,
+  MessageSquare,
+  Music,
+  Mic2,
 } from "lucide-react";
 import { ArrangementDetail } from "../types/song.types";
+import FavoritesToggle from "./FavoritesToggle";
+import MashupIndicator from "./MashupIndicator";
 
 interface ArrangementCardProps {
   arrangement: ArrangementDetail;
@@ -38,9 +41,6 @@ interface ArrangementCardProps {
   onDelete?: () => void;
   onDuplicate?: () => void;
   onSetDefault?: () => void;
-  onRate?: (rating: number) => void;
-  rating?: number;
-  ratingCount?: number;
 }
 
 export default function ArrangementCard({
@@ -51,11 +51,7 @@ export default function ArrangementCard({
   onDelete,
   onDuplicate,
   onSetDefault,
-  onRate,
-  rating = 0,
-  ratingCount = 0,
 }: ArrangementCardProps) {
-  const [hoveredRating, setHoveredRating] = useState(0);
 
   const formatDate = (date: string): string => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -65,33 +61,10 @@ export default function ArrangementCard({
     });
   };
 
-  const renderStars = () => {
-    const stars = [];
-    const displayRating = hoveredRating || rating;
-    
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <button
-          key={i}
-          onClick={() => onRate?.(i)}
-          onMouseEnter={() => setHoveredRating(i)}
-          onMouseLeave={() => setHoveredRating(0)}
-          className="p-0.5 transition-colors hover:text-yellow-500"
-          disabled={!onRate}
-        >
-          <Star 
-            className={`h-4 w-4 ${
-              i <= displayRating 
-                ? "fill-yellow-500 text-yellow-500" 
-                : "text-muted-foreground"
-            }`}
-          />
-        </button>
-      );
-    }
-    
-    return stars;
-  };
+  // Get metadata with defaults
+  const rating = arrangement.metadata?.ratings?.average || 0;
+  const reviewCount = arrangement.metadata?.reviewCount || 0;
+  const isMashup = arrangement.metadata?.isMashup || false;
 
   return (
     <Card className={`relative ${isDefault ? "ring-2 ring-worship" : ""}`}>
@@ -115,12 +88,21 @@ export default function ArrangementCard({
             </CardDescription>
           </div>
           
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
+          <div className="flex items-center gap-1">
+            <FavoritesToggle
+              type="arrangement"
+              itemId={arrangement._id}
+              itemName={arrangement.name}
+              size="sm"
+              variant="ghost"
+            />
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={onView}>
                 <Eye className="mr-2 h-4 w-4" />
@@ -150,25 +132,42 @@ export default function ArrangementCard({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          </div>
         </div>
         
-        <div className="flex items-center gap-2 mt-3">
-          {arrangement.metadata.key && (
+        <div className="flex flex-wrap items-center gap-2 mt-3">
+          {arrangement.key && (
             <Badge variant="outline" className="text-xs">
-              Key: {arrangement.metadata.key}
+              <Music className="h-3 w-3 mr-1" />
+              {arrangement.key}
             </Badge>
           )}
-          {arrangement.metadata.tempo && (
+          {arrangement.tempo && (
             <Badge variant="outline" className="text-xs">
-              {arrangement.metadata.tempo} BPM
+              {arrangement.tempo} BPM
             </Badge>
           )}
-          {arrangement.songIds && arrangement.songIds.length > 1 && (
-            <Badge variant="secondary" className="text-xs">
-              <Music2 className="h-3 w-3 mr-1" />
-              Mashup ({arrangement.songIds.length} songs)
+          {arrangement.difficulty && (
+            <Badge variant="outline" className="text-xs">
+              {arrangement.difficulty}
             </Badge>
           )}
+          {arrangement.genreStyle && (
+            <Badge variant="outline" className="text-xs">
+              {arrangement.genreStyle}
+            </Badge>
+          )}
+          {arrangement.vocalRange && (
+            <Badge variant="outline" className="text-xs">
+              <Mic2 className="h-3 w-3 mr-1" />
+              {arrangement.vocalRange.low} - {arrangement.vocalRange.high}
+            </Badge>
+          )}
+          <MashupIndicator
+            isMashup={isMashup}
+            songCount={arrangement.songIds?.length}
+            variant="minimal"
+          />
         </div>
       </CardHeader>
       
@@ -189,11 +188,22 @@ export default function ArrangementCard({
       
       <CardFooter className="border-t pt-3">
         <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-1">
-            {renderStars()}
-            <span className="text-sm text-muted-foreground ml-2">
-              ({ratingCount})
-            </span>
+          <div className="flex items-center gap-3">
+            {rating > 0 && (
+              <div className="flex items-center gap-1">
+                <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                <span className="font-medium">{rating.toFixed(1)}</span>
+                <span className="text-sm text-muted-foreground">
+                  ({arrangement.metadata?.ratings?.count || 0})
+                </span>
+              </div>
+            )}
+            {reviewCount > 0 && (
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <MessageSquare className="h-4 w-4" />
+                <span>{reviewCount} review{reviewCount !== 1 ? "s" : ""}</span>
+              </div>
+            )}
           </div>
           
           <Button onClick={onView} size="sm">

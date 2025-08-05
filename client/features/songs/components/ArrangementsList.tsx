@@ -28,7 +28,6 @@ import ArrangementCard from "./ArrangementCard";
 import { 
   useCreateArrangement, 
   useDeleteArrangement,
-  useRateArrangement,
 } from "../hooks/useArrangements";
 import { useAuthContext } from "@/shared/contexts/AuthContext";
 
@@ -56,7 +55,6 @@ export default function ArrangementsList({
   const { currentUser } = useAuthContext();
   const createArrangementMutation = useCreateArrangement();
   const deleteArrangementMutation = useDeleteArrangement();
-  const rateArrangementMutation = useRateArrangement();
 
   const handleCreateArrangement = async () => {
     if (!newArrangementName.trim()) {
@@ -84,6 +82,7 @@ export default function ArrangementsList({
       setNewArrangementName("");
       setNewArrangementDescription("");
     } catch (error) {
+      console.error("Failed to create arrangement:", error);
     }
   };
 
@@ -95,15 +94,10 @@ export default function ArrangementsList({
     try {
       await deleteArrangementMutation.mutateAsync(arrangementId);
     } catch (error) {
+      console.error("Failed to delete arrangement:", error);
     }
   };
 
-  const handleRateArrangement = async (arrangementId: string, rating: number) => {
-    try {
-      await rateArrangementMutation.mutateAsync({ id: arrangementId, rating });
-    } catch (error) {
-    }
-  };
 
   if (arrangements.length === 0) {
     return (
@@ -251,7 +245,6 @@ export default function ArrangementsList({
             onView={() => onArrangementView?.(arrangement)}
             onEdit={() => onArrangementEdit?.(arrangement)}
             onDelete={() => handleDeleteArrangement(arrangement._id)}
-            onRate={(rating) => handleRateArrangement(arrangement._id, rating)}
           />
         ))}
       </div>

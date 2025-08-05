@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +33,34 @@ interface ChordProEditorProps {
   readOnly?: boolean;
 }
 
+/**
+ * Detects if chord data appears to be corrupted/encrypted
+ * Common indicators: base64-like strings, binary data, unusual character patterns
+ */
+function isCorruptedChordData(data: string): boolean {
+  if (!data || data.trim() === "") {return false;}
+  
+  // Check for base64-like patterns (long strings with only base64 characters)
+  const base64Pattern = /^[A-Za-z0-9+/]{20,}={0,2}$/;
+  if (base64Pattern.test(data.replace(/\s/g, ""))) {
+    return true;
+  }
+  
+  // Check for excessive non-printable characters
+  // eslint-disable-next-line no-control-regex
+  const nonPrintableCount = (data.match(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\xFF]/g) || []).length;
+  if (nonPrintableCount > data.length * 0.1) { // More than 10% non-printable
+    return true;
+  }
+  
+  // Check for patterns that look like compressed data
+  if (data.startsWith("�") || data.includes("\x00") || data.includes("\\x")) {
+    return true;
+  }
+  
+  return false;
+}
+
 export default function ChordProEditor({
   initialContent,
   songTitle,
@@ -44,10 +73,16 @@ export default function ChordProEditor({
   const [hasChanges, setHasChanges] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
+  const [isCorrupted, setIsCorrupted] = useState(false);
 
   useEffect(() => {
     setHasChanges(content !== initialContent);
   }, [content, initialContent]);
+
+  useEffect(() => {
+    // Check if initial content appears corrupted
+    setIsCorrupted(isCorruptedChordData(initialContent));
+  }, [initialContent]);
 
   const handleSave = () => {
     onSave(content);
@@ -64,6 +99,16 @@ export default function ChordProEditor({
   const confirmCancel = () => {
     setShowCancelDialog(false);
     onCancel();
+  };
+
+  const handleFixCorruptedData = () => {
+    // Clear corrupted data and replace with empty template
+    const cleanTemplate = `{title: ${songTitle.split(" - ")[0]}}
+{key: C}
+
+[C]Add your lyrics and chords here...`;
+    setContent(cleanTemplate);
+    setIsCorrupted(false);
   };
 
   // Simple ChordPro preview renderer
@@ -170,6 +215,39 @@ export default function ChordProEditor({
             </div>
           </div>
         </CardHeader>
+        
+        {/* Corrupted Data Warning */}
+        {isCorrupted && (
+          <div className="border-b bg-destructive/10 px-4 py-3">
+            <Alert className="border-destructive/20">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Corrupted Chord Data Detected</AlertTitle>
+              <AlertDescription className="mt-2">
+                The chord data appears to be corrupted or encrypted. This may happen with older songs 
+                that had compression issues.
+                <div className="mt-3 flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleFixCorruptedData}
+                    className="bg-background"
+                  >
+                    Replace with Clean Template
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsCorrupted(false)}
+                    className="text-muted-foreground"
+                  >
+                    Continue Anyway
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
+        
         <CardContent className="p-0">
           {!readOnly && (
             <div className="border-b px-4 py-2 flex justify-end">

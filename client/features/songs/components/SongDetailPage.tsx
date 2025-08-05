@@ -4,7 +4,7 @@ import { Layout } from "@/shared/components/Layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Music, FileText, Star } from "lucide-react";
+import { AlertCircle, Music, FileText, Star, Book } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSongBySlug } from "../hooks/useSongsAPI";
 import { useArrangementsBySong, useUpdateArrangement } from "../hooks/useArrangements";
@@ -13,6 +13,7 @@ import SongMetadata from "./SongMetadata";
 import ArrangementsList from "./ArrangementsList";
 import SongRating from "./SongRating";
 import ChordProEditor from "./ChordProEditor";
+import SongNotesTab from "./SongNotesTab";
 import { ArrangementDetail } from "../types/song.types";
 
 type SongParams = {
@@ -203,7 +204,7 @@ export default function SongDetailPage(): ReactElement {
           <div className="max-w-6xl mx-auto">
             {/* Tabs for content organization */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="info" className="gap-2">
                   <Music className="h-4 w-4" />
                   Song Info
@@ -211,6 +212,10 @@ export default function SongDetailPage(): ReactElement {
                 <TabsTrigger value="arrangements" className="gap-2">
                   <FileText className="h-4 w-4" />
                   Arrangements {arrangements && `(${arrangements.length})`}
+                </TabsTrigger>
+                <TabsTrigger value="notes" className="gap-2">
+                  <Book className="h-4 w-4" />
+                  Notes & Verses
                 </TabsTrigger>
                 <TabsTrigger value="rating" className="gap-2">
                   <Star className="h-4 w-4" />
@@ -238,6 +243,14 @@ export default function SongDetailPage(): ReactElement {
                     onArrangementEdit={handleArrangementEdit}
                   />
                 )}
+              </TabsContent>
+              
+              <TabsContent value="notes" className="mt-6">
+                <SongNotesTab
+                  songId={song.id}
+                  songTitle={song.title}
+                  songNotes={song.notes}
+                />
               </TabsContent>
               
               <TabsContent value="rating" className="mt-6">

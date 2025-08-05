@@ -23,7 +23,7 @@ export default function SongMetadata({ song }: SongMetadataProps) {
   };
 
   const formatDate = (date: Date | undefined): string => {
-    if (!date) return "Never";
+    if (!date) {return "Never";}
     return new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
