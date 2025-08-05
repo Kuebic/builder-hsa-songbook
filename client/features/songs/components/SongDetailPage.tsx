@@ -169,7 +169,7 @@ export default function SongDetailPage(): ReactElement {
   if (showChordProEditor && editingArrangement) {
     return (
       <Layout>
-        <div className="max-w-7xl mx-auto">
+        <div className={`mx-auto ${isViewMode ? 'max-w-4xl' : 'max-w-7xl'}`}>
           <ChordProEditor
             initialContent={editingArrangement.chordData}
             songTitle={`${song.title} - ${editingArrangement.name}`}
