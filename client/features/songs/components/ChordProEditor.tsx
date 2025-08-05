@@ -89,7 +89,7 @@ function isCorruptedChordData(data: string): boolean {
   return false;
 }
 
-const ChordProEditor = memo(function ChordProEditor({
+function ChordProEditor({
   initialContent,
   songTitle,
   onSave,
@@ -472,7 +472,7 @@ const ChordProEditor = memo(function ChordProEditor({
       </AlertDialog>
     </>
   );
-});
+}
 
 // Performance comparison function for React.memo
 const arePropsEqual = (
