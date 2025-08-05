@@ -81,7 +81,7 @@ function isCorruptedChordData(data: string): boolean {
   return false;
 }
 
-export default function ChordProEditor({
+const ChordProEditor = memo(function ChordProEditor({
   initialContent,
   songTitle,
   onSave,
@@ -460,4 +460,24 @@ export default function ChordProEditor({
       </AlertDialog>
     </>
   );
-}
+});
+
+// Performance comparison function for React.memo
+const arePropsEqual = (prevProps: ChordProEditorProps, nextProps: ChordProEditorProps): boolean => {
+  // Compare primitive props
+  return (
+    prevProps.initialContent === nextProps.initialContent &&
+    prevProps.songTitle === nextProps.songTitle &&
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.readOnly === nextProps.readOnly &&
+    prevProps.debounceMs === nextProps.debounceMs &&
+    prevProps.fontSize === nextProps.fontSize &&
+    prevProps.theme === nextProps.theme &&
+    // Functions should be memoized by parent
+    prevProps.onSave === nextProps.onSave &&
+    prevProps.onCancel === nextProps.onCancel
+  );
+};
+
+// Export memoized component with custom comparison
+export default memo(ChordProEditor, arePropsEqual);
