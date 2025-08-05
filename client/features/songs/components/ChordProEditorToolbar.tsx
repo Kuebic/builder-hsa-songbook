@@ -457,16 +457,6 @@ export function ChordProEditorToolbar({
             <TooltipContent>Font Size</TooltipContent>
           </Tooltip>
 
-          <Select value={theme} onValueChange={onThemeChange}>
-            <SelectTrigger className="w-20 h-8">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="light">Light</SelectItem>
-              <SelectItem value="dark">Dark</SelectItem>
-              <SelectItem value="stage">Stage</SelectItem>
-            </SelectContent>
-          </Select>
 
           <Tooltip>
             <TooltipTrigger asChild>
