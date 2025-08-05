@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -19,16 +18,31 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { 
-  FileText, 
-  Eye, 
-  Save, 
+import {
+  FileText,
+  Save,
+  Eye,
   X,
   AlertCircle,
   GripVertical,
 } from "lucide-react";
 import { ChordDisplay } from "./ChordDisplay";
+import { ChordProTextEditor } from "./ChordProTextEditor";
+import { ChordProEditorToolbar } from "./ChordProEditorToolbar";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { useChordTransposition } from "../hooks/useChordTransposition";
+
+// Simple debounce implementation
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number,
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
 
 export interface ChordProEditorProps {
   initialContent: string;
@@ -37,6 +51,9 @@ export interface ChordProEditorProps {
   onCancel: () => void;
   isLoading?: boolean;
   readOnly?: boolean;
+  debounceMs?: number;
+  fontSize?: number;
+  theme?: "light" | "dark" | "stage";
 }
 
 /**
@@ -44,71 +61,110 @@ export interface ChordProEditorProps {
  * Common indicators: base64-like strings, binary data, unusual character patterns
  */
 function isCorruptedChordData(data: string): boolean {
-  if (!data || data.trim() === "") {return false;}
-  
+  if (!data || data.trim() === "") {
+    return false;
+  }
+
   // Check for base64-like patterns (long strings with only base64 characters)
   const base64Pattern = /^[A-Za-z0-9+/]{20,}={0,2}$/;
   if (base64Pattern.test(data.replace(/\s/g, ""))) {
     return true;
   }
-  
+
   // Check for excessive non-printable characters
   // eslint-disable-next-line no-control-regex
-  const nonPrintableCount = (data.match(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\xFF]/g) || []).length;
-  if (nonPrintableCount > data.length * 0.1) { // More than 10% non-printable
+  const nonPrintableCount = (
+    data.match(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\xFF]/g) || []
+  ).length;
+  if (nonPrintableCount > data.length * 0.1) {
+    // More than 10% non-printable
     return true;
   }
-  
+
   // Check for patterns that look like compressed data
   if (data.startsWith("�") || data.includes("\x00") || data.includes("\\x")) {
     return true;
   }
-  
+
   return false;
 }
 
-export default function ChordProEditor({
+function ChordProEditor({
   initialContent,
   songTitle,
   onSave,
   onCancel,
   isLoading = false,
   readOnly = false,
+  debounceMs = 300,
+  fontSize = 14,
+  theme = "light",
 }: ChordProEditorProps) {
   const [content, setContent] = useState(initialContent);
+  const [debouncedContent, setDebouncedContent] = useState(initialContent);
   const [hasChanges, setHasChanges] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
   const [isCorrupted, setIsCorrupted] = useState(false);
+  const [editorFontSize, setEditorFontSize] = useState(fontSize);
+  const [displayTheme, setDisplayTheme] = useState(theme);
+  const [showChords, setShowChords] = useState(true);
+  const [undoStack, setUndoStack] = useState<string[]>([]);
+  const [redoStack, setRedoStack] = useState<string[]>([]);
   const isMobile = useMediaQuery("(max-width: 768px)");
+
+  // Debounced content update for live preview
+  const debouncedUpdateContent = useMemo(() => {
+    let timeoutId: NodeJS.Timeout;
+    const debouncedFn = (newContent: string) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setDebouncedContent(newContent);
+      }, debounceMs);
+    };
+
+    debouncedFn.cancel = () => clearTimeout(timeoutId);
+    return debouncedFn;
+  }, [debounceMs]);
 
   useEffect(() => {
     setHasChanges(content !== initialContent);
-  }, [content, initialContent]);
+    debouncedUpdateContent(content);
+    return () => {
+      debouncedUpdateContent.cancel?.();
+    };
+  }, [content, initialContent, debouncedUpdateContent]);
 
   useEffect(() => {
     // Check if initial content appears corrupted
     setIsCorrupted(isCorruptedChordData(initialContent));
   }, [initialContent]);
 
-  const handleSave = () => {
-    onSave(content);
-  };
+  // Set up transposition hook
+  const transposition = useChordTransposition({
+    initialTranspose: 0,
+    content: debouncedContent,
+    enableKeyDetection: true,
+  });
 
-  const handleCancel = () => {
+  const handleSave = useCallback(() => {
+    onSave(content);
+  }, [content, onSave]);
+
+  const handleCancel = useCallback(() => {
     if (hasChanges) {
       setShowCancelDialog(true);
     } else {
       onCancel();
     }
-  };
+  }, [hasChanges, onCancel]);
 
-  const confirmCancel = () => {
+  const confirmCancel = useCallback(() => {
     setShowCancelDialog(false);
     onCancel();
-  };
+  }, [onCancel]);
 
-  const handleFixCorruptedData = () => {
+  const handleFixCorruptedData = useCallback(() => {
     // Clear corrupted data and replace with empty template
     const cleanTemplate = `{title: ${songTitle.split(" - ")[0]}}
 {key: C}
@@ -116,8 +172,54 @@ export default function ChordProEditor({
 [C]Add your lyrics and chords here...`;
     setContent(cleanTemplate);
     setIsCorrupted(false);
-  };
+  }, [songTitle]);
 
+  // Enhanced editor functions
+  const handleUndo = useCallback(() => {
+    if (undoStack.length > 0) {
+      const previousContent = undoStack[undoStack.length - 1];
+      setRedoStack((prev) => [...prev, content]);
+      setUndoStack((prev) => prev.slice(0, -1));
+      setContent(previousContent);
+    }
+  }, [content, undoStack]);
+
+  const handleRedo = useCallback(() => {
+    if (redoStack.length > 0) {
+      const nextContent = redoStack[redoStack.length - 1];
+      setUndoStack((prev) => [...prev, content]);
+      setRedoStack((prev) => prev.slice(0, -1));
+      setContent(nextContent);
+    }
+  }, [content, redoStack]);
+
+  const handleContentChange = useCallback(
+    (newContent: string) => {
+      // Add to undo stack if significant change
+      if (Math.abs(newContent.length - content.length) > 1) {
+        setUndoStack((prev) => [...prev.slice(-19), content]); // Keep last 20 states
+        setRedoStack([]);
+      }
+      setContent(newContent);
+    },
+    [content],
+  );
+
+  const handleInsertAtCursor = useCallback((text: string) => {
+    // This would need textarea ref to get cursor position
+    // For now, append to end
+    setContent((prev) => prev + text);
+  }, []);
+
+  const handleExport = useCallback((format: "pdf" | "html" | "txt") => {
+    // TODO: Implement export functionality
+    console.log("Export as:", format);
+  }, []);
+
+  const handleShowHelp = useCallback(() => {
+    // TODO: Implement help modal
+    console.log("Show help");
+  }, []);
 
   return (
     <>
@@ -135,11 +237,7 @@ export default function ChordProEditor({
                   Unsaved changes
                 </Badge>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCancel}
-              >
+              <Button variant="outline" size="sm" onClick={handleCancel}>
                 <X className="mr-2 h-4 w-4" />
                 {readOnly ? "Close" : "Cancel"}
               </Button>
@@ -156,7 +254,7 @@ export default function ChordProEditor({
             </div>
           </div>
         </CardHeader>
-        
+
         {/* Corrupted Data Warning */}
         {isCorrupted && (
           <div className="border-b bg-destructive/10 px-4 py-3">
@@ -164,8 +262,8 @@ export default function ChordProEditor({
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Corrupted Chord Data Detected</AlertTitle>
               <AlertDescription className="mt-2">
-                The chord data appears to be corrupted or encrypted. This may happen with older songs 
-                that had compression issues.
+                The chord data appears to be corrupted or encrypted. This may
+                happen with older songs that had compression issues.
                 <div className="mt-3 flex gap-2">
                   <Button
                     variant="outline"
@@ -188,8 +286,38 @@ export default function ChordProEditor({
             </Alert>
           </div>
         )}
-        
-        <CardContent className="p-0 h-[calc(100vh-12rem)]">
+
+        {/* Enhanced Toolbar */}
+        <ChordProEditorToolbar
+          onSave={handleSave}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          canUndo={undoStack.length > 0}
+          canRedo={redoStack.length > 0}
+          onInsertChord={handleInsertAtCursor}
+          onInsertDirective={handleInsertAtCursor}
+          onInsertSection={handleInsertAtCursor}
+          currentKey={transposition.currentKey || "C"}
+          transpositionLevel={transposition.transpositionLevel}
+          canTransposeUp={transposition.canTransposeUp}
+          canTransposeDown={transposition.canTransposeDown}
+          onTranspose={transposition.transpose}
+          onTransposeReset={transposition.reset}
+          fontSize={editorFontSize}
+          onFontSizeChange={setEditorFontSize}
+          theme={displayTheme}
+          onThemeChange={setDisplayTheme}
+          showChords={showChords}
+          onShowChordsChange={setShowChords}
+          hasUnsavedChanges={hasChanges}
+          isLoading={isLoading}
+          readOnly={readOnly}
+          onExport={handleExport}
+          onShowHelp={handleShowHelp}
+          className="border-b"
+        />
+
+        <CardContent className="p-0 h-[calc(100vh-16rem)]">
           {!readOnly && isMobile && (
             <div className="border-b px-4 py-2 flex justify-end">
               <Button
@@ -198,89 +326,103 @@ export default function ChordProEditor({
                 onClick={() => setShowPreview(!showPreview)}
                 className="gap-2"
               >
-                <Eye className={`h-4 w-4 ${!showPreview ? "opacity-50" : ""}`} />
+                <Eye
+                  className={`h-4 w-4 ${!showPreview ? "opacity-50" : ""}`}
+                />
                 {showPreview ? "Hide Preview" : "Show Preview"}
               </Button>
             </div>
           )}
-          
+
           {/* Mobile Layout - Stacked */}
           {isMobile ? (
             <div className="h-full">
               {!readOnly && !showPreview && (
                 <div className="h-full p-4 overflow-auto">
-                  <div className="space-y-4">
-                    <div className="bg-muted/50 rounded-md p-3 text-sm">
-                      <p className="font-medium mb-2">ChordPro Quick Reference:</p>
-                      <ul className="space-y-1 text-muted-foreground">
-                        <li>• Chords: [C] [G] [Am] [F]</li>
-                        <li>• Title: {"{title: Song Title}"}</li>
-                        <li>• Artist: {"{subtitle: Artist Name}"}</li>
-                        <li>• Comments: {"{comment: This is a comment}"}</li>
-                        <li>• Sections: {"{chorus}"} {"{verse: 1}"}</li>
-                      </ul>
-                    </div>
-                    
-                    <Textarea
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      className="font-mono text-sm min-h-[400px] resize-none"
-                      placeholder="Enter ChordPro formatted lyrics here..."
-                      readOnly={readOnly}
-                    />
+                  <div className="bg-muted/50 rounded-md p-3 text-sm mb-4">
+                    <p className="font-medium mb-2">
+                      ChordPro Quick Reference:
+                    </p>
+                    <ul className="space-y-1 text-muted-foreground">
+                      <li>• Chords: [C] [G] [Am] [F]</li>
+                      <li>• Title: {"{title: Song Title}"}</li>
+                      <li>• Artist: {"{subtitle: Artist Name}"}</li>
+                      <li>• Comments: {"{comment: This is a comment}"}</li>
+                      <li>
+                        • Sections: {"{chorus}"} {"{verse: 1}"}
+                      </li>
+                    </ul>
                   </div>
+
+                  <ChordProTextEditor
+                    value={content}
+                    onChange={handleContentChange}
+                    onSave={handleSave}
+                    readOnly={readOnly}
+                    fontSize={editorFontSize}
+                    className="h-[calc(100vh-20rem)]"
+                  />
                 </div>
               )}
-              
+
               {(showPreview || readOnly) && (
                 <div className="h-full p-4 overflow-auto">
                   <ChordDisplay
-                    content={content}
-                    theme="light"
-                    showControls={true}
+                    content={debouncedContent}
+                    transpose={transposition.transpositionLevel}
+                    theme={displayTheme}
+                    showChords={showChords}
+                    showControls={false}
                     className="max-w-none"
+                    onTranspose={transposition.transpose}
                   />
                 </div>
               )}
             </div>
           ) : (
             /* Desktop Layout - Resizable Split Panes */
-            <ResizablePanelGroup
-              direction="horizontal"
-              className="h-full"
-            >
+            <ResizablePanelGroup direction="horizontal" className="h-full">
               {/* Editor Panel */}
               {!readOnly && (
                 <>
                   <ResizablePanel
                     defaultSize={50}
-                    minSize={20}
+                    minSize={30}
                     className="min-w-[300px]"
                   >
-                    <div className="h-full p-4 overflow-auto">
-                      <div className="space-y-4">
+                    <div className="h-full flex flex-col">
+                      <div className="p-4 border-b bg-muted/30">
                         <div className="bg-muted/50 rounded-md p-3 text-sm">
-                          <p className="font-medium mb-2">ChordPro Quick Reference:</p>
+                          <p className="font-medium mb-2">
+                            ChordPro Quick Reference:
+                          </p>
                           <ul className="space-y-1 text-muted-foreground">
                             <li>• Chords: [C] [G] [Am] [F]</li>
                             <li>• Title: {"{title: Song Title}"}</li>
                             <li>• Artist: {"{subtitle: Artist Name}"}</li>
-                            <li>• Comments: {"{comment: This is a comment}"}</li>
-                            <li>• Sections: {"{chorus}"} {"{verse: 1}"}</li>
+                            <li>
+                              • Comments: {"{comment: This is a comment}"}
+                            </li>
+                            <li>
+                              • Sections: {"{chorus}"} {"{verse: 1}"}
+                            </li>
                           </ul>
                         </div>
-                        
-                        <Textarea
+                      </div>
+
+                      <div className="flex-1 p-4">
+                        <ChordProTextEditor
                           value={content}
-                          onChange={(e) => setContent(e.target.value)}
-                          className="font-mono text-sm min-h-[calc(100vh-20rem)] resize-none"
-                          placeholder="Enter ChordPro formatted lyrics here..."
+                          onChange={handleContentChange}
+                          onSave={handleSave}
                           readOnly={readOnly}
+                          fontSize={editorFontSize}
+                          className="h-full"
                         />
                       </div>
                     </div>
                   </ResizablePanel>
-                  
+
                   <ResizableHandle withHandle className="bg-border">
                     <div className="flex h-full w-full items-center justify-center">
                       <GripVertical className="h-4 w-4 text-muted-foreground" />
@@ -288,19 +430,22 @@ export default function ChordProEditor({
                   </ResizableHandle>
                 </>
               )}
-              
+
               {/* Preview Panel */}
               <ResizablePanel
                 defaultSize={readOnly ? 100 : 50}
-                minSize={20}
+                minSize={30}
                 className="min-w-[300px]"
               >
                 <div className="h-full p-4 overflow-auto">
                   <ChordDisplay
-                    content={content}
-                    theme="light"
-                    showControls={true}
+                    content={debouncedContent}
+                    transpose={transposition.transpositionLevel}
+                    theme={displayTheme}
+                    showChords={showChords}
+                    showControls={!readOnly}
                     className="max-w-none"
+                    onTranspose={transposition.transpose}
                   />
                 </div>
               </ResizablePanel>
@@ -308,7 +453,7 @@ export default function ChordProEditor({
           )}
         </CardContent>
       </Card>
-      
+
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -328,3 +473,26 @@ export default function ChordProEditor({
     </>
   );
 }
+
+// Performance comparison function for React.memo
+const arePropsEqual = (
+  prevProps: ChordProEditorProps,
+  nextProps: ChordProEditorProps,
+): boolean => {
+  // Compare primitive props
+  return (
+    prevProps.initialContent === nextProps.initialContent &&
+    prevProps.songTitle === nextProps.songTitle &&
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.readOnly === nextProps.readOnly &&
+    prevProps.debounceMs === nextProps.debounceMs &&
+    prevProps.fontSize === nextProps.fontSize &&
+    prevProps.theme === nextProps.theme &&
+    // Functions should be memoized by parent
+    prevProps.onSave === nextProps.onSave &&
+    prevProps.onCancel === nextProps.onCancel
+  );
+};
+
+// Export memoized component with custom comparison
+export default memo(ChordProEditor, arePropsEqual);
