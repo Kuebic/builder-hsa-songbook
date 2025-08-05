@@ -277,13 +277,10 @@ export function ChordProTextEditor({
           "font-mono resize-none relative z-10",
           "min-h-[400px] w-full",
           "bg-transparent",
+          "text-transparent caret-foreground",
           readOnly && "cursor-default"
         )}
-        style={{
-          ...editorStyle,
-          color: 'rgba(0, 0, 0, 0.01)', // Nearly transparent but not completely
-          caretColor: 'var(--foreground)', // Theme-aware cursor color
-        }}
+        style={editorStyle}
         placeholder={placeholder}
         readOnly={readOnly}
         spellCheck={false}
