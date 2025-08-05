@@ -82,7 +82,8 @@ const mockBibleVerses: BibleVerse[] = [
     downvotes: 2,
     hasUpvoted: false,
     hasDownvoted: false,
-    relevanceNote: "This verse perfectly captures the core message of Amazing Grace - that salvation is a gift from God, not earned through our works.",
+    relevanceNote:
+      "This verse perfectly captures the core message of Amazing Grace - that salvation is a gift from God, not earned through our works.",
     status: "approved",
   },
   {
@@ -95,7 +96,8 @@ const mockBibleVerses: BibleVerse[] = [
     downvotes: 1,
     hasUpvoted: true,
     hasDownvoted: false,
-    relevanceNote: "The enduring nature of God's grace is beautifully reflected in both this verse and the song's message.",
+    relevanceNote:
+      "The enduring nature of God's grace is beautifully reflected in both this verse and the song's message.",
     status: "approved",
   },
 ];
@@ -298,7 +300,11 @@ export default function SongDetailPage(): ReactElement {
                   songTitle={song.title}
                   verses={mockBibleVerses} // Mock data for now
                   onSubmitVerse={async (reference, text, relevanceNote) => {
-                    console.log("Submitting verse:", { reference, text, relevanceNote });
+                    console.log("Submitting verse:", {
+                      reference,
+                      text,
+                      relevanceNote,
+                    });
                     // TODO: Implement verse submission
                   }}
                   onVote={(verseId, voteType) => {
