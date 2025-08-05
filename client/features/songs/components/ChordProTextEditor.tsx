@@ -274,7 +274,7 @@ export function ChordProTextEditor({
         onKeyDown={handleKeyDown}
         onScroll={handleScroll}
         className={cn(
-          "font-mono resize-none bg-transparent relative z-10",
+          "font-mono resize-none bg-transparent relative z-10 text-transparent caret-current",
           "min-h-[400px] w-full",
           readOnly && "cursor-default"
         )}
