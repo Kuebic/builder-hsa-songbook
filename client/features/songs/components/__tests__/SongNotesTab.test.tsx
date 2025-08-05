@@ -103,7 +103,7 @@ describe("SongNotesTab", () => {
 
       render(
         <SongNotesTab songId="song123" songTitle="Amazing Grace" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getAllByTestId("skeleton")).toHaveLength(3);
@@ -124,7 +124,7 @@ describe("SongNotesTab", () => {
           songTitle="Amazing Grace"
           songNotes="This hymn was written in 1772."
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByText("Song Notes")).toBeInTheDocument();
@@ -140,7 +140,7 @@ describe("SongNotesTab", () => {
 
       render(
         <SongNotesTab songId="song123" songTitle="Amazing Grace" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.queryByText("Song Notes")).not.toBeInTheDocument();
@@ -157,7 +157,7 @@ describe("SongNotesTab", () => {
 
       render(
         <SongNotesTab songId="song123" songTitle="Amazing Grace" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByText("Related Bible Verses")).toBeInTheDocument();
@@ -176,7 +176,7 @@ describe("SongNotesTab", () => {
 
       render(
         <SongNotesTab songId="song123" songTitle="Amazing Grace" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByText("No verses submitted yet")).toBeInTheDocument();
@@ -192,7 +192,7 @@ describe("SongNotesTab", () => {
 
       render(
         <SongNotesTab songId="song123" songTitle="Amazing Grace" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByText("5")).toBeInTheDocument();
@@ -210,7 +210,7 @@ describe("SongNotesTab", () => {
 
       render(
         <SongNotesTab songId="song123" songTitle="Amazing Grace" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const addButton = screen.getByText("Add Verse");
@@ -236,7 +236,7 @@ describe("SongNotesTab", () => {
 
       render(
         <SongNotesTab songId="song123" songTitle="Amazing Grace" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       // Open dialog
@@ -274,7 +274,7 @@ describe("SongNotesTab", () => {
 
       render(
         <SongNotesTab songId="song123" songTitle="Amazing Grace" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const addButton = screen.getByText("Add Verse");
@@ -299,7 +299,7 @@ describe("SongNotesTab", () => {
 
       render(
         <SongNotesTab songId="song123" songTitle="Amazing Grace" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const upvoteButtons = screen.getAllByRole("button", { name: /upvote/i });
@@ -320,7 +320,7 @@ describe("SongNotesTab", () => {
 
       render(
         <SongNotesTab songId="song123" songTitle="Amazing Grace" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const upvoteIcons = screen.getAllByTestId("thumbs-up-icon");
@@ -351,7 +351,7 @@ describe("SongNotesTab", () => {
 
       render(
         <SongNotesTab songId="song123" songTitle="Amazing Grace" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByText("Pending")).toBeInTheDocument();
@@ -369,7 +369,7 @@ describe("SongNotesTab", () => {
 
       render(
         <SongNotesTab songId="song123" songTitle="Amazing Grace" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByText("Failed to load verses")).toBeInTheDocument();
@@ -387,7 +387,7 @@ describe("SongNotesTab", () => {
 
       render(
         <SongNotesTab songId="song123" songTitle="Amazing Grace" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const retryButton = screen.getByText("Try Again");

@@ -82,7 +82,7 @@ describe("Reviews API Routes", () => {
     it("should return reviews for a valid arrangement", async () => {
       const { req, res } = createMockReqRes(
         { userId: "user1" },
-        { arrangementId: "507f1f77bcf86cd799439011" }
+        { arrangementId: "507f1f77bcf86cd799439011" },
       );
 
       const mockArrangement = {
@@ -162,7 +162,7 @@ describe("Reviews API Routes", () => {
     it("should return 404 if arrangement not found", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { arrangementId: "507f1f77bcf86cd799439011" }
+        { arrangementId: "507f1f77bcf86cd799439011" },
       );
 
       (Arrangement.findById as any).mockReturnValue({
@@ -184,7 +184,7 @@ describe("Reviews API Routes", () => {
     it("should include reported reviews for moderators", async () => {
       const { req, res } = createMockReqRes(
         { userId: "mod1", includeReported: "true" },
-        { arrangementId: "507f1f77bcf86cd799439011" }
+        { arrangementId: "507f1f77bcf86cd799439011" },
       );
 
       const mockArrangement = { _id: "507f1f77bcf86cd799439011", name: "Test" };
@@ -212,7 +212,7 @@ describe("Reviews API Routes", () => {
           userId: "user1",
           rating: 5,
           comment: "This is an excellent arrangement for our worship team!",
-        }
+        },
       );
 
       const mockArrangement = {
@@ -272,7 +272,7 @@ describe("Reviews API Routes", () => {
           userId: "user1",
           rating: 4,
           comment: "Updated review - still good but found some issues",
-        }
+        },
       );
 
       const mockArrangement = {
@@ -318,7 +318,7 @@ describe("Reviews API Routes", () => {
           userId: "user1",
           rating: 6, // Invalid rating
           comment: "Too short", // Less than 10 characters
-        }
+        },
       );
 
       await createOrUpdateReview(req as Request, res as Response);
@@ -340,7 +340,7 @@ describe("Reviews API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "review1" },
-        { userId: "user1" }
+        { userId: "user1" },
       );
 
       const mockReview = {
@@ -371,7 +371,7 @@ describe("Reviews API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "review1" },
-        { userId: "user1" }
+        { userId: "user1" },
       );
 
       const userId = new Types.ObjectId("user1" as any);
@@ -402,7 +402,7 @@ describe("Reviews API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "review1" },
-        { userId: "user1" }
+        { userId: "user1" },
       );
 
       const mockReview = {
@@ -430,7 +430,7 @@ describe("Reviews API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "review1" },
-        { userId: "user1", reason: "Inappropriate language" }
+        { userId: "user1", reason: "Inappropriate language" },
       );
 
       const mockReview = {
@@ -457,7 +457,7 @@ describe("Reviews API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "review1" },
-        { userId: "user1" }
+        { userId: "user1" },
       );
 
       const mockReview = {
@@ -546,7 +546,7 @@ describe("Reviews API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "review1" },
-        { userId: "mod1" }
+        { userId: "mod1" },
       );
 
       const mockUser = { _id: "mod1", role: "MODERATOR" };
@@ -576,7 +576,7 @@ describe("Reviews API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "review1" },
-        { userId: "admin1" }
+        { userId: "admin1" },
       );
 
       const mockUser = { _id: "admin1", role: "ADMIN" };
@@ -624,7 +624,7 @@ describe("Reviews API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "review1" },
-        { userId: "mod1" }
+        { userId: "mod1" },
       );
 
       const mockUser = { _id: "mod1", role: "MODERATOR" };

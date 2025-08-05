@@ -119,7 +119,7 @@ describe("Users API Routes - Dual Favorites", () => {
     it("should return only song favorites when type=songs", async () => {
       const { req, res } = createMockReqRes(
         { type: "songs" },
-        { userId: "507f1f77bcf86cd799439011" }
+        { userId: "507f1f77bcf86cd799439011" },
       );
 
       const mockUserWithSongs = {
@@ -155,7 +155,7 @@ describe("Users API Routes - Dual Favorites", () => {
     it("should return only arrangement favorites when type=arrangements", async () => {
       const { req, res } = createMockReqRes(
         { type: "arrangements" },
-        { userId: "507f1f77bcf86cd799439011" }
+        { userId: "507f1f77bcf86cd799439011" },
       );
 
       const mockUserWithArrangements = {
@@ -215,7 +215,7 @@ describe("Users API Routes - Dual Favorites", () => {
     it("should add song to favorites", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" }
+        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" },
       );
 
       const mockUser = {
@@ -249,7 +249,7 @@ describe("Users API Routes - Dual Favorites", () => {
     it("should return 409 if song already favorited", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" }
+        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" },
       );
 
       const mockUser = {
@@ -276,7 +276,7 @@ describe("Users API Routes - Dual Favorites", () => {
     it("should return 404 if song not found", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" }
+        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" },
       );
 
       const mockUser = { _id: "507f1f77bcf86cd799439011" };
@@ -301,7 +301,7 @@ describe("Users API Routes - Dual Favorites", () => {
     it("should remove song from favorites", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" }
+        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" },
       );
 
       const mockUser = {
@@ -328,7 +328,7 @@ describe("Users API Routes - Dual Favorites", () => {
     it("should return 404 if song not in favorites", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" }
+        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" },
       );
 
       const mockUser = {
@@ -355,7 +355,7 @@ describe("Users API Routes - Dual Favorites", () => {
     it("should add arrangement to favorites", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", arrangementId: "507f1f77bcf86cd799439013" }
+        { userId: "507f1f77bcf86cd799439011", arrangementId: "507f1f77bcf86cd799439013" },
       );
 
       const mockUser = {
@@ -391,7 +391,7 @@ describe("Users API Routes - Dual Favorites", () => {
     it("should remove arrangement from favorites", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", arrangementId: "507f1f77bcf86cd799439013" }
+        { userId: "507f1f77bcf86cd799439011", arrangementId: "507f1f77bcf86cd799439013" },
       );
 
       const mockUser = {
@@ -440,14 +440,14 @@ describe("Users API Routes - Dual Favorites", () => {
             songs: mockUserWithSongs.favoriteSongs,
             arrangements: undefined,
           },
-        })
+        }),
       );
     });
 
     it("POST /api/users/:userId/favorites/:songId should add song favorite", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" }
+        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" },
       );
 
       const mockUser = {
@@ -468,7 +468,7 @@ describe("Users API Routes - Dual Favorites", () => {
     it("DELETE /api/users/:userId/favorites/:songId should remove song favorite", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" }
+        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" },
       );
 
       const mockUser = {
@@ -489,7 +489,7 @@ describe("Users API Routes - Dual Favorites", () => {
     it("should check if song is favorited", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" }
+        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" },
       );
 
       const mockUser = {

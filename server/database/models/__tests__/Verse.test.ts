@@ -64,7 +64,7 @@ describe("Verse Model Schema", () => {
     it("should have compound index on songId and status", () => {
       const indexes = verseSchema.indexes();
       const songStatusIndex = indexes.find(
-        idx => idx[0].songId === 1 && idx[0].status === 1
+        idx => idx[0].songId === 1 && idx[0].status === 1,
       );
       
       expect(songStatusIndex).toBeDefined();
@@ -73,7 +73,7 @@ describe("Verse Model Schema", () => {
     it("should have index on submittedBy", () => {
       const indexes = verseSchema.indexes();
       const submittedByIndex = indexes.find(
-        idx => idx[0].submittedBy === 1
+        idx => idx[0].submittedBy === 1,
       );
       
       expect(submittedByIndex).toBeDefined();
@@ -82,7 +82,7 @@ describe("Verse Model Schema", () => {
     it("should have index on status", () => {
       const indexes = verseSchema.indexes();
       const statusIndex = indexes.find(
-        idx => idx[0].status === 1
+        idx => idx[0].status === 1,
       );
       
       expect(statusIndex).toBeDefined();

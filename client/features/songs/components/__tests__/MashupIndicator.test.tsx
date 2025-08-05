@@ -13,7 +13,7 @@ describe("MashupIndicator", () => {
   describe("Rendering", () => {
     it("should not render when not a mashup", () => {
       const { container } = render(
-        <MashupIndicator isMashup={false} />
+        <MashupIndicator isMashup={false} />,
       );
 
       expect(container.firstChild).toBeNull();
@@ -21,7 +21,7 @@ describe("MashupIndicator", () => {
 
     it("should render when is a mashup", () => {
       render(
-        <MashupIndicator isMashup={true} />
+        <MashupIndicator isMashup={true} />,
       );
 
       expect(screen.getByText("Mashup")).toBeInTheDocument();
@@ -30,7 +30,7 @@ describe("MashupIndicator", () => {
 
     it("should display song count when provided", () => {
       render(
-        <MashupIndicator isMashup={true} songCount={3} />
+        <MashupIndicator isMashup={true} songCount={3} />,
       );
 
       expect(screen.getByText("Mashup (3 songs)")).toBeInTheDocument();
@@ -38,7 +38,7 @@ describe("MashupIndicator", () => {
 
     it("should not display song count when less than 2", () => {
       render(
-        <MashupIndicator isMashup={true} songCount={1} />
+        <MashupIndicator isMashup={true} songCount={1} />,
       );
 
       expect(screen.getByText("Mashup")).toBeInTheDocument();
@@ -49,7 +49,7 @@ describe("MashupIndicator", () => {
   describe("Variants", () => {
     it("should render default variant with full badge", () => {
       render(
-        <MashupIndicator isMashup={true} variant="default" />
+        <MashupIndicator isMashup={true} variant="default" />,
       );
 
       const badge = screen.getByText("Mashup").parentElement;
@@ -59,7 +59,7 @@ describe("MashupIndicator", () => {
 
     it("should render minimal variant with icon only", () => {
       render(
-        <MashupIndicator isMashup={true} variant="minimal" />
+        <MashupIndicator isMashup={true} variant="minimal" />,
       );
 
       expect(screen.getByTestId("layers-icon")).toBeInTheDocument();
@@ -71,7 +71,7 @@ describe("MashupIndicator", () => {
   describe("Styling", () => {
     it("should apply correct classes for default variant", () => {
       render(
-        <MashupIndicator isMashup={true} variant="default" />
+        <MashupIndicator isMashup={true} variant="default" />,
       );
 
       const badge = screen.getByText("Mashup").parentElement;
@@ -81,7 +81,7 @@ describe("MashupIndicator", () => {
 
     it("should apply correct classes for minimal variant", () => {
       render(
-        <MashupIndicator isMashup={true} variant="minimal" />
+        <MashupIndicator isMashup={true} variant="minimal" />,
       );
 
       const icon = screen.getByTestId("layers-icon");
@@ -95,7 +95,7 @@ describe("MashupIndicator", () => {
   describe("Song Count Display", () => {
     it("should pluralize correctly for 2 songs", () => {
       render(
-        <MashupIndicator isMashup={true} songCount={2} />
+        <MashupIndicator isMashup={true} songCount={2} />,
       );
 
       expect(screen.getByText("Mashup (2 songs)")).toBeInTheDocument();
@@ -103,7 +103,7 @@ describe("MashupIndicator", () => {
 
     it("should pluralize correctly for multiple songs", () => {
       render(
-        <MashupIndicator isMashup={true} songCount={5} />
+        <MashupIndicator isMashup={true} songCount={5} />,
       );
 
       expect(screen.getByText("Mashup (5 songs)")).toBeInTheDocument();
@@ -111,7 +111,7 @@ describe("MashupIndicator", () => {
 
     it("should handle undefined song count", () => {
       render(
-        <MashupIndicator isMashup={true} songCount={undefined} />
+        <MashupIndicator isMashup={true} songCount={undefined} />,
       );
 
       expect(screen.getByText("Mashup")).toBeInTheDocument();
@@ -120,7 +120,7 @@ describe("MashupIndicator", () => {
 
     it("should handle zero song count", () => {
       render(
-        <MashupIndicator isMashup={true} songCount={0} />
+        <MashupIndicator isMashup={true} songCount={0} />,
       );
 
       expect(screen.getByText("Mashup")).toBeInTheDocument();
@@ -131,7 +131,7 @@ describe("MashupIndicator", () => {
   describe("Tooltip", () => {
     it("should have title attribute on minimal variant", () => {
       render(
-        <MashupIndicator isMashup={true} variant="minimal" songCount={3} />
+        <MashupIndicator isMashup={true} variant="minimal" songCount={3} />,
       );
 
       const container = screen.getByTestId("layers-icon").parentElement;
@@ -140,7 +140,7 @@ describe("MashupIndicator", () => {
 
     it("should have title without count when count not provided", () => {
       render(
-        <MashupIndicator isMashup={true} variant="minimal" />
+        <MashupIndicator isMashup={true} variant="minimal" />,
       );
 
       const container = screen.getByTestId("layers-icon").parentElement;

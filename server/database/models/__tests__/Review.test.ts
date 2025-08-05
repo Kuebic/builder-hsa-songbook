@@ -82,7 +82,7 @@ describe("Review Model Schema", () => {
       const uniqueIndex = indexes.find(
         idx => idx[0].arrangementId === 1 && 
                idx[0].userId === 1 && 
-               idx[1]?.unique === true
+               idx[1]?.unique === true,
       );
       
       expect(uniqueIndex).toBeDefined();
@@ -91,7 +91,7 @@ describe("Review Model Schema", () => {
     it("should have index on reported field", () => {
       const indexes = reviewSchema.indexes();
       const reportedIndex = indexes.find(
-        idx => idx[0].reported === 1
+        idx => idx[0].reported === 1,
       );
       
       expect(reportedIndex).toBeDefined();
@@ -100,7 +100,7 @@ describe("Review Model Schema", () => {
     it("should have index on arrangementId", () => {
       const indexes = reviewSchema.indexes();
       const arrangementIndex = indexes.find(
-        idx => idx[0].arrangementId === 1 && !idx[0].userId
+        idx => idx[0].arrangementId === 1 && !idx[0].userId,
       );
       
       expect(arrangementIndex).toBeDefined();
@@ -109,7 +109,7 @@ describe("Review Model Schema", () => {
     it("should have index on userId", () => {
       const indexes = reviewSchema.indexes();
       const userIndex = indexes.find(
-        idx => idx[0].userId === 1 && !idx[0].arrangementId
+        idx => idx[0].userId === 1 && !idx[0].arrangementId,
       );
       
       expect(userIndex).toBeDefined();

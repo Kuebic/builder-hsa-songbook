@@ -86,7 +86,7 @@ describe("FavoritesToggle", () => {
           itemId="song123"
           itemName="Amazing Grace"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const heartIcon = screen.getByTestId("heart-icon");
@@ -108,7 +108,7 @@ describe("FavoritesToggle", () => {
           itemId="song123"
           itemName="Amazing Grace"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const heartIcon = screen.getByTestId("heart-icon");
@@ -128,7 +128,7 @@ describe("FavoritesToggle", () => {
           itemId="song123"
           itemName="Amazing Grace"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const button = screen.getByRole("button");
@@ -160,7 +160,7 @@ describe("FavoritesToggle", () => {
           itemId="song123"
           itemName="Amazing Grace"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const button = screen.getByRole("button");
@@ -194,7 +194,7 @@ describe("FavoritesToggle", () => {
           itemId="song123"
           itemName="Amazing Grace"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const button = screen.getByRole("button");
@@ -222,7 +222,7 @@ describe("FavoritesToggle", () => {
           itemId="song123"
           itemName="Amazing Grace"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const button = screen.getByRole("button");
@@ -246,7 +246,7 @@ describe("FavoritesToggle", () => {
           itemId="song123"
           itemName="Amazing Grace"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const button = screen.getByRole("button");
@@ -266,7 +266,7 @@ describe("FavoritesToggle", () => {
           itemName="Amazing Grace"
           size="sm"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       let heartIcon = screen.getByTestId("heart-icon");
@@ -278,7 +278,7 @@ describe("FavoritesToggle", () => {
           itemId="song123"
           itemName="Amazing Grace"
           size="lg"
-        />
+        />,
       );
 
       heartIcon = screen.getByTestId("heart-icon");
@@ -298,7 +298,7 @@ describe("FavoritesToggle", () => {
           itemName="Amazing Grace"
           variant="outline"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const button = screen.getByRole("button");
@@ -319,7 +319,7 @@ describe("FavoritesToggle", () => {
           itemName="Amazing Grace"
           showLabel={true}
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByText("Favorite")).toBeInTheDocument();
@@ -338,7 +338,7 @@ describe("FavoritesToggle", () => {
           itemName="Amazing Grace"
           showLabel={true}
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByText("Favorited")).toBeInTheDocument();
@@ -359,7 +359,7 @@ describe("FavoritesToggle", () => {
           itemName="Amazing Grace"
           onToggle={mockOnToggle}
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const button = screen.getByRole("button");
@@ -384,7 +384,7 @@ describe("FavoritesToggle", () => {
           itemId="arr123"
           itemName="Acoustic Version"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const button = screen.getByRole("button");
@@ -417,7 +417,7 @@ describe("FavoritesToggle", () => {
           itemId="arr123"
           itemName="Acoustic Version"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const button = screen.getByRole("button");
@@ -449,7 +449,7 @@ describe("FavoritesToggle", () => {
           itemId="song123"
           itemName="Amazing Grace"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const button = screen.getByRole("button");
@@ -479,7 +479,7 @@ describe("FavoritesToggle", () => {
           itemId="song123"
           itemName="Amazing Grace"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const button = screen.getByRole("button");
@@ -508,7 +508,7 @@ describe("FavoritesToggle", () => {
           itemId="song123"
           itemName="Amazing Grace"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const button = screen.getByRole("button");
@@ -527,7 +527,7 @@ describe("FavoritesToggle", () => {
           itemId="song123"
           itemName="Amazing Grace"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const button = screen.getByRole("button");

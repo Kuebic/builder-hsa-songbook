@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Request, Response } from "express";
+import type { MockRequest, MockResponse } from '../../../shared/types/express.types';
 import {
   getStorageStats,
   triggerCleanup,
@@ -49,23 +50,45 @@ const mockConsole = {
 vi.stubGlobal("console", mockConsole);
 
 // Helper to create mock request and response objects
-const createMockReqRes = (
-  query: any = {},
-  params: any = {},
-  body: any = {},
-): { req: Partial<Request>; res: Partial<Response> } => {
-  const req = {
+const createMockReqRes = <TBody = Record<string, unknown>, TQuery = Record<string, unknown>, TParams = Record<string, unknown>>(
+  query: TQuery = {} as TQuery,
+  params: TParams = {} as TParams,
+  body: TBody = {} as TBody,
+): { req: MockRequest<TBody, TQuery, TParams>; res: MockResponse } => {
+  const req: MockRequest<TBody, TQuery, TParams> = {
     query,
     params,
     body,
+    headers: {},
+    get: vi.fn((header: string) => undefined),
+    header: vi.fn((header: string) => undefined),
   };
 
-  const res = {
-    json: vi.fn().mockReturnThis(),
-    status: vi.fn().mockReturnThis(),
+  const res: MockResponse = {
+    statusCode: 200,
+    headers: {},
+    json: vi.fn(function(this: MockResponse, data: unknown) {
+      this.jsonData = data;
+      return this;
+    }),
+    status: vi.fn(function(this: MockResponse, code: number) {
+      this.statusCode = code;
+      return this;
+    }),
+    send: vi.fn(function(this: MockResponse, data: unknown) {
+      this.sentData = data;
+      return this;
+    }),
+    set: vi.fn(function(this: MockResponse, field: string, value: string) {
+      this.headers[field] = value;
+      return this;
+    }),
+    end: vi.fn(function(this: MockResponse) {
+      return this;
+    }),
   };
 
-  return { req, res } as { req: Partial<Request>; res: Partial<Response> };
+  return { req, res };
 };
 
 // Mock data

@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 import React from "react";
+import type { ClerkSignInButtonProps, ClerkSignOutButtonProps, ClerkUserButtonProps, MockClerkUser } from '../../../shared/types/test.types';
 
 // Mock all Clerk components and hooks
 vi.mock("@clerk/clerk-react", () => ({
@@ -11,17 +12,17 @@ vi.mock("@clerk/clerk-react", () => ({
   SignedOut: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   
   // Authentication components
-  SignInButton: ({ children, mode, ...props }: any) => (
+  SignInButton: ({ children, mode, ...props }: ClerkSignInButtonProps) => (
     <button data-testid="sign-in-button" data-mode={mode} {...props}>
       {children || "Sign In"}
     </button>
   ),
-  SignOutButton: ({ children, ...props }: any) => (
+  SignOutButton: ({ children, ...props }: ClerkSignOutButtonProps) => (
     <button data-testid="sign-out-button" {...props}>
       {children || "Sign Out"}
     </button>
   ),
-  UserButton: ({ afterSignOutUrl, ...props }: any) => (
+  UserButton: ({ afterSignOutUrl, ...props }: ClerkUserButtonProps) => (
     <div data-testid="user-button" data-after-sign-out-url={afterSignOutUrl} {...props}>
       User
     </div>
@@ -58,7 +59,7 @@ vi.mock("@clerk/clerk-react", () => ({
 const { useUser, useAuth, useClerk, useSession } = await import("@clerk/clerk-react");
 
 // Helper function to mock an authenticated user
-export const mockAuthenticatedUser = (userData: any = {}) => {
+export const mockAuthenticatedUser = (userData: MockClerkUser = {}) => {
   const user = {
     id: "user_test_123",
     firstName: "Test",

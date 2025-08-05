@@ -3,10 +3,10 @@ import React from "react";
 
 // Create a generic icon component factory
 const createIcon = (name: string) => {
-  const Icon = React.forwardRef<SVGSVGElement, any>(({ className, fill, ...props }, ref) => (
+  const Icon = React.forwardRef<HTMLDivElement, any>(({ className, fill, ...props }, ref) => (
     <div 
       ref={ref}
-      data-testid={`${name.toLowerCase().replace(/([A-Z])/g, '-$1').replace(/^-/, '')}-icon`} 
+      data-testid={`${name.toLowerCase().replace(/([A-Z])/g, "-$1").replace(/^-/, "")}-icon`} 
       className={className}
       data-fill={fill}
       {...props}
@@ -31,6 +31,9 @@ vi.mock("lucide-react", () => ({
   ArrowDown: createIcon("ArrowDown"),
   MoreHorizontal: createIcon("MoreHorizontal"),
   MoreVertical: createIcon("MoreVertical"),
+  GripVertical: createIcon("GripVertical"),
+  PanelLeft: createIcon("PanelLeft"),
+  Dot: createIcon("Dot"),
   
   // Actions
   Plus: createIcon("Plus"),
@@ -47,6 +50,8 @@ vi.mock("lucide-react", () => ({
   Upload: createIcon("Upload"),
   Copy: createIcon("Copy"),
   Clipboard: createIcon("Clipboard"),
+  RotateCcw: createIcon("RotateCcw"),
+  ThumbsUp: createIcon("ThumbsUp"),
   
   // Status & Feedback
   Check: createIcon("Check"),
@@ -60,6 +65,7 @@ vi.mock("lucide-react", () => ({
   Loader: createIcon("Loader"),
   Loader2: createIcon("Loader2"),
   RefreshCw: createIcon("RefreshCw"),
+  FileWarning: createIcon("FileWarning"),
   
   // User & Social
   User: createIcon("User"),
@@ -84,6 +90,7 @@ vi.mock("lucide-react", () => ({
   Video: createIcon("Video"),
   Camera: createIcon("Camera"),
   Mic: createIcon("Mic"),
+  Mic2: createIcon("Mic2"),
   
   // Common Icons
   Settings: createIcon("Settings"),
@@ -124,6 +131,8 @@ vi.mock("lucide-react", () => ({
   Filter: createIcon("Filter"),
   SortAsc: createIcon("SortAsc"),
   SortDesc: createIcon("SortDesc"),
+  Cross: createIcon("Cross"),
+  Crown: createIcon("Crown"),
   
   // Communication
   Mail: createIcon("Mail"),
@@ -214,4 +223,7 @@ vi.mock("lucide-react", () => ({
   Wind: createIcon("Wind"),
   ZoomIn: createIcon("ZoomIn"),
   ZoomOut: createIcon("ZoomOut"),
+  
+  // ChordDisplay specific icons
+  Keyboard: createIcon("Keyboard"),
 }));

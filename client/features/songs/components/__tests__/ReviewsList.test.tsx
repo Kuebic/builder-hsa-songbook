@@ -7,7 +7,7 @@ import {
   useReviewsByArrangement, 
   useCreateOrUpdateReview, 
   useMarkReviewHelpful, 
-  useReportReview 
+  useReportReview, 
 } from "../../hooks/useReviews";
 
 // Mock hooks
@@ -134,7 +134,7 @@ describe("ReviewsList", () => {
 
       render(
         <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getAllByTestId("skeleton")).toHaveLength(4);
@@ -151,7 +151,7 @@ describe("ReviewsList", () => {
 
       render(
         <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByText("Reviews")).toBeInTheDocument();
@@ -170,7 +170,7 @@ describe("ReviewsList", () => {
 
       render(
         <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByText("4.5")).toBeInTheDocument();
@@ -188,7 +188,7 @@ describe("ReviewsList", () => {
             3: 2,
             2: 0,
             1: 0,
-          }
+          },
         },
         isLoading: false,
         error: null,
@@ -196,7 +196,7 @@ describe("ReviewsList", () => {
 
       render(
         <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       // Check for star labels
@@ -214,7 +214,7 @@ describe("ReviewsList", () => {
 
       render(
         <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByText("No reviews yet")).toBeInTheDocument();
@@ -236,7 +236,7 @@ describe("ReviewsList", () => {
 
       render(
         <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByText("Your Review")).toBeInTheDocument();
@@ -256,7 +256,7 @@ describe("ReviewsList", () => {
 
       render(
         <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByTestId("edit-icon")).toBeInTheDocument();
@@ -273,7 +273,7 @@ describe("ReviewsList", () => {
 
       render(
         <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const writeButton = screen.getByText("Write a Review");
@@ -298,7 +298,7 @@ describe("ReviewsList", () => {
 
       render(
         <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       // Open form
@@ -311,7 +311,7 @@ describe("ReviewsList", () => {
       // Enter comment
       const commentInput = screen.getByPlaceholderText(/Share your experience/);
       fireEvent.change(commentInput, { 
-        target: { value: "This is an excellent arrangement for our worship team!" } 
+        target: { value: "This is an excellent arrangement for our worship team!" }, 
       });
 
       // Submit
@@ -339,7 +339,7 @@ describe("ReviewsList", () => {
 
       render(
         <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const writeButton = screen.getByText("Write a Review");
@@ -364,7 +364,7 @@ describe("ReviewsList", () => {
 
       render(
         <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const helpfulButtons = screen.getAllByRole("button", { name: /helpful/i });
@@ -385,7 +385,7 @@ describe("ReviewsList", () => {
 
       render(
         <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const helpfulButtons = screen.getAllByRole("button", { name: /helpful/i });
@@ -404,7 +404,7 @@ describe("ReviewsList", () => {
 
       render(
         <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const reportButtons = screen.getAllByTestId("flag-icon");
@@ -429,7 +429,7 @@ describe("ReviewsList", () => {
 
       render(
         <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       // Open report dialog
@@ -462,13 +462,13 @@ describe("ReviewsList", () => {
 
       render(
         <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       const reviewCards = screen.getAllByTestId(/review-/);
       const firstReviewStars = reviewCards[0].querySelectorAll('[data-testid="star-icon"]');
       const filledStars = Array.from(firstReviewStars).filter(
-        star => star.getAttribute('data-fill') === 'currentColor'
+        star => star.getAttribute("data-fill") === "currentColor",
       );
 
       expect(filledStars).toHaveLength(5); // 5-star review
@@ -485,7 +485,7 @@ describe("ReviewsList", () => {
 
       render(
         <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByText("Failed to load reviews")).toBeInTheDocument();

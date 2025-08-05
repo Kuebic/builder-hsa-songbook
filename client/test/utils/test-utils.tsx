@@ -14,7 +14,7 @@ interface CustomRenderOptions extends Omit<RenderOptions, "queries"> {
 
 export function renderWithProviders(
   ui: React.ReactElement,
-  options?: CustomRenderOptions
+  options?: CustomRenderOptions,
 ) {
   const {
     initialRoute = "/",

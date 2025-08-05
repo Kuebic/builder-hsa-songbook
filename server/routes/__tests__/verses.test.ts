@@ -135,7 +135,7 @@ describe("Verses API Routes", () => {
     it("should include user upvote status when userId provided", async () => {
       const { req, res } = createMockReqRes(
         { userId: "user1" },
-        { songId: "507f1f77bcf86cd799439011" }
+        { songId: "507f1f77bcf86cd799439011" },
       );
       const mockSong = { _id: "507f1f77bcf86cd799439011", title: "Test Song" };
       const mockVerses = [
@@ -169,7 +169,7 @@ describe("Verses API Routes", () => {
           reference: "Psalm 23:1",
           text: "The Lord is my shepherd",
           userId: "user1",
-        }
+        },
       );
 
       const mockSong = { _id: "507f1f77bcf86cd799439011", title: "Test Song" };
@@ -222,7 +222,7 @@ describe("Verses API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { songId: "507f1f77bcf86cd799439011" },
-        { reference: "John 3:16" } // Missing text and userId
+        { reference: "John 3:16" }, // Missing text and userId
       );
 
       await submitVerse(req as Request, res as Response);
@@ -244,7 +244,7 @@ describe("Verses API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "verse1" },
-        { userId: "user1" }
+        { userId: "user1" },
       );
 
       const mockVerse = {
@@ -275,7 +275,7 @@ describe("Verses API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "verse1" },
-        { userId: "user1" }
+        { userId: "user1" },
       );
 
       const userId = { equals: vi.fn().mockReturnValue(true) };
@@ -308,7 +308,7 @@ describe("Verses API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "verse1" },
-        { status: "approved", userId: "admin1" }
+        { status: "approved", userId: "admin1" },
       );
 
       const mockVerse = {
@@ -339,8 +339,8 @@ describe("Verses API Routes", () => {
         { 
           status: "rejected", 
           rejectionReason: "Inappropriate content",
-          userId: "mod1" 
-        }
+          userId: "mod1", 
+        },
       );
 
       const mockVerse = {
@@ -368,7 +368,7 @@ describe("Verses API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "verse1" },
-        { status: "approved", userId: "user1" }
+        { status: "approved", userId: "user1" },
       );
 
       const mockUser = { _id: "user1", role: "USER" };
@@ -393,7 +393,7 @@ describe("Verses API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "verse1" },
-        { userId: "admin1" }
+        { userId: "admin1" },
       );
 
       const mockVerse = {
@@ -421,7 +421,7 @@ describe("Verses API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "verse1" },
-        { userId: "user1" }
+        { userId: "user1" },
       );
 
       const mockVerse = {
@@ -450,7 +450,7 @@ describe("Verses API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "verse1" },
-        { userId: "user1" }
+        { userId: "user1" },
       );
 
       const mockVerse = {
