@@ -6,7 +6,7 @@ import { useUserId } from "@/shared/hooks/useAuth";
 import { useAddFavorite, useRemoveFavorite, useCheckFavorite } from "../hooks/useFavorites";
 import { cn } from "@/lib/utils";
 
-interface FavoritesToggleProps {
+export interface FavoritesToggleProps {
   type: "song" | "arrangement";
   itemId: string;
   itemName?: string;

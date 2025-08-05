@@ -3,7 +3,7 @@ import { Progress } from "@/components/ui/progress";
 import { Star } from "lucide-react";
 import { StarRating } from "./StarRating";
 
-interface ReviewsSummaryProps {
+export interface ReviewsSummaryProps {
   averageRating: number;
   totalReviews: number;
 }

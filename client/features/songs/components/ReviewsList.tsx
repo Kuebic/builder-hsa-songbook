@@ -22,12 +22,12 @@ import { StarRating } from "./StarRating";
 import { ReviewCard } from "./ReviewCard";
 import { ReviewsSummary } from "./ReviewsSummary";
 
-interface ReviewsListProps {
+export interface ReviewsListProps {
   arrangementId: string;
   arrangementName: string;
 }
 
-interface ReviewFormData {
+export interface ReviewFormData {
   rating: number;
   comment: string;
 }

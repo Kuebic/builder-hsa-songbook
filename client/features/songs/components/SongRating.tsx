@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-interface SongRatingProps {
+export interface SongRatingProps {
   currentRating: number;
   totalRatings: number;
   userRating?: number;

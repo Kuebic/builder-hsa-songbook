@@ -31,7 +31,7 @@ import {
   PlusCircle,
 } from "lucide-react";
 
-interface LayoutProps {
+export interface LayoutProps {
   children: React.ReactNode;
 }
 

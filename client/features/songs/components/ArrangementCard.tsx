@@ -33,7 +33,7 @@ import { ArrangementDetail } from "../types/song.types";
 import FavoritesToggle from "./FavoritesToggle";
 import MashupIndicator from "./MashupIndicator";
 
-interface ArrangementCardProps {
+export interface ArrangementCardProps {
   arrangement: ArrangementDetail;
   isDefault?: boolean;
   onView?: () => void;

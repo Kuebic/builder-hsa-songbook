@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { useConnectionInfo } from "../../contexts/NetworkContext";
 import { useSync } from "../../hooks/useSync";
 
-interface OfflineIndicatorProps {
+export interface OfflineIndicatorProps {
   className?: string;
   showDetails?: boolean;
 }

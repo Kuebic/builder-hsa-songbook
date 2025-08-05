@@ -30,7 +30,7 @@ import {
 import { ChordDisplay } from "./ChordDisplay";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
-interface ChordProEditorProps {
+export interface ChordProEditorProps {
   initialContent: string;
   songTitle: string;
   onSave: (content: string) => void;

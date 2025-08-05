@@ -1,7 +1,7 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
-interface SongsSearchBarProps {
+export interface SongsSearchBarProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
   placeholder?: string;

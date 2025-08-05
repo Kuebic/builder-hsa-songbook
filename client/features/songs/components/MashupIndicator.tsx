@@ -9,7 +9,7 @@ import {
 import { Layers, Music2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface MashupIndicatorProps {
+export interface MashupIndicatorProps {
   isMashup: boolean;
   songCount?: number;
   songTitles?: string[];

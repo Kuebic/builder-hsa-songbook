@@ -5,7 +5,7 @@ import { User, ThumbsUp, Flag } from "lucide-react";
 import { formatDistanceToNow } from "@/shared/utils/formatRelativeTime";
 import { StarRating } from "./StarRating";
 
-interface ReviewCardProps {
+export interface ReviewCardProps {
   review: {
     id: string;
     user: {

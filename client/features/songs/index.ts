@@ -1,13 +1,18 @@
 // Public exports for songs feature
 export { default as SongCard } from "./components/SongCard";
+export type { SongCardProps } from "./components/SongCard";
 export { default as SongsPage } from "./components/SongsPage";
 export { default as SongDetailPage } from "./components/SongDetailPage";
 
 // Extracted components
 export { StarRating } from "./components/StarRating";
+export type { StarRatingProps } from "./components/StarRating";
 export { ReviewCard } from "./components/ReviewCard";
+export type { ReviewCardProps } from "./components/ReviewCard";
 export { ReviewsSummary } from "./components/ReviewsSummary";
+export type { ReviewsSummaryProps } from "./components/ReviewsSummary";
 export { SongsSearchBar } from "./components/SongsSearchBar";
+export type { SongsSearchBarProps } from "./components/SongsSearchBar";
 
 // ChordDisplay components
 export { ChordDisplay, default as ChordDisplayComponent } from "./components/ChordDisplay";

@@ -28,9 +28,10 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useUserId } from "@/shared/hooks/useAuth";
 import { useVersesBySong, useSubmitVerse, useUpvoteVerse } from "../hooks/useVerses";
+import type { Verse } from "../types/verse.types";
 import { formatDistanceToNow } from "@/shared/utils/formatRelativeTime";
 
-interface SongNotesTabProps {
+export interface SongNotesTabProps {
   songId: string;
   songTitle: string;
   songNotes?: string;
@@ -148,7 +149,7 @@ export default function SongNotesTab({ songId, songTitle, songNotes }: SongNotes
     }
   };
 
-  const renderVerseCard = (verse: any) => (
+  const renderVerseCard = (verse: Verse) => (
     <Card key={verse.id} className="transition-shadow hover:shadow-md">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">

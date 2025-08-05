@@ -21,7 +21,7 @@ import {
 import { Link } from "react-router-dom";
 import { ClientSong } from "../types/song.types";
 
-interface SongHeaderProps {
+export interface SongHeaderProps {
   song: ClientSong;
   onToggleFavorite?: () => void;
   onEdit?: () => void;

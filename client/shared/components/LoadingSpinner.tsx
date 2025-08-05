@@ -3,7 +3,7 @@ import { Loader2 } from "lucide-react";
 /**
  * Props for the LoadingSpinner component.
  */
-interface LoadingSpinnerProps {
+export interface LoadingSpinnerProps {
   /** Optional message to display below the spinner. Defaults to "Loading..." */
   message?: string;
 }

@@ -47,7 +47,7 @@ const formatLastUsedDate = (date: Date): string => {
   return new Date(date).toLocaleDateString();
 };
 
-interface SongCardProps {
+export interface SongCardProps {
   song: ClientSong;
   onAddToSetlist?: (songId: string) => void;
   onToggleFavorite?: (songId: string) => void;

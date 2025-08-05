@@ -31,7 +31,7 @@ import {
 } from "../hooks/useArrangements";
 import { useAuthContext } from "@/shared/contexts/AuthContext";
 
-interface ArrangementsListProps {
+export interface ArrangementsListProps {
   songId: string;
   songChordData: string;
   arrangements: ArrangementDetail[];

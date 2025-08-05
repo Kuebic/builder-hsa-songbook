@@ -11,7 +11,7 @@ import { AlertCircle, RefreshCw } from "lucide-react";
 /**
  * Props for the ErrorBoundary component
  */
-interface ErrorBoundaryProps {
+export interface ErrorBoundaryProps {
   /** Child components to wrap with error boundary */
   children: ReactNode;
   /** Optional custom error title */

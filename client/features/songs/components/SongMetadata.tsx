@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { ClientSong } from "../types/song.types";
 
-interface SongMetadataProps {
+export interface SongMetadataProps {
   song: ClientSong;
 }
 
