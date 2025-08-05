@@ -1,11 +1,9 @@
 import { useState, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
   DialogContent,
@@ -15,19 +13,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Star,
-  ThumbsUp,
-  Flag,
-  User,
-  Edit2,
-  MessageSquare,
-} from "lucide-react";
+import { Edit2, MessageSquare, Star } from "lucide-react";
+import { formatDistanceToNow } from "@/shared/utils/formatRelativeTime";
 import { useToast } from "@/hooks/use-toast";
 import { useUserId } from "@/shared/hooks/useAuth";
 import { useReviewsByArrangement, useCreateOrUpdateReview, useMarkReviewHelpful, useReportReview } from "../hooks/useReviews";
-import { formatDistanceToNow } from "@/shared/utils/formatRelativeTime";
-import { cn } from "@/lib/utils";
+import { StarRating } from "./StarRating";
+import { ReviewCard } from "./ReviewCard";
+import { ReviewsSummary } from "./ReviewsSummary";
 
 interface ReviewsListProps {
   arrangementId: string;
@@ -38,57 +31,6 @@ interface ReviewFormData {
   rating: number;
   comment: string;
 }
-
-const StarRating = ({ rating, onRate, readOnly = false, size = "default" }: {
-  rating: number;
-  onRate?: (rating: number) => void;
-  readOnly?: boolean;
-  size?: "small" | "default" | "large";
-}) => {
-  const [hoverRating, setHoverRating] = useState(0);
-  const sizeClasses = {
-    small: "h-4 w-4",
-    default: "h-5 w-5",
-    large: "h-6 w-6",
-  };
-
-  return (
-    <div 
-      className="flex gap-1"
-      role="group"
-      aria-label="Star rating"
-      aria-valuemin={1}
-      aria-valuemax={5}
-      aria-valuenow={rating}
-    >
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          type="button"
-          className={cn(
-            "transition-colors",
-            readOnly ? "cursor-default" : "cursor-pointer hover:scale-110",
-          )}
-          onClick={() => !readOnly && onRate?.(star)}
-          onMouseEnter={() => !readOnly && setHoverRating(star)}
-          onMouseLeave={() => !readOnly && setHoverRating(0)}
-          disabled={readOnly}
-          aria-label={`Rate ${star} out of 5 stars`}
-        >
-          <Star
-            className={cn(
-              sizeClasses[size],
-              (hoverRating || rating) >= star
-                ? "fill-yellow-500 text-yellow-500"
-                : "text-gray-300",
-            )}
-            aria-hidden="true"
-          />
-        </button>
-      ))}
-    </div>
-  );
-};
 
 export default function ReviewsList({ arrangementId, arrangementName }: ReviewsListProps) {
   const userId = useUserId();
@@ -215,103 +157,7 @@ export default function ReviewsList({ arrangementId, arrangementName }: ReviewsL
     }
   }, [reviewsData]);
 
-  const renderRatingBreakdown = () => {
-    if (!reviewsData || reviewsData.summary.totalReviews === 0) {return null;}
 
-    // Calculate rating distribution (mock data for now)
-    const distribution = [
-      { stars: 5, count: Math.floor(reviewsData.summary.totalReviews * 0.6) },
-      { stars: 4, count: Math.floor(reviewsData.summary.totalReviews * 0.25) },
-      { stars: 3, count: Math.floor(reviewsData.summary.totalReviews * 0.1) },
-      { stars: 2, count: Math.floor(reviewsData.summary.totalReviews * 0.03) },
-      { stars: 1, count: Math.floor(reviewsData.summary.totalReviews * 0.02) },
-    ];
-
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Rating Summary</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="text-center">
-            <div className="text-3xl font-bold">{reviewsData.summary.averageRating.toFixed(1)}</div>
-            <StarRating rating={Math.round(reviewsData.summary.averageRating)} readOnly size="large" />
-            <p className="text-sm text-muted-foreground mt-1">
-              {reviewsData.summary.totalReviews} {reviewsData.summary.totalReviews === 1 ? "review" : "reviews"}
-            </p>
-          </div>
-          <div className="space-y-2">
-            {distribution.map(({ stars, count }) => (
-              <div key={stars} className="flex items-center gap-2">
-                <span className="text-sm w-3">{stars}</span>
-                <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-                <Progress value={(count / reviewsData.summary.totalReviews) * 100} className="h-2 flex-1" />
-                <span className="text-sm text-muted-foreground w-8 text-right">{count}</span>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const renderReviewCard = (review: any) => (
-    <Card key={review.id} className="transition-shadow hover:shadow-md">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              <span className="font-medium">{review.user.name}</span>
-              <span className="text-sm text-muted-foreground">•</span>
-              <span className="text-sm text-muted-foreground">
-                {formatDistanceToNow(new Date(review.createdAt))}
-              </span>
-            </div>
-            <StarRating rating={review.rating} readOnly size="small" />
-          </div>
-          {review.reported && (
-            <Badge variant="destructive" className="gap-1">
-              <Flag className="h-3 w-3" aria-hidden="true" />
-              Reported
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <p className="text-sm leading-relaxed">{review.comment}</p>
-        
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button
-              variant={review.hasMarkedHelpful ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleMarkHelpful(review.id)}
-              disabled={markHelpfulMutation.isPending}
-              className="gap-1"
-              aria-label={`Mark review as helpful, ${review.helpfulCount} people found this helpful`}
-            >
-              <ThumbsUp className="h-3 w-3" aria-hidden="true" />
-              Helpful ({review.helpfulCount})
-            </Button>
-          </div>
-          {!review.reported && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleReportReview(review.id)}
-              disabled={reportReviewMutation.isPending}
-              className="gap-1 text-muted-foreground hover:text-destructive"
-              aria-label="Report this review as inappropriate"
-            >
-              <Flag className="h-3 w-3" aria-hidden="true" />
-              Report
-            </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
 
   if (isLoading) {
     return (
@@ -431,12 +277,26 @@ export default function ReviewsList({ arrangementId, arrangementName }: ReviewsL
       {/* Reviews Grid */}
       <div className="grid gap-4 lg:grid-cols-[300px_1fr]">
         {/* Rating Summary */}
-        {renderRatingBreakdown()}
+        {reviewsData && reviewsData.summary.totalReviews > 0 && (
+          <ReviewsSummary 
+            averageRating={reviewsData.summary.averageRating}
+            totalReviews={reviewsData.summary.totalReviews}
+          />
+        )}
 
         {/* Reviews List */}
         <div className="space-y-4">
           {reviewsData && reviewsData.reviews.length > 0 ? (
-            reviewsData.reviews.map(renderReviewCard)
+            reviewsData.reviews.map((review: any) => (
+              <ReviewCard
+                key={review.id}
+                review={review}
+                onMarkHelpful={handleMarkHelpful}
+                onReport={handleReportReview}
+                isMarkingHelpful={markHelpfulMutation.isPending}
+                isReporting={reportReviewMutation.isPending}
+              />
+            ))
           ) : (
             <Card className="p-8 text-center">
               <CardContent>

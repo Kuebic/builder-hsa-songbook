@@ -71,6 +71,19 @@ export default tseslint.config(
       'eqeqeq': ['error', 'always'],
       'curly': ['error', 'all'],
       
+      // Component size enforcement
+      'max-lines': ['warn', {
+        max: 300,
+        skipBlankLines: true,
+        skipComments: true,
+      }],
+      'max-lines-per-function': ['warn', {
+        max: 150,
+        skipBlankLines: true,
+        skipComments: true,
+        IIFEs: true,
+      }],
+      
       // Code style rules (lighter since we have Prettier)
       'semi': ['error', 'always'],
       'quotes': ['error', 'double', { avoidEscape: true }],
@@ -104,6 +117,26 @@ export default tseslint.config(
       'no-console': 'off',
       // Allow any in test files
       '@typescript-eslint/no-explicit-any': 'off',
+      // Test files can be longer
+      'max-lines': ['warn', { max: 600, skipBlankLines: true, skipComments: true }],
+      'max-lines-per-function': 'off',
+    },
+  },
+  {
+    // Stricter rules for React components
+    files: ['client/features/**/components/*.tsx', 'client/components/**/*.tsx'],
+    rules: {
+      'max-lines': ['error', {
+        max: 200,  // Strict limit for component files
+        skipBlankLines: true,
+        skipComments: true,
+      }],
+      'max-lines-per-function': ['warn', {
+        max: 100,  // Components should be focused
+        skipBlankLines: true,
+        skipComments: true,
+        IIFEs: true,
+      }],
     },
   },
   {

@@ -3,6 +3,12 @@ export { default as SongCard } from "./components/SongCard";
 export { default as SongsPage } from "./components/SongsPage";
 export { default as SongDetailPage } from "./components/SongDetailPage";
 
+// Extracted components
+export { StarRating } from "./components/StarRating";
+export { ReviewCard } from "./components/ReviewCard";
+export { ReviewsSummary } from "./components/ReviewsSummary";
+export { SongsSearchBar } from "./components/SongsSearchBar";
+
 // ChordDisplay components
 export { ChordDisplay, default as ChordDisplayComponent } from "./components/ChordDisplay";
 export { ChordDisplayControls, default as ChordDisplayControlsComponent } from "./components/ChordDisplayControls";
