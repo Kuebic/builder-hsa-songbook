@@ -295,7 +295,6 @@ export default function SongDetailPage(): ReactElement {
 
               <TabsContent value="verses" className="mt-6">
                 <BibleVersesSection
-                  songId={song.id}
                   songTitle={song.title}
                   verses={mockBibleVerses} // Mock data for now
                   onSubmitVerse={async (reference, text, relevanceNote) => {
@@ -315,7 +314,6 @@ export default function SongDetailPage(): ReactElement {
 
               <TabsContent value="reviews" className="mt-6">
                 <SongReviewsSection
-                  songId={song.id}
                   songTitle={song.title}
                   averageRating={song.avgRating}
                   totalReviews={23} // Mock data
