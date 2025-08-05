@@ -17,7 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrangementDetail } from "../types/song.types";
+import { Arrangement } from "../types/song.types";
 import { StarRating } from "./StarRating";
 
 export interface ArrangementGridProps {
