@@ -33,7 +33,6 @@ export interface SongReviewsSectionProps {
  * (not specific arrangements) and view community feedback
  */
 export default function SongReviewsSection({
-  songId,
   songTitle,
   averageRating,
   totalReviews,
