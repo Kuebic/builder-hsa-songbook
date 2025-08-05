@@ -55,7 +55,6 @@ export interface BibleVersesSectionProps {
  * scriptural references to songs and vote on relevance
  */
 export default function BibleVersesSection({
-  songId,
   songTitle,
   verses,
   onSubmitVerse,
