@@ -282,7 +282,7 @@ export function ChordProTextEditor({
         style={{
           ...editorStyle,
           color: 'rgba(0, 0, 0, 0.01)', // Nearly transparent but not completely
-          caretColor: '#000000', // Always visible black cursor
+          caretColor: 'var(--foreground)', // Theme-aware cursor color
         }}
         placeholder={placeholder}
         readOnly={readOnly}
