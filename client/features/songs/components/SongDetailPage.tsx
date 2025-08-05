@@ -17,7 +17,7 @@ import ArrangementGrid from "./ArrangementGrid";
 import SongReviewsSection from "./SongReviewsSection";
 import BibleVersesSection, { BibleVerse } from "./BibleVersesSection";
 import ChordProEditor from "./ChordProEditor";
-import { ArrangementDetail } from "../types/song.types";
+import { Arrangement } from "../types/song.types";
 
 type SongParams = {
   slug: string;
