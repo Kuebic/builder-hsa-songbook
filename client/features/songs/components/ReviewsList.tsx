@@ -26,7 +26,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useUserId } from "@/shared/hooks/useAuth";
 import { useReviewsByArrangement, useCreateOrUpdateReview, useMarkReviewHelpful, useReportReview } from "../hooks/useReviews";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "@/shared/utils/formatRelativeTime";
 import { cn } from "@/lib/utils";
 
 interface ReviewsListProps {
@@ -265,7 +265,7 @@ export default function ReviewsList({ arrangementId, arrangementName }: ReviewsL
               <span className="font-medium">{review.user.name}</span>
               <span className="text-sm text-muted-foreground">•</span>
               <span className="text-sm text-muted-foreground">
-                {formatDistanceToNow(new Date(review.createdAt), { addSuffix: true })}
+                {formatDistanceToNow(new Date(review.createdAt))}
               </span>
             </div>
             <StarRating rating={review.rating} readOnly size="small" />
@@ -421,7 +421,7 @@ export default function ReviewsList({ arrangementId, arrangementName }: ReviewsL
               <StarRating rating={reviewsData.currentUserReview.rating} readOnly size="small" />
               <p className="text-sm">{reviewsData.currentUserReview.comment}</p>
               <p className="text-xs text-muted-foreground">
-                Posted {formatDistanceToNow(new Date(reviewsData.currentUserReview.createdAt), { addSuffix: true })}
+                Posted {formatDistanceToNow(new Date(reviewsData.currentUserReview.createdAt))}
               </p>
             </div>
           </AlertDescription>

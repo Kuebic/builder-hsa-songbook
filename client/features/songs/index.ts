@@ -11,3 +11,11 @@ export * from "./hooks/useArrangements";
 // Types and utilities
 export type { Song, ClientSong, ChordChart, SongFilters } from "./types/song.types";
 export { songToClientFormat } from "./types/song.types";
+
+// Review hooks
+export {
+  useReviewsByArrangement,
+  useCreateOrUpdateReview,
+  useMarkReviewHelpful,
+  useReportReview
+} from "./hooks/useReviews";

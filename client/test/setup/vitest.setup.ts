@@ -2,6 +2,12 @@ import { beforeAll, afterEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
+// Import Clerk mocks
+import "../mocks/clerk";
+
+// Import lucide-react mocks
+import "../mocks/lucide-react";
+
 // Mock IntersectionObserver
 global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),

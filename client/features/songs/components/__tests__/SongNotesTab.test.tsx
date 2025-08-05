@@ -16,17 +16,7 @@ vi.mock("../../hooks/useVerses", () => ({
   useUpvoteVerse: vi.fn(),
 }));
 
-// Mock lucide icons
-vi.mock("lucide-react", () => ({
-  Book: () => <div data-testid="book-icon" />,
-  Plus: () => <div data-testid="plus-icon" />,
-  ThumbsUp: ({ className, fill }: any) => (
-    <div data-testid="thumbs-up-icon" className={className} data-fill={fill} />
-  ),
-  CheckCircle: () => <div data-testid="check-circle-icon" />,
-  XCircle: () => <div data-testid="x-circle-icon" />,
-  Clock: () => <div data-testid="clock-icon" />,
-}));
+// Lucide icons are mocked globally in test setup
 
 // Mock UI components
 vi.mock("@/components/ui/card", () => ({

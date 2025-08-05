@@ -28,7 +28,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useUserId } from "@/shared/hooks/useAuth";
 import { useVersesBySong, useSubmitVerse, useUpvoteVerse } from "../hooks/useVerses";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "@/shared/utils/formatRelativeTime";
 
 interface SongNotesTabProps {
   songId: string;
@@ -158,7 +158,7 @@ export default function SongNotesTab({ songId, songTitle, songNotes }: SongNotes
               <User className="h-3 w-3" aria-hidden="true" />
               <span>{verse.submittedBy.name}</span>
               <span>•</span>
-              <span>{formatDistanceToNow(new Date(verse.createdAt), { addSuffix: true })}</span>
+              <span>{formatDistanceToNow(new Date(verse.createdAt))}</span>
             </div>
           </div>
           {verse.status && getStatusBadge(verse.status)}

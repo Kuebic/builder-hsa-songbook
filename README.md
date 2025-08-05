@@ -24,24 +24,24 @@ A Progressive Web App (PWA) for worship songbook management, featuring offline c
    ```
 
 3. **Configure environment variables**
-   
+
    Create a `.env` file in the project root:
    ```env
    # MongoDB Connection (Required)
    MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database
-   
+
    # Clerk Authentication (Required)
    VITE_CLERK_PUBLISHABLE_KEY=pk_test_your_clerk_publishable_key
-   
+
    # Server Configuration
    PORT=3000
    NODE_ENV=development
-   
+
    # Optional
    PING_MESSAGE="ping pong"
    ```
 
-   **Important:** 
+   **Important:**
    - Copy `.env.example` as a starting point
    - Replace with your actual MongoDB connection string
    - Get your Clerk key from https://dashboard.clerk.dev

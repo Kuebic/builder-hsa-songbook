@@ -196,18 +196,7 @@ vi.mock("@features/songs/utils/mockData", () => ({
 }));
 
 // Mock lucide-react icons
-vi.mock("lucide-react", () => ({
-  Music: () => <div data-testid="music-icon" />,
-  Search: () => <div data-testid="search-icon" />,
-  Filter: () => <div data-testid="filter-icon" />,
-  Sparkles: () => <div data-testid="sparkles-icon" />,
-  Clock: () => <div data-testid="clock-icon" />,
-  Heart: () => <div data-testid="heart-icon" />,
-  TrendingUp: () => <div data-testid="trending-up-icon" />,
-  Users: () => <div data-testid="users-icon" />,
-  BookOpen: () => <div data-testid="book-open-icon" />,
-  PlusCircle: () => <div data-testid="plus-circle-icon" />,
-}));
+// Lucide icons are mocked globally in test setup
 
 // Mock UI components
 vi.mock("@/components/ui/button", () => ({

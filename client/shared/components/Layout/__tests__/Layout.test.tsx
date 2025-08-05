@@ -4,20 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 import Layout from "../Layout";
 
 // Mock lucide-react icons
-vi.mock("lucide-react", () => ({
-  Music: () => <div data-testid="music-icon" />,
-  Search: () => <div data-testid="search-icon" />,
-  List: () => <div data-testid="list-icon" />,
-  User: () => <div data-testid="user-icon" />,
-  Settings: () => <div data-testid="settings-icon" />,
-  Moon: () => <div data-testid="moon-icon" />,
-  Sun: () => <div data-testid="sun-icon" />,
-  Monitor: () => <div data-testid="monitor-icon" />,
-  Menu: () => <div data-testid="menu-icon" />,
-  Home: () => <div data-testid="home-icon" />,
-  BookOpen: () => <div data-testid="book-open-icon" />,
-  PlusCircle: () => <div data-testid="plus-circle-icon" />,
-}));
+// Lucide icons are mocked globally in test setup
 
 // Mock UI components
 vi.mock("@/components/ui/button", () => ({

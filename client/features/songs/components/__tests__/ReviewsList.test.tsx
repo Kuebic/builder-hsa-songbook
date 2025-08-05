@@ -4,9 +4,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ReviewsList from "../ReviewsList";
 import { useAuthContext } from "@/shared/contexts/AuthContext";
 import { 
-  useArrangementReviews, 
-  useSubmitReview, 
-  useMarkHelpful, 
+  useReviewsByArrangement, 
+  useCreateOrUpdateReview, 
+  useMarkReviewHelpful, 
   useReportReview 
 } from "../../hooks/useReviews";
 
@@ -16,9 +16,9 @@ vi.mock("@/shared/contexts/AuthContext", () => ({
 }));
 
 vi.mock("../../hooks/useReviews", () => ({
-  useArrangementReviews: vi.fn(),
-  useSubmitReview: vi.fn(),
-  useMarkHelpful: vi.fn(),
+  useReviewsByArrangement: vi.fn(),
+  useCreateOrUpdateReview: vi.fn(),
+  useMarkReviewHelpful: vi.fn(),
   useReportReview: vi.fn(),
 }));
 
@@ -112,11 +112,11 @@ describe("ReviewsList", () => {
       currentUser: mockCurrentUser,
       isAuthenticated: true,
     });
-    (useSubmitReview as any).mockReturnValue({
+    (useCreateOrUpdateReview as any).mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
     });
-    (useMarkHelpful as any).mockReturnValue({
+    (useMarkReviewHelpful as any).mockReturnValue({
       mutate: vi.fn(),
     });
     (useReportReview as any).mockReturnValue({
@@ -126,7 +126,7 @@ describe("ReviewsList", () => {
 
   describe("Loading State", () => {
     it("should show loading skeletons while fetching", () => {
-      (useArrangementReviews as any).mockReturnValue({
+      (useReviewsByArrangement as any).mockReturnValue({
         data: null,
         isLoading: true,
         error: null,
@@ -143,7 +143,7 @@ describe("ReviewsList", () => {
 
   describe("Reviews Display", () => {
     it("should display reviews list", () => {
-      (useArrangementReviews as any).mockReturnValue({
+      (useReviewsByArrangement as any).mockReturnValue({
         data: { reviews: mockReviews, summary: mockSummary },
         isLoading: false,
         error: null,
@@ -162,7 +162,7 @@ describe("ReviewsList", () => {
     });
 
     it("should display average rating and total count", () => {
-      (useArrangementReviews as any).mockReturnValue({
+      (useReviewsByArrangement as any).mockReturnValue({
         data: { reviews: mockReviews, summary: mockSummary },
         isLoading: false,
         error: null,
@@ -178,7 +178,7 @@ describe("ReviewsList", () => {
     });
 
     it("should display rating breakdown", () => {
-      (useArrangementReviews as any).mockReturnValue({
+      (useReviewsByArrangement as any).mockReturnValue({
         data: { 
           reviews: mockReviews, 
           summary: mockSummary,
@@ -206,7 +206,7 @@ describe("ReviewsList", () => {
     });
 
     it("should show empty state when no reviews", () => {
-      (useArrangementReviews as any).mockReturnValue({
+      (useReviewsByArrangement as any).mockReturnValue({
         data: { reviews: [], summary: { ...mockSummary, totalReviews: 0, averageRating: 0 } },
         isLoading: false,
         error: null,
@@ -224,7 +224,7 @@ describe("ReviewsList", () => {
 
   describe("Current User Review", () => {
     it("should display current user review separately", () => {
-      (useArrangementReviews as any).mockReturnValue({
+      (useReviewsByArrangement as any).mockReturnValue({
         data: { 
           reviews: mockReviews, 
           summary: mockSummary,
@@ -244,7 +244,7 @@ describe("ReviewsList", () => {
     });
 
     it("should show edit button for user's own review", () => {
-      (useArrangementReviews as any).mockReturnValue({
+      (useReviewsByArrangement as any).mockReturnValue({
         data: { 
           reviews: mockReviews, 
           summary: mockSummary,
@@ -265,7 +265,7 @@ describe("ReviewsList", () => {
 
   describe("Review Submission", () => {
     it("should open review form when write review clicked", async () => {
-      (useArrangementReviews as any).mockReturnValue({
+      (useReviewsByArrangement as any).mockReturnValue({
         data: { reviews: [], summary: mockSummary },
         isLoading: false,
         error: null,
@@ -286,11 +286,11 @@ describe("ReviewsList", () => {
 
     it("should submit review with valid data", async () => {
       const mockSubmit = vi.fn();
-      (useSubmitReview as any).mockReturnValue({
+      (useCreateOrUpdateReview as any).mockReturnValue({
         mutate: mockSubmit,
         isPending: false,
       });
-      (useArrangementReviews as any).mockReturnValue({
+      (useReviewsByArrangement as any).mockReturnValue({
         data: { reviews: [], summary: mockSummary },
         isLoading: false,
         error: null,
@@ -331,7 +331,7 @@ describe("ReviewsList", () => {
         currentUser: null,
         isAuthenticated: false,
       });
-      (useArrangementReviews as any).mockReturnValue({
+      (useReviewsByArrangement as any).mockReturnValue({
         data: { reviews: [], summary: mockSummary },
         isLoading: false,
         error: null,
@@ -353,10 +353,10 @@ describe("ReviewsList", () => {
   describe("Helpful Marking", () => {
     it("should mark review as helpful", async () => {
       const mockMarkHelpful = vi.fn();
-      (useMarkHelpful as any).mockReturnValue({
+      (useMarkReviewHelpful as any).mockReturnValue({
         mutate: mockMarkHelpful,
       });
-      (useArrangementReviews as any).mockReturnValue({
+      (useReviewsByArrangement as any).mockReturnValue({
         data: { reviews: mockReviews, summary: mockSummary },
         isLoading: false,
         error: null,
@@ -377,7 +377,7 @@ describe("ReviewsList", () => {
     });
 
     it("should show different style for already marked helpful", () => {
-      (useArrangementReviews as any).mockReturnValue({
+      (useReviewsByArrangement as any).mockReturnValue({
         data: { reviews: mockReviews, summary: mockSummary },
         isLoading: false,
         error: null,
@@ -396,7 +396,7 @@ describe("ReviewsList", () => {
 
   describe("Review Reporting", () => {
     it("should show report dialog when flag clicked", async () => {
-      (useArrangementReviews as any).mockReturnValue({
+      (useReviewsByArrangement as any).mockReturnValue({
         data: { reviews: mockReviews, summary: mockSummary },
         isLoading: false,
         error: null,
@@ -421,7 +421,7 @@ describe("ReviewsList", () => {
       (useReportReview as any).mockReturnValue({
         mutate: mockReport,
       });
-      (useArrangementReviews as any).mockReturnValue({
+      (useReviewsByArrangement as any).mockReturnValue({
         data: { reviews: mockReviews, summary: mockSummary },
         isLoading: false,
         error: null,
@@ -454,7 +454,7 @@ describe("ReviewsList", () => {
 
   describe("Star Rating Display", () => {
     it("should display correct number of filled stars", () => {
-      (useArrangementReviews as any).mockReturnValue({
+      (useReviewsByArrangement as any).mockReturnValue({
         data: { reviews: mockReviews, summary: mockSummary },
         isLoading: false,
         error: null,
@@ -477,7 +477,7 @@ describe("ReviewsList", () => {
 
   describe("Error Handling", () => {
     it("should show error state when loading fails", () => {
-      (useArrangementReviews as any).mockReturnValue({
+      (useReviewsByArrangement as any).mockReturnValue({
         data: null,
         isLoading: false,
         error: new Error("Failed to load reviews"),
