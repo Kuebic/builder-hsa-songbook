@@ -9,7 +9,6 @@ import { ReviewsSummary } from "./ReviewsSummary";
 import { StarRating } from "./StarRating";
 
 export interface SongReviewsSectionProps {
-  songId: string;
   songTitle: string;
   averageRating: number;
   totalReviews: number;
