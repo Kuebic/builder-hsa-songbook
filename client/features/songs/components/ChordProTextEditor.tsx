@@ -266,7 +266,7 @@ export function ChordProTextEditor({
         scrollLeft={scrollLeft}
       />
 
-      {/* Main textarea */}
+      {/* Main textarea with carefully tuned transparency */}
       <Textarea
         ref={textareaRef}
         value={value}
@@ -274,13 +274,16 @@ export function ChordProTextEditor({
         onKeyDown={handleKeyDown}
         onScroll={handleScroll}
         className={cn(
-          "font-mono resize-none bg-transparent relative z-10",
+          "font-mono resize-none relative z-10",
           "min-h-[400px] w-full",
-          "text-transparent caret-black dark:caret-white",
-          "[&::selection]:bg-blue-200 [&::selection]:text-transparent",
+          "bg-transparent",
           readOnly && "cursor-default"
         )}
-        style={editorStyle}
+        style={{
+          ...editorStyle,
+          color: 'rgba(0, 0, 0, 0.01)', // Nearly transparent but not completely
+          caretColor: 'currentColor', // Visible cursor
+        }}
         placeholder={placeholder}
         readOnly={readOnly}
         spellCheck={false}
