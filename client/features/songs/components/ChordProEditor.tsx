@@ -29,7 +29,15 @@ import { ChordProTextEditor } from "./ChordProTextEditor";
 import { ChordProEditorToolbar } from "./ChordProEditorToolbar";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useChordTransposition } from "../hooks/useChordTransposition";
-import { debounce } from "lodash";
+
+// Simple debounce implementation
+function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
 
 export interface ChordProEditorProps {
   initialContent: string;
