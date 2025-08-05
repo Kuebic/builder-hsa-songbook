@@ -323,26 +323,25 @@ export default function ChordProEditor({
             <div className="h-full">
               {!readOnly && !showPreview && (
                 <div className="h-full p-4 overflow-auto">
-                  <div className="space-y-4">
-                    <div className="bg-muted/50 rounded-md p-3 text-sm">
-                      <p className="font-medium mb-2">ChordPro Quick Reference:</p>
-                      <ul className="space-y-1 text-muted-foreground">
-                        <li>• Chords: [C] [G] [Am] [F]</li>
-                        <li>• Title: {"{title: Song Title}"}</li>
-                        <li>• Artist: {"{subtitle: Artist Name}"}</li>
-                        <li>• Comments: {"{comment: This is a comment}"}</li>
-                        <li>• Sections: {"{chorus}"} {"{verse: 1}"}</li>
-                      </ul>
-                    </div>
-                    
-                    <Textarea
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      className="font-mono text-sm min-h-[400px] resize-none"
-                      placeholder="Enter ChordPro formatted lyrics here..."
-                      readOnly={readOnly}
-                    />
+                  <div className="bg-muted/50 rounded-md p-3 text-sm mb-4">
+                    <p className="font-medium mb-2">ChordPro Quick Reference:</p>
+                    <ul className="space-y-1 text-muted-foreground">
+                      <li>• Chords: [C] [G] [Am] [F]</li>
+                      <li>• Title: {"{title: Song Title}"}</li>
+                      <li>• Artist: {"{subtitle: Artist Name}"}</li>
+                      <li>• Comments: {"{comment: This is a comment}"}</li>
+                      <li>• Sections: {"{chorus}"} {"{verse: 1}"}</li>
+                    </ul>
                   </div>
+
+                  <ChordProTextEditor
+                    value={content}
+                    onChange={handleContentChange}
+                    onSave={handleSave}
+                    readOnly={readOnly}
+                    fontSize={editorFontSize}
+                    className="h-[calc(100vh-20rem)]"
+                  />
                 </div>
               )}
               
