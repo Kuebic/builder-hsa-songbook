@@ -1,3 +1,4 @@
+import "./env"; // Load environment variables first
 import path from "path";
 import { createServer, initializeServer } from "./index";
 import * as express from "express";

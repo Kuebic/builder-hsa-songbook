@@ -276,14 +276,10 @@ export async function migrateMockData() {
         mockChordProData[mockSong.title as keyof typeof mockChordProData] ||
         `{title: ${mockSong.title}}\n{artist: ${mockSong.artist}}\n{key: ${mockSong.key}}\n\n[${mockSong.key}]Sample chord progression\n[${mockSong.key}]More chords here`;
 
+      // First create the song without arrangement
       const song = new Song({
         title: mockSong.title,
         artist: mockSong.artist,
-        chordData,
-        key: mockSong.key,
-        tempo: mockSong.tempo,
-        timeSignature: "4/4",
-        difficulty: mockSong.difficulty,
         themes: mockSong.themes,
         source: mockSong.source,
         lyrics: `Sample lyrics for ${mockSong.title}`,
@@ -302,7 +298,40 @@ export async function migrateMockData() {
       });
 
       await song.save();
-      console.log(`✅ Migrated: ${song.title} (${song.slug})`);
+      
+      // Create a default arrangement for the song
+      const arrangement = new Arrangement({
+        name: "Default",
+        songIds: [song._id],
+        createdBy: adminUserId,
+        chordData,
+        key: mockSong.key,
+        tempo: mockSong.tempo,
+        timeSignature: "4/4",
+        difficulty: mockSong.difficulty,
+        description: `Default arrangement for ${mockSong.title}`,
+        tags: ["default", "original"],
+        metadata: {
+          isMashup: false,
+          isPublic: true,
+          ratings: {
+            average: 0,
+            count: 0,
+          },
+          views: 0,
+          setlistCount: 0,
+          reviewCount: 0,
+        },
+        documentSize: 0,
+      });
+      
+      await arrangement.save();
+      
+      // Update the song with the default arrangement
+      song.defaultArrangement = arrangement._id;
+      await song.save();
+      
+      console.log(`✅ Migrated: ${song.title} (${song.slug}) with default arrangement`);
     }
 
     // Create sample arrangements for the first few songs

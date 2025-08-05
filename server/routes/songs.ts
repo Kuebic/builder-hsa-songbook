@@ -25,19 +25,20 @@ function extractBasicChords(chordData: string): string[] {
 
 // Helper function to transform MongoDB song to client format
 function transformSongToClientFormat(song: any) {
-  // Extract arrangement data if available
-  const arrangement = song.defaultArrangement || song.arrangements?.[0];
-  
-  // Extract basic chords from arrangement if available
-  let basicChords: string[] = [];
-  if (arrangement?.chordData) {
-    basicChords = extractBasicChords(arrangement.chordData);
-  }
+  try {
+    // Extract arrangement data if available
+    const arrangement = song.defaultArrangement || song.arrangements?.[0];
+    
+    // Extract basic chords from arrangement if available
+    let basicChords: string[] = [];
+    if (arrangement?.chordData) {
+      basicChords = extractBasicChords(arrangement.chordData);
+    }
   
   return {
     id: song._id.toString(),
     title: song.title,
-    artist: song.artist,
+    artist: song.artist || "",
     slug: song.slug,
     compositionYear: song.compositionYear,
     ccli: song.ccli,
@@ -62,6 +63,11 @@ function transformSongToClientFormat(song: any) {
     lastUsed: undefined, // Client-side only field
     isFavorite: false, // Client-side only field
   };
+  } catch (error) {
+    console.error("Error in transformSongToClientFormat:", error);
+    console.error("Song data:", JSON.stringify(song, null, 2));
+    throw error;
+  }
 }
 
 // Validation schemas
@@ -227,6 +233,19 @@ export async function getSong(req: Request, res: Response) {
 // Get single song by slug
 export async function getSongBySlug(req: Request, res: Response) {
   try {
+    // Check database connection first
+    const { database } = await import("../database/connection");
+    if (!database.isConnectedToDatabase()) {
+      return res.status(503).json({
+        success: false,
+        error: {
+          code: "DATABASE_UNAVAILABLE",
+          message: "Database connection is not available",
+          details: "The server is currently unable to connect to the database. Please try again later."
+        },
+      });
+    }
+
     const { slug } = req.params;
 
     // Validate slug parameter
@@ -275,16 +294,34 @@ export async function getSongBySlug(req: Request, res: Response) {
     });
   } catch (error) {
     console.error("Error fetching song by slug:", error);
-
+    console.error("Stack trace:", error instanceof Error ? error.stack : "No stack trace available");
+    
+    // Provide more specific error messages
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
         error: {
           code: "VALIDATION_ERROR",
-          message: "Invalid slug parameter",
+          message: "Invalid request parameters",
           details: error.errors,
         },
       });
+    }
+    
+    // Check for MongoDB connection errors
+    if (error instanceof Error) {
+      if (error.message.includes("buffering timed out") || 
+          error.message.includes("ECONNREFUSED") ||
+          error.message.includes("connect ETIMEDOUT")) {
+        return res.status(503).json({
+          success: false,
+          error: {
+            code: "DATABASE_ERROR",
+            message: "Database connection error",
+            details: "Unable to connect to the database. Please check server logs.",
+          },
+        });
+      }
     }
 
     res.status(500).json({
