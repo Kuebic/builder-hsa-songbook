@@ -348,10 +348,13 @@ export default function ChordProEditor({
               {(showPreview || readOnly) && (
                 <div className="h-full p-4 overflow-auto">
                   <ChordDisplay
-                    content={content}
-                    theme="light"
-                    showControls={true}
+                    content={debouncedContent}
+                    transpose={transposition.transpositionLevel}
+                    theme={displayTheme}
+                    showChords={showChords}
+                    showControls={false}
                     className="max-w-none"
+                    onTranspose={transposition.transpose}
                   />
                 </div>
               )}
