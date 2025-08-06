@@ -13,12 +13,14 @@ A Progressive Web App (PWA) for worship songbook management, featuring offline c
 ### Environment Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone <your-repo-url>
    cd builder-hsa-songbook
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -26,6 +28,7 @@ A Progressive Web App (PWA) for worship songbook management, featuring offline c
 3. **Configure environment variables**
 
    Create a `.env` file in the project root:
+
    ```env
    # MongoDB Connection (Required)
    MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database
@@ -42,11 +45,13 @@ A Progressive Web App (PWA) for worship songbook management, featuring offline c
    ```
 
    **Important:**
+
    - Copy `.env.example` as a starting point
    - Replace with your actual MongoDB connection string
    - Get your Clerk key from https://dashboard.clerk.dev
 
 4. **Start the development server**
+
    ```bash
    npm run dev
    ```
@@ -83,6 +88,7 @@ If you see a 500 error or database connection failures:
 1. **Push your code to GitHub**
 
 2. **Import project in Vercel:**
+
    - Go to https://vercel.com/new
    - Import your GitHub repository
    - Configure environment variables in Vercel dashboard:
@@ -96,6 +102,7 @@ If you see a 500 error or database connection failures:
 ### Environment Variables in Vercel
 
 Add these in your Vercel project settings:
+
 - `MONGODB_URI` - Your production MongoDB connection string
 - `VITE_CLERK_PUBLISHABLE_KEY` - Your Clerk production key
 - `NODE_ENV` - Set to "production"

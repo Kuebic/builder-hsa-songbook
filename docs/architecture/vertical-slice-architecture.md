@@ -40,7 +40,9 @@ client/
 ## Key Principles
 
 ### 1. Feature Independence
+
 Each feature is self-contained with its own:
+
 - Components
 - Business logic (hooks)
 - API integration
@@ -48,6 +50,7 @@ Each feature is self-contained with its own:
 - Tests
 
 ### 2. Public API via index.ts
+
 Each feature exports only what's needed by other features through its index.ts file:
 
 ```typescript
@@ -58,7 +61,9 @@ export type { Song, ChordChart } from "./types/song.types";
 ```
 
 ### 3. Import Paths
+
 Use path aliases for clean imports:
+
 - `@features/songs` - Access feature exports
 - `@/shared` - Access shared components/utilities
 - `@/components/ui` - Access UI component library
@@ -66,31 +71,37 @@ Use path aliases for clean imports:
 ### 4. Feature Structure Guidelines
 
 #### Components
+
 - Feature-specific React components
 - Keep components focused and single-purpose
 - Co-locate related components
 
 #### Hooks
+
 - Custom hooks for feature logic
 - API data fetching hooks
 - State management hooks
 
 #### Types
+
 - TypeScript interfaces and types
 - Keep types close to where they're used
 - Export shared types through index.ts
 
 #### API
+
 - API client functions
 - React Query hooks
 - API response transformations
 
 #### Schemas
+
 - Zod validation schemas
 - Form validation schemas
 - API request/response validation
 
 #### Utils
+
 - Feature-specific helper functions
 - Constants and configurations
 - Data transformations
@@ -109,11 +120,13 @@ Use path aliases for clean imports:
 To add a new "recordings" feature:
 
 1. Create feature directory:
+
 ```bash
 mkdir -p client/features/recordings/{components,hooks,api,types,__tests__}
 ```
 
 2. Create the index.ts:
+
 ```typescript
 // client/features/recordings/index.ts
 export { RecordingsList } from "./components/RecordingsList";
@@ -122,6 +135,7 @@ export type { Recording } from "./types/recording.types";
 ```
 
 3. Import in other features:
+
 ```typescript
 import { useRecordings } from "@features/recordings";
 ```
@@ -129,6 +143,7 @@ import { useRecordings } from "@features/recordings";
 ## Migration Notes
 
 This codebase was migrated from a traditional layered architecture. The migration involved:
+
 1. Creating feature directories
 2. Moving components to their respective features
 3. Extracting shared components to the shared directory
