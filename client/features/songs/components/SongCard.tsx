@@ -26,14 +26,9 @@ import {
   Edit,
   Share,
 } from "lucide-react";
-import { ClientSong } from "../types/song.types";
+import { ClientSong } from "@features/songs/types/song.types";
 
 // Constants moved outside component to prevent recreation
-const DIFFICULTY_COLORS = {
-  beginner: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  intermediate: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300", 
-  advanced: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-} as const;
 
 // Utility functions moved outside component to prevent recreation
 const formatCount = (count: number): string => {
@@ -82,9 +77,6 @@ function SongCard({
                 </p>
               </div>
               <div className="flex items-center space-x-2 ml-2">
-                <Badge variant="outline" className="text-xs">
-                  {song.key}
-                </Badge>
                 {song.tempo && (
                   <Badge variant="outline" className="text-xs">
                     {song.tempo} BPM
@@ -157,18 +149,11 @@ function SongCard({
       <CardContent className="pt-0">
         <Link to={`/songs/${song.slug}`}>
           {/* Song metadata */}
-          <div className="flex items-center space-x-3 mb-3">
-            <Badge variant="outline" className="font-medium">
-              Key: {song.key}
-            </Badge>
-            {song.tempo && <Badge variant="outline">{song.tempo} BPM</Badge>}
-            <Badge
-              variant="secondary"
-              className={DIFFICULTY_COLORS[song.difficulty]}
-            >
-              {song.difficulty}
-            </Badge>
-          </div>
+          {song.tempo && (
+            <div className="flex items-center space-x-3 mb-3">
+              <Badge variant="outline">{song.tempo} BPM</Badge>
+            </div>
+          )}
 
           {/* Chord preview */}
           {song.basicChords && song.basicChords.length > 0 && (
@@ -221,9 +206,7 @@ function SongCard({
             <Star className="h-3 w-3 fill-current" />
             <span>{song.avgRating.toFixed(1)}</span>
           </div>
-          {formattedLastUsed && (
-            <span>Used {formattedLastUsed}</span>
-          )}
+          {formattedLastUsed && <span>Used {formattedLastUsed}</span>}
         </div>
 
         <div className="flex items-center space-x-1">
@@ -261,12 +244,28 @@ function SongCard({
 }
 
 // Custom comparison function for React.memo
-const arePropsEqual = (prevProps: SongCardProps, nextProps: SongCardProps): boolean => {
-  const { song: prevSong, onAddToSetlist: prevOnAdd, onToggleFavorite: prevOnToggle, ...prevRest } = prevProps;
-  const { song: nextSong, onAddToSetlist: nextOnAdd, onToggleFavorite: nextOnToggle, ...nextRest } = nextProps;
+const arePropsEqual = (
+  prevProps: SongCardProps,
+  nextProps: SongCardProps,
+): boolean => {
+  const {
+    song: prevSong,
+    onAddToSetlist: prevOnAdd,
+    onToggleFavorite: prevOnToggle,
+    ...prevRest
+  } = prevProps;
+  const {
+    song: nextSong,
+    onAddToSetlist: nextOnAdd,
+    onToggleFavorite: nextOnToggle,
+    ...nextRest
+  } = nextProps;
 
   // Compare primitive props
-  if (prevRest.showActions !== nextRest.showActions || prevRest.variant !== nextRest.variant) {
+  if (
+    prevRest.showActions !== nextRest.showActions ||
+    prevRest.variant !== nextRest.variant
+  ) {
     return false;
   }
 

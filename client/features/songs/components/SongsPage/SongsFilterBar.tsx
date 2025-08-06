@@ -20,7 +20,10 @@ import {
 } from "@/components/ui/select";
 import { SPIRITUAL_CATEGORIES } from "@features/categories/utils/categoryMappings";
 import { getCategoryById } from "@features/categories";
-import { FilterState, ViewMode, SortOption } from "../../hooks/useFilteredSongs";
+import {
+  FilterState,
+  SortOption,
+} from "../../hooks/useFilteredSongs";
 
 export interface SongsFilterBarProps {
   filters: FilterState;
@@ -28,7 +31,10 @@ export interface SongsFilterBarProps {
   availableThemes: string[];
   isPending: boolean;
   hasActiveFilters: boolean;
-  onFilterChange: <K extends keyof FilterState>(key: K, value: FilterState[K]) => void;
+  onFilterChange: <K extends keyof FilterState>(
+    key: K,
+    value: FilterState[K],
+  ) => void;
   onClearFilters: () => void;
 }
 
@@ -49,7 +55,7 @@ export function SongsFilterBar({
         <Input
           placeholder="Search songs, artists, or themes..."
           value={filters.searchQuery}
-          onChange={(e) => onFilterChange('searchQuery', e.target.value)}
+          onChange={(e) => onFilterChange("searchQuery", e.target.value)}
           className="pl-10"
         />
       </div>
@@ -59,9 +65,9 @@ export function SongsFilterBar({
         <div className="flex items-center gap-3">
           <Filter className="h-4 w-4 text-muted-foreground" />
 
-          <Select 
-            value={filters.selectedKey} 
-            onValueChange={(value) => onFilterChange('selectedKey', value)}
+          <Select
+            value={filters.selectedKey}
+            onValueChange={(value) => onFilterChange("selectedKey", value)}
           >
             <SelectTrigger className="w-24">
               <SelectValue placeholder="Key" />
@@ -76,9 +82,11 @@ export function SongsFilterBar({
             </SelectContent>
           </Select>
 
-          <Select 
-            value={filters.selectedDifficulty} 
-            onValueChange={(value) => onFilterChange('selectedDifficulty', value)}
+          <Select
+            value={filters.selectedDifficulty}
+            onValueChange={(value) =>
+              onFilterChange("selectedDifficulty", value)
+            }
           >
             <SelectTrigger className="w-32">
               <SelectValue placeholder="Difficulty" />
@@ -91,9 +99,9 @@ export function SongsFilterBar({
             </SelectContent>
           </Select>
 
-          <Select 
-            value={filters.selectedTheme} 
-            onValueChange={(value) => onFilterChange('selectedTheme', value)}
+          <Select
+            value={filters.selectedTheme}
+            onValueChange={(value) => onFilterChange("selectedTheme", value)}
           >
             <SelectTrigger className="w-32">
               <SelectValue placeholder="Theme" />
@@ -108,9 +116,9 @@ export function SongsFilterBar({
             </SelectContent>
           </Select>
 
-          <Select 
-            value={filters.selectedCategory} 
-            onValueChange={(value) => onFilterChange('selectedCategory', value)}
+          <Select
+            value={filters.selectedCategory}
+            onValueChange={(value) => onFilterChange("selectedCategory", value)}
           >
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Category" />
@@ -127,7 +135,9 @@ export function SongsFilterBar({
 
           <Select
             value={filters.sortBy}
-            onValueChange={(value) => onFilterChange('sortBy', value as SortOption)}
+            onValueChange={(value) =>
+              onFilterChange("sortBy", value as SortOption)
+            }
           >
             <SelectTrigger className="w-32">
               <SelectValue placeholder="Sort by" />
@@ -163,9 +173,9 @@ export function SongsFilterBar({
 
         <div className="flex items-center gap-2 ml-auto">
           {hasActiveFilters && (
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={onClearFilters}
               disabled={isPending}
             >
@@ -177,7 +187,7 @@ export function SongsFilterBar({
             <Button
               variant={filters.viewMode === "grid" ? "default" : "ghost"}
               size="sm"
-              onClick={() => onFilterChange('viewMode', 'grid')}
+              onClick={() => onFilterChange("viewMode", "grid")}
               className="rounded-r-none"
               disabled={isPending}
             >
@@ -186,7 +196,7 @@ export function SongsFilterBar({
             <Button
               variant={filters.viewMode === "list" ? "default" : "ghost"}
               size="sm"
-              onClick={() => onFilterChange('viewMode', 'list')}
+              onClick={() => onFilterChange("viewMode", "list")}
               className="rounded-l-none"
               disabled={isPending}
             >
@@ -205,15 +215,20 @@ export function SongsFilterBar({
           {filters.selectedKey && filters.selectedKey !== "all" && (
             <Badge variant="secondary">Key: {filters.selectedKey}</Badge>
           )}
-          {filters.selectedDifficulty && filters.selectedDifficulty !== "all" && (
-            <Badge variant="secondary">Difficulty: {filters.selectedDifficulty}</Badge>
-          )}
+          {filters.selectedDifficulty &&
+            filters.selectedDifficulty !== "all" && (
+              <Badge variant="secondary">
+                Difficulty: {filters.selectedDifficulty}
+              </Badge>
+            )}
           {filters.selectedTheme && filters.selectedTheme !== "all" && (
             <Badge variant="secondary">Theme: {filters.selectedTheme}</Badge>
           )}
           {filters.selectedCategory && filters.selectedCategory !== "all" && (
             <Badge variant="secondary">
-              Category: {getCategoryById(filters.selectedCategory)?.name || filters.selectedCategory}
+              Category:{" "}
+              {getCategoryById(filters.selectedCategory)?.name ||
+                filters.selectedCategory}
             </Badge>
           )}
           {filters.sortBy !== "recent" && (

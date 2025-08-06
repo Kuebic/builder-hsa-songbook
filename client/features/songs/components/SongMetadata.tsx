@@ -1,14 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Eye, 
-  Star, 
-  Clock, 
-  Music, 
-  Hash,
-  User,
-} from "lucide-react";
-import { ClientSong } from "../types/song.types";
+import { Eye, Star, Clock, Music, Hash, User } from "lucide-react";
+import { ClientSong } from "@features/songs/types/song.types";
 
 export interface SongMetadataProps {
   song: ClientSong;
@@ -23,7 +16,9 @@ export default function SongMetadata({ song }: SongMetadataProps) {
   };
 
   const formatDate = (date: Date | undefined): string => {
-    if (!date) {return "Never";}
+    if (!date) {
+      return "Never";
+    }
     return new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
@@ -53,14 +48,14 @@ export default function SongMetadata({ song }: SongMetadataProps) {
           )}
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Difficulty</span>
-            <Badge 
+            <Badge
               variant="secondary"
               className={
-                song.difficulty === "beginner" 
+                song.difficulty === "beginner"
                   ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
                   : song.difficulty === "intermediate"
-                  ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                  : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                    ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+                    : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
               }
             >
               {song.difficulty}
@@ -89,7 +84,9 @@ export default function SongMetadata({ song }: SongMetadataProps) {
               <Star className="h-3 w-3" />
               Rating
             </span>
-            <span className="font-medium">{song.avgRating.toFixed(1)} / 5.0</span>
+            <span className="font-medium">
+              {song.avgRating.toFixed(1)} / 5.0
+            </span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground flex items-center gap-1">
@@ -111,7 +108,9 @@ export default function SongMetadata({ song }: SongMetadataProps) {
         <CardContent className="space-y-3">
           {song.themes && song.themes.length > 0 && (
             <div>
-              <span className="text-sm text-muted-foreground block mb-2">Themes</span>
+              <span className="text-sm text-muted-foreground block mb-2">
+                Themes
+              </span>
               <div className="flex flex-wrap gap-1">
                 {song.themes.map((theme, index) => (
                   <Badge key={index} variant="secondary">
@@ -121,10 +120,12 @@ export default function SongMetadata({ song }: SongMetadataProps) {
               </div>
             </div>
           )}
-          
+
           {song.basicChords && song.basicChords.length > 0 && (
             <div>
-              <span className="text-sm text-muted-foreground block mb-2">Common Chords</span>
+              <span className="text-sm text-muted-foreground block mb-2">
+                Common Chords
+              </span>
               <div className="flex flex-wrap gap-1">
                 {song.basicChords.map((chord, index) => (
                   <span key={index} className="chord text-sm">

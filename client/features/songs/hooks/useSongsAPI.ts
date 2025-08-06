@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ClientSong } from "../types/song.types";
+import { ClientSong } from "@features/songs/types/song.types";
 
 interface APIResponse<T> {
   success: boolean;
@@ -92,13 +92,13 @@ export function useSong(id: string) {
     queryKey: ["songs", id],
     queryFn: async (): Promise<ClientSong> => {
       const response = await fetch(`/api/songs/${id}`);
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch song: ${response.statusText}`);
       }
 
       const result: APIResponse<ClientSong> = await response.json();
-      
+
       if (!result.success) {
         throw new Error(result.error?.message || "Failed to fetch song");
       }
@@ -115,20 +115,22 @@ export function useSongBySlug(slug: string) {
   return useQuery({
     queryKey: ["songs", "slug", slug],
     queryFn: async (): Promise<ClientSong> => {
-      if (!slug) {throw new Error("Slug is required");}
-      
+      if (!slug) {
+        throw new Error("Slug is required");
+      }
+
       const response = await fetch(`/api/songs/slug/${slug}`);
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch song: ${response.statusText}`);
       }
-      
+
       const result: APIResponse<ClientSong> = await response.json();
-      
+
       if (!result.success) {
         throw new Error(result.error?.message || "Failed to fetch song");
       }
-      
+
       return result.data;
     },
     enabled: !!slug,
@@ -142,16 +144,20 @@ export function useSearchSongs(query: string, enabled = true) {
   return useQuery({
     queryKey: ["songs", "search", query],
     queryFn: async (): Promise<ClientSong[]> => {
-      if (!query.trim()) {return [];}
-      
-      const response = await fetch(`/api/songs/search?q=${encodeURIComponent(query)}`);
-      
+      if (!query.trim()) {
+        return [];
+      }
+
+      const response = await fetch(
+        `/api/songs/search?q=${encodeURIComponent(query)}`,
+      );
+
       if (!response.ok) {
         throw new Error(`Search failed: ${response.statusText}`);
       }
 
       const result: APIResponse<ClientSong[]> = await response.json();
-      
+
       if (!result.success) {
         throw new Error(result.error?.message || "Search failed");
       }
@@ -166,7 +172,7 @@ export function useSearchSongs(query: string, enabled = true) {
 // Create new song
 export function useCreateSong() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (songData: any): Promise<ClientSong> => {
       const response = await fetch("/api/songs", {
@@ -182,7 +188,7 @@ export function useCreateSong() {
       }
 
       const result: APIResponse<ClientSong> = await response.json();
-      
+
       if (!result.success) {
         throw new Error(result.error?.message || "Failed to create song");
       }
@@ -199,9 +205,12 @@ export function useCreateSong() {
 // Update song
 export function useUpdateSong() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: async ({ id, ...songData }: { id: string } & any): Promise<ClientSong> => {
+    mutationFn: async ({
+      id,
+      ...songData
+    }: { id: string } & any): Promise<ClientSong> => {
       const response = await fetch(`/api/songs/${id}`, {
         method: "PUT",
         headers: {
@@ -215,7 +224,7 @@ export function useUpdateSong() {
       }
 
       const result: APIResponse<ClientSong> = await response.json();
-      
+
       if (!result.success) {
         throw new Error(result.error?.message || "Failed to update song");
       }
@@ -234,7 +243,7 @@ export function useUpdateSong() {
 // Delete song
 export function useDeleteSong() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (id: string): Promise<{ id: string }> => {
       const response = await fetch(`/api/songs/${id}`, {
@@ -246,7 +255,7 @@ export function useDeleteSong() {
       }
 
       const result: APIResponse<{ id: string }> = await response.json();
-      
+
       if (!result.success) {
         throw new Error(result.error?.message || "Failed to delete song");
       }
@@ -263,7 +272,7 @@ export function useDeleteSong() {
 // Rate a song
 export function useRateSong() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ id, rating }: { id: string; rating: number }) => {
       const response = await fetch(`/api/songs/${id}/rate`, {
@@ -279,7 +288,7 @@ export function useRateSong() {
       }
 
       const result = await response.json();
-      
+
       if (!result.success) {
         throw new Error(result.error?.message || "Failed to rate song");
       }

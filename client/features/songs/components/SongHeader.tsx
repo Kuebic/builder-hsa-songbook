@@ -19,7 +19,7 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { ClientSong } from "../types/song.types";
+import { ClientSong } from "@features/songs/types/song.types";
 
 export interface SongHeaderProps {
   song: ClientSong;
@@ -53,41 +53,37 @@ export default function SongHeader({
                 </Button>
               </Link>
             </div>
-            
+
             <h1 className="text-3xl font-bold tracking-tight truncate">
               {song.title}
             </h1>
-            
+
             {song.artist && (
               <p className="text-lg text-muted-foreground mt-1">
                 {song.artist}
               </p>
             )}
-            
+
             <div className="flex items-center gap-2 mt-3">
               <Badge variant="outline" className="font-medium">
                 Key: {song.key}
               </Badge>
-              {song.tempo && (
-                <Badge variant="outline">
-                  {song.tempo} BPM
-                </Badge>
-              )}
-              <Badge 
-                variant="secondary" 
+              {song.tempo && <Badge variant="outline">{song.tempo} BPM</Badge>}
+              <Badge
+                variant="secondary"
                 className={
-                  song.difficulty === "beginner" 
+                  song.difficulty === "beginner"
                     ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
                     : song.difficulty === "intermediate"
-                    ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                    : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+                      : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
                 }
               >
                 {song.difficulty}
               </Badge>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2 ml-4">
             <Button
               variant="outline"
@@ -97,14 +93,15 @@ export default function SongHeader({
             >
               <Heart
                 className={`h-5 w-5 ${
-                  song.isFavorite 
-                    ? "fill-red-500 text-red-500" 
-                    : ""
+                  song.isFavorite ? "fill-red-500 text-red-500" : ""
                 }`}
               />
             </Button>
-            
-            <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+
+            <DropdownMenu
+              open={isDropdownOpen}
+              onOpenChange={setIsDropdownOpen}
+            >
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon" className="h-10 w-10">
                   <MoreVertical className="h-5 w-5" />
@@ -128,7 +125,7 @@ export default function SongHeader({
                   Export
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={onDelete}
                   className="text-red-600 dark:text-red-400"
                 >

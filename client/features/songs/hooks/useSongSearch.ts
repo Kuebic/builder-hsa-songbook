@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Song, SongFilters } from "../types/song.types";
+import { Song, SongFilters } from "@features/songs/types/song.types";
 
 export function useSongSearch(songs: Song[], filters: SongFilters) {
   const [filteredSongs, setFilteredSongs] = useState<Song[]>(songs);
@@ -11,8 +11,12 @@ export function useSongSearch(songs: Song[], filters: SongFilters) {
     if (filters.searchQuery.trim()) {
       filtered = filtered.filter(
         (song) =>
-          song.title.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
-          song.artist?.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
+          song.title
+            .toLowerCase()
+            .includes(filters.searchQuery.toLowerCase()) ||
+          song.artist
+            ?.toLowerCase()
+            .includes(filters.searchQuery.toLowerCase()) ||
           song.themes.some((theme) =>
             theme.toLowerCase().includes(filters.searchQuery.toLowerCase()),
           ),

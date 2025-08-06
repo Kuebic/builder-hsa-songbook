@@ -15,8 +15,14 @@ export { SongsSearchBar } from "./components/SongsSearchBar";
 export type { SongsSearchBarProps } from "./components/SongsSearchBar";
 
 // ChordDisplay components
-export { ChordDisplay, default as ChordDisplayComponent } from "./components/ChordDisplay";
-export { ChordDisplayControls, default as ChordDisplayControlsComponent } from "./components/ChordDisplayControls";
+export {
+  ChordDisplay,
+  default as ChordDisplayComponent,
+} from "./components/ChordDisplay";
+export {
+  ChordDisplayControls,
+  default as ChordDisplayControlsComponent,
+} from "./components/ChordDisplayControls";
 
 // Hooks
 export { useSongSearch } from "./hooks/useSongSearch";
@@ -24,15 +30,15 @@ export * from "./hooks/useSongsAPI";
 export * from "./hooks/useArrangements";
 
 // ChordDisplay hooks
-export { 
-  useChordSheetParser, 
-  useChordSheetParserCallback, 
-  useChordSheetParserCache, 
+export {
+  useChordSheetParser,
+  useChordSheetParserCallback,
+  useChordSheetParserCache,
 } from "./hooks/useChordSheetParser";
-export { 
-  useChordTransposition, 
-  useKeyTransposition, 
-  useTargetKeyTransposition, 
+export {
+  useChordTransposition,
+  useKeyTransposition,
+  useTargetKeyTransposition,
 } from "./hooks/useChordTransposition";
 
 // Review hooks
@@ -44,7 +50,12 @@ export {
 } from "./hooks/useReviews";
 
 // Types and utilities
-export type { Song, ClientSong, ChordChart, SongFilters } from "./types/song.types";
+export type {
+  Song,
+  ClientSong,
+  ChordChart,
+  SongFilters,
+} from "./types/song.types";
 export { songToClientFormat } from "./types/song.types";
 
 // ChordDisplay types

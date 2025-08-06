@@ -1,6 +1,12 @@
-import { useState, useMemo, useCallback, useDeferredValue, useTransition } from "react";
+import {
+  useState,
+  useMemo,
+  useCallback,
+  useDeferredValue,
+  useTransition,
+} from "react";
 import { useSearchParams } from "react-router-dom";
-import { ClientSong } from "../types/song.types";
+import { ClientSong } from "@features/songs/types/song.types";
 import { assignClientSongCategories } from "@features/categories";
 
 export type ViewMode = "grid" | "list";
@@ -28,14 +34,17 @@ export interface UseFilteredSongsReturn {
   deferredSearchQuery: string;
   isPending: boolean;
   hasActiveFilters: boolean;
-  
+
   // Filtered data
   filteredSongs: ClientSong[];
   availableKeys: string[];
   availableThemes: string[];
-  
+
   // Update handlers
-  updateFilter: <K extends keyof FilterState>(key: K, value: FilterState[K]) => void;
+  updateFilter: <K extends keyof FilterState>(
+    key: K,
+    value: FilterState[K],
+  ) => void;
   clearFilters: () => void;
   updateSearchParams: (updates: Record<string, string | null>) => void;
 }
@@ -43,31 +52,49 @@ export interface UseFilteredSongsReturn {
 export function useFilteredSongs({
   songs,
   defaultSort = "recent",
-  defaultView = "grid"
+  defaultView = "grid",
 }: UseFilteredSongsOptions): UseFilteredSongsReturn {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // Initialize state from URL parameters
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-  const [viewMode, setViewMode] = useState<ViewMode>((searchParams.get('view') as ViewMode) || defaultView);
-  const [sortBy, setSortBy] = useState<SortOption>((searchParams.get('sort') as SortOption) || defaultSort);
-  const [selectedKey, setSelectedKey] = useState<string>(searchParams.get('key') || 'all');
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>(searchParams.get('difficulty') || 'all');
-  const [selectedTheme, setSelectedTheme] = useState<string>(searchParams.get('theme') || 'all');
-  const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get('category') || 'all');
-  
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get("search") || "",
+  );
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    (searchParams.get("view") as ViewMode) || defaultView,
+  );
+  const [sortBy, setSortBy] = useState<SortOption>(
+    (searchParams.get("sort") as SortOption) || defaultSort,
+  );
+  const [selectedKey, setSelectedKey] = useState<string>(
+    searchParams.get("key") || "all",
+  );
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>(
+    searchParams.get("difficulty") || "all",
+  );
+  const [selectedTheme, setSelectedTheme] = useState<string>(
+    searchParams.get("theme") || "all",
+  );
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    searchParams.get("category") || "all",
+  );
+
   // React 18 performance optimizations
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const [isPending, startTransition] = useTransition();
-  
+
   // Filter and sort songs
   const filteredSongs = useMemo(() => {
     const filtered = songs.filter((song) => {
       const matchesSearch =
         !deferredSearchQuery ||
         song.title.toLowerCase().includes(deferredSearchQuery.toLowerCase()) ||
-        song.artist?.toLowerCase().includes(deferredSearchQuery.toLowerCase()) ||
-        song.themes?.some(theme => theme.toLowerCase().includes(deferredSearchQuery.toLowerCase()));
+        song.artist
+          ?.toLowerCase()
+          .includes(deferredSearchQuery.toLowerCase()) ||
+        song.themes?.some((theme) =>
+          theme.toLowerCase().includes(deferredSearchQuery.toLowerCase()),
+        );
 
       const matchesKey =
         !selectedKey || selectedKey === "all" || song.key === selectedKey;
@@ -81,12 +108,21 @@ export function useFilteredSongs({
         song.themes?.includes(selectedTheme);
 
       // Category filtering using category assignment algorithm
-      const matchesCategory = !selectedCategory || selectedCategory === "all" || (() => {
-        const { categories } = assignClientSongCategories(song);
-        return categories.includes(selectedCategory);
-      })();
+      const matchesCategory =
+        !selectedCategory ||
+        selectedCategory === "all" ||
+        (() => {
+          const { categories } = assignClientSongCategories(song);
+          return categories.includes(selectedCategory);
+        })();
 
-      return matchesSearch && matchesKey && matchesDifficulty && matchesTheme && matchesCategory;
+      return (
+        matchesSearch &&
+        matchesKey &&
+        matchesDifficulty &&
+        matchesTheme &&
+        matchesCategory
+      );
     });
 
     // Sort songs
@@ -116,10 +152,12 @@ export function useFilteredSongs({
     selectedCategory,
     sortBy,
   ]);
-  
+
   // Get unique values for filters
   const availableKeys = useMemo(() => {
-    const keys = [...new Set(songs.map((song) => song.key).filter(Boolean))] as string[];
+    const keys = [
+      ...new Set(songs.map((song) => song.key).filter(Boolean)),
+    ] as string[];
     return keys.sort();
   }, [songs]);
 
@@ -127,61 +165,64 @@ export function useFilteredSongs({
     const themes = [...new Set(songs.flatMap((song) => song.themes || []))];
     return themes.sort();
   }, [songs]);
-  
+
   // URL state management
-  const updateSearchParams = useCallback((updates: Record<string, string | null>) => {
-    const newSearchParams = new URLSearchParams(searchParams);
-    
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value && value !== 'all' && value !== '') {
-        newSearchParams.set(key, value);
-      } else {
-        newSearchParams.delete(key);
-      }
-    });
-    
-    setSearchParams(newSearchParams);
-  }, [searchParams, setSearchParams]);
-  
+  const updateSearchParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const newSearchParams = new URLSearchParams(searchParams);
+
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value && value !== "all" && value !== "") {
+          newSearchParams.set(key, value);
+        } else {
+          newSearchParams.delete(key);
+        }
+      });
+
+      setSearchParams(newSearchParams);
+    },
+    [searchParams, setSearchParams],
+  );
+
   // Generic filter update handler
-  const updateFilter = useCallback(<K extends keyof FilterState>(
-    key: K,
-    value: FilterState[K]
-  ) => {
-    startTransition(() => {
-      switch (key) {
-        case 'searchQuery':
-          setSearchQuery(value as string);
-          updateSearchParams({ search: value as string });
-          break;
-        case 'selectedKey':
-          setSelectedKey(value as string);
-          updateSearchParams({ key: value as string });
-          break;
-        case 'selectedDifficulty':
-          setSelectedDifficulty(value as string);
-          updateSearchParams({ difficulty: value as string });
-          break;
-        case 'selectedTheme':
-          setSelectedTheme(value as string);
-          updateSearchParams({ theme: value as string });
-          break;
-        case 'selectedCategory':
-          setSelectedCategory(value as string);
-          updateSearchParams({ category: value as string });
-          break;
-        case 'sortBy':
-          setSortBy(value as SortOption);
-          updateSearchParams({ sort: value as string });
-          break;
-        case 'viewMode':
-          setViewMode(value as ViewMode);
-          updateSearchParams({ view: value as string });
-          break;
-      }
-    });
-  }, [updateSearchParams]);
-  
+  const updateFilter = useCallback(
+    <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
+      startTransition(() => {
+        switch (key) {
+          case "searchQuery":
+            setSearchQuery(value as string);
+            updateSearchParams({ search: value as string });
+            break;
+          case "selectedKey":
+            setSelectedKey(value as string);
+            updateSearchParams({ key: value as string });
+            break;
+          case "selectedDifficulty":
+            setSelectedDifficulty(value as string);
+            updateSearchParams({ difficulty: value as string });
+            break;
+          case "selectedTheme":
+            setSelectedTheme(value as string);
+            updateSearchParams({ theme: value as string });
+            break;
+          case "selectedCategory":
+            setSelectedCategory(value as string);
+            updateSearchParams({ category: value as string });
+            break;
+          case "sortBy":
+            setSortBy(value as SortOption);
+            updateSearchParams({ sort: value as string });
+            break;
+          case "viewMode":
+            setViewMode(value as ViewMode);
+            updateSearchParams({ view: value as string });
+            break;
+        }
+      });
+    },
+    [updateSearchParams],
+  );
+
   const clearFilters = useCallback(() => {
     startTransition(() => {
       setSearchQuery("");
@@ -193,15 +234,16 @@ export function useFilteredSongs({
       setSearchParams({});
     });
   }, [defaultSort, setSearchParams]);
-  
-  const hasActiveFilters =
+
+  const hasActiveFilters = Boolean(
     searchQuery ||
     (selectedKey && selectedKey !== "all") ||
     (selectedDifficulty && selectedDifficulty !== "all") ||
     (selectedTheme && selectedTheme !== "all") ||
     (selectedCategory && selectedCategory !== "all") ||
-    sortBy !== defaultSort;
-  
+    sortBy !== defaultSort
+  );
+
   return {
     filters: {
       searchQuery,

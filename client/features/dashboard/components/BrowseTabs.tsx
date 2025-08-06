@@ -1,19 +1,8 @@
-import {
-  TrendingUp,
-  Music,
-  Users,
-  Calendar,
-} from "lucide-react";
+import { TrendingUp, Music, Users, Calendar } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSongsStats } from "../../songs/hooks/useSongsAPI";
 import { CategoryGrid } from "@features/categories";
-
 
 export default function BrowseTabs() {
   // Fetch stats for overview cards
@@ -74,8 +63,6 @@ export default function BrowseTabs() {
       </Card>
     </div>
   );
-
-
 
   return (
     <div className="space-y-6">

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { 
+import {
   Card,
   CardContent,
   CardDescription,
@@ -18,26 +18,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Plus, 
-  Music,
-  AlertCircle,
-} from "lucide-react";
-import { ArrangementDetail } from "../types/song.types";
+import { Plus, Music, AlertCircle } from "lucide-react";
+import { ArrangementDetail, ArrangementWithMetrics } from "@features/songs/types/song.types";
 import ArrangementCard from "./ArrangementCard";
-import { 
-  useCreateArrangement, 
+import {
+  useCreateArrangement,
   useDeleteArrangement,
-} from "../hooks/useArrangements";
+} from "@features/songs/hooks/useArrangements";
 import { useAuthContext } from "@/shared/contexts/AuthContext";
 
 export interface ArrangementsListProps {
   songId: string;
   songChordData: string;
-  arrangements: ArrangementDetail[];
+  arrangements: ArrangementWithMetrics[];
   defaultArrangementId?: string;
-  onArrangementView?: (arrangement: ArrangementDetail) => void;
-  onArrangementEdit?: (arrangement: ArrangementDetail) => void;
+  onArrangementView?: (arrangement: ArrangementWithMetrics) => void;
+  onArrangementEdit?: (arrangement: ArrangementWithMetrics) => void;
 }
 
 export default function ArrangementsList({
@@ -50,8 +46,9 @@ export default function ArrangementsList({
 }: ArrangementsListProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newArrangementName, setNewArrangementName] = useState("");
-  const [newArrangementDescription, setNewArrangementDescription] = useState("");
-  
+  const [newArrangementDescription, setNewArrangementDescription] =
+    useState("");
+
   const { currentUser } = useAuthContext();
   const createArrangementMutation = useCreateArrangement();
   const deleteArrangementMutation = useDeleteArrangement();
@@ -60,11 +57,11 @@ export default function ArrangementsList({
     if (!newArrangementName.trim()) {
       return;
     }
-    
+
     if (!currentUser) {
       return;
     }
-    
+
     try {
       await createArrangementMutation.mutateAsync({
         name: newArrangementName,
@@ -77,7 +74,7 @@ export default function ArrangementsList({
         createdBy: currentUser._id, // Use actual user ID from auth context
         isPublic: true, // Make arrangement public by default
       });
-      
+
       setIsCreateDialogOpen(false);
       setNewArrangementName("");
       setNewArrangementDescription("");
@@ -90,14 +87,13 @@ export default function ArrangementsList({
     if (!confirm("Are you sure you want to delete this arrangement?")) {
       return;
     }
-    
+
     try {
       await deleteArrangementMutation.mutateAsync(arrangementId);
     } catch (error) {
       console.error("Failed to delete arrangement:", error);
     }
   };
-
 
   if (arrangements.length === 0) {
     return (
@@ -118,8 +114,11 @@ export default function ArrangementsList({
               Arrangements allow you to save different versions of this song
             </p>
           </div>
-          
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+
+          <Dialog
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
@@ -130,7 +129,8 @@ export default function ArrangementsList({
               <DialogHeader>
                 <DialogTitle>Create New Arrangement</DialogTitle>
                 <DialogDescription>
-                  Create a new arrangement for this song. You can customize the chords, key, and tempo.
+                  Create a new arrangement for this song. You can customize the
+                  chords, key, and tempo.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 mt-4">
@@ -148,23 +148,30 @@ export default function ArrangementsList({
                   <Textarea
                     id="description"
                     value={newArrangementDescription}
-                    onChange={(e) => setNewArrangementDescription(e.target.value)}
+                    onChange={(e) =>
+                      setNewArrangementDescription(e.target.value)
+                    }
                     placeholder="Describe this arrangement..."
                     rows={3}
                   />
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => setIsCreateDialogOpen(false)}
                   >
                     Cancel
                   </Button>
-                  <Button 
+                  <Button
                     onClick={handleCreateArrangement}
-                    disabled={!newArrangementName.trim() || createArrangementMutation.isPending}
+                    disabled={
+                      !newArrangementName.trim() ||
+                      createArrangementMutation.isPending
+                    }
                   >
-                    {createArrangementMutation.isPending ? "Creating..." : "Create"}
+                    {createArrangementMutation.isPending
+                      ? "Creating..."
+                      : "Create"}
                   </Button>
                 </div>
               </div>
@@ -182,7 +189,7 @@ export default function ArrangementsList({
           <Music className="h-5 w-5" />
           Arrangements ({arrangements.length})
         </h2>
-        
+
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
@@ -194,7 +201,8 @@ export default function ArrangementsList({
             <DialogHeader>
               <DialogTitle>Create New Arrangement</DialogTitle>
               <DialogDescription>
-                Create a new arrangement for this song. You can customize the chords, key, and tempo.
+                Create a new arrangement for this song. You can customize the
+                chords, key, and tempo.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 mt-4">
@@ -218,24 +226,29 @@ export default function ArrangementsList({
                 />
               </div>
               <div className="flex justify-end gap-2">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setIsCreateDialogOpen(false)}
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   onClick={handleCreateArrangement}
-                  disabled={!newArrangementName.trim() || createArrangementMutation.isPending}
+                  disabled={
+                    !newArrangementName.trim() ||
+                    createArrangementMutation.isPending
+                  }
                 >
-                  {createArrangementMutation.isPending ? "Creating..." : "Create"}
+                  {createArrangementMutation.isPending
+                    ? "Creating..."
+                    : "Create"}
                 </Button>
               </div>
             </div>
           </DialogContent>
         </Dialog>
       </div>
-      
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {arrangements.map((arrangement) => (
           <ArrangementCard

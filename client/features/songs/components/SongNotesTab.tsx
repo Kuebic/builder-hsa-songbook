@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -23,12 +22,11 @@ import {
   Clock,
   XCircle,
   User,
-  AlertCircle,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useUserId } from "@/shared/hooks/useAuth";
-import { useVersesBySong, useSubmitVerse, useUpvoteVerse } from "../hooks/useVerses";
-import type { Verse } from "../types/verse.types";
+import { useVerses, useSubmitVerse, useVoteVerse } from "@features/songs/hooks/useVerses";
+import type { Verse } from "@features/songs/types/song.types";
 import { formatDistanceToNow } from "@/shared/utils/formatRelativeTime";
 
 export interface SongNotesTabProps {
@@ -42,7 +40,11 @@ interface VerseFormData {
   text: string;
 }
 
-export default function SongNotesTab({ songId, songTitle, songNotes }: SongNotesTabProps) {
+export default function SongNotesTab({
+  songId,
+  songTitle,
+  songNotes,
+}: SongNotesTabProps) {
   const userId = useUserId();
   const { toast } = useToast();
   const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
@@ -51,9 +53,9 @@ export default function SongNotesTab({ songId, songTitle, songNotes }: SongNotes
     text: "",
   });
 
-  const { data: verses, isLoading, refetch } = useVersesBySong(songId);
+  const { data: verses, isLoading, refetch } = useVerses(songId);
   const submitVerseMutation = useSubmitVerse();
-  const upvoteVerseMutation = useUpvoteVerse();
+  const voteVerseMutation = useVoteVerse();
 
   const handleSubmitVerse = useCallback(async () => {
     if (!userId) {
@@ -79,7 +81,7 @@ export default function SongNotesTab({ songId, songTitle, songNotes }: SongNotes
         songId,
         reference: formData.reference.trim(),
         text: formData.text.trim(),
-        userId,
+        type: "bible" as const,
       });
 
       toast({
@@ -93,33 +95,42 @@ export default function SongNotesTab({ songId, songTitle, songNotes }: SongNotes
     } catch (error) {
       toast({
         title: "Failed to submit verse",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description:
+          error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     }
   }, [userId, formData, songId, submitVerseMutation, toast, refetch]);
 
-  const handleUpvote = useCallback(async (verseId: string) => {
-    if (!userId) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to upvote verses",
-        variant: "default",
-      });
-      return;
-    }
+  const handleUpvote = useCallback(
+    async (verseId: string) => {
+      if (!userId) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to upvote verses",
+          variant: "default",
+        });
+        return;
+      }
 
-    try {
-      await upvoteVerseMutation.mutateAsync({ verseId, userId });
-      refetch();
-    } catch (error) {
-      toast({
-        title: "Failed to update vote",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
-    }
-  }, [userId, upvoteVerseMutation, toast, refetch]);
+      try {
+        await voteVerseMutation.mutateAsync({
+          verseId,
+          voteType: "up",
+          songId,
+        });
+        refetch();
+      } catch (error) {
+        toast({
+          title: "Failed to update vote",
+          description:
+            error instanceof Error ? error.message : "An error occurred",
+          variant: "destructive",
+        });
+      }
+    },
+    [userId, voteVerseMutation, toast, refetch, songId],
+  );
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -157,39 +168,30 @@ export default function SongNotesTab({ songId, songTitle, songNotes }: SongNotes
             <h3 className="font-semibold text-lg">{verse.reference}</h3>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <User className="h-3 w-3" aria-hidden="true" />
-              <span>{verse.submittedBy.name}</span>
+              <span>{verse.userName}</span>
               <span>•</span>
               <span>{formatDistanceToNow(new Date(verse.createdAt))}</span>
             </div>
           </div>
-          {verse.status && getStatusBadge(verse.status)}
+          {getStatusBadge(verse.isApproved ? "approved" : "pending")}
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-sm leading-relaxed">{verse.text}</p>
-        
-        {verse.rejectionReason && (
-          <Alert className="py-2">
-            <AlertCircle className="h-4 w-4" aria-hidden="true" />
-            <AlertDescription className="text-sm">
-              {verse.rejectionReason}
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        {verse.status === "approved" && (
+
+        {verse.isApproved && (
           <div className="flex items-center gap-2">
             <Button
-              variant={verse.hasUpvoted ? "default" : "outline"}
+              variant={verse.userVote === "up" ? "default" : "outline"}
               size="sm"
               onClick={() => handleUpvote(verse.id)}
-              disabled={upvoteVerseMutation.isPending}
+              disabled={voteVerseMutation.isPending}
               className="gap-1"
-              aria-label={`Upvote this verse, ${verse.upvoteCount} upvotes`}
-              aria-pressed={verse.hasUpvoted}
+              aria-label={`Upvote this verse, ${verse.upvotes} upvotes`}
+              aria-pressed={verse.userVote === "up"}
             >
               <ChevronUp className="h-4 w-4" aria-hidden="true" />
-              {verse.upvoteCount}
+              {verse.upvotes}
             </Button>
           </div>
         )}
@@ -219,7 +221,9 @@ export default function SongNotesTab({ songId, songTitle, songNotes }: SongNotes
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">{songNotes}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">
+              {songNotes}
+            </p>
           </CardContent>
         </Card>
       )}
@@ -231,9 +235,16 @@ export default function SongNotesTab({ songId, songTitle, songNotes }: SongNotes
             <Book className="h-5 w-5" />
             Related Bible Verses
           </h2>
-          <Dialog open={isSubmitDialogOpen} onOpenChange={setIsSubmitDialogOpen}>
+          <Dialog
+            open={isSubmitDialogOpen}
+            onOpenChange={setIsSubmitDialogOpen}
+          >
             <DialogTrigger asChild>
-              <Button size="sm" className="gap-1" aria-label="Add a Bible verse related to this song">
+              <Button
+                size="sm"
+                className="gap-1"
+                aria-label="Add a Bible verse related to this song"
+              >
                 <Plus className="h-4 w-4" aria-hidden="true" />
                 Add Verse
               </Button>
@@ -253,7 +264,9 @@ export default function SongNotesTab({ songId, songTitle, songNotes }: SongNotes
                   <Input
                     id="reference"
                     value={formData.reference}
-                    onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, reference: e.target.value })
+                    }
                     placeholder="Enter verse reference"
                   />
                 </div>
@@ -264,7 +277,9 @@ export default function SongNotesTab({ songId, songTitle, songNotes }: SongNotes
                   <Textarea
                     id="text"
                     value={formData.text}
-                    onChange={(e) => setFormData({ ...formData, text: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, text: e.target.value })
+                    }
                     placeholder="Enter the verse text"
                     rows={4}
                   />
@@ -291,10 +306,8 @@ export default function SongNotesTab({ songId, songTitle, songNotes }: SongNotes
         </div>
 
         {/* Verses List */}
-        {verses && verses.verses.length > 0 ? (
-          <div className="grid gap-4">
-            {verses.verses.map(renderVerseCard)}
-          </div>
+        {verses && verses.length > 0 ? (
+          <div className="grid gap-4">{verses.map(renderVerseCard)}</div>
         ) : (
           <Card className="p-8 text-center">
             <CardContent>
