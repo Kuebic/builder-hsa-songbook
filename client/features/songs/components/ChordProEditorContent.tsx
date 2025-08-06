@@ -10,15 +10,27 @@ import { cn } from "@/lib/utils";
 interface ChordProEditorContentProps {
   content: string;
   onChange: (content: string) => void;
+  debouncedContent: string;
   readOnly: boolean;
   isMobile: boolean;
+  undoStack: string[];
+  redoStack: string[];
+  transposition: any;
+  onUndo: () => void;
+  onRedo: () => void;
 }
 
 export function ChordProEditorContent({
   content,
   onChange,
+  debouncedContent,
   readOnly,
   isMobile,
+  undoStack, // eslint-disable-line @typescript-eslint/no-unused-vars
+  redoStack, // eslint-disable-line @typescript-eslint/no-unused-vars
+  transposition,
+  onUndo, // eslint-disable-line @typescript-eslint/no-unused-vars
+  onRedo, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: ChordProEditorContentProps) {
   const [showPreview, setShowPreview] = useState(true);
   const [scrollTop, setScrollTop] = useState(0);
@@ -106,10 +118,12 @@ export function ChordProEditorContent({
           {(showPreview || readOnly) && (
             <div className="h-full p-4 overflow-auto">
               <ChordDisplay
-                content={content}
+                content={debouncedContent}
+                transpose={transposition.transpositionLevel}
                 theme="light"
                 showControls={true}
                 className="max-w-none"
+                onTranspose={transposition.transpose}
               />
             </div>
           )}
@@ -171,10 +185,12 @@ export function ChordProEditorContent({
           >
             <div className="h-full p-4 overflow-auto">
               <ChordDisplay
-                content={content}
+                content={debouncedContent}
+                transpose={transposition.transpositionLevel}
                 theme="light"
-                showControls={true}
+                showControls={!readOnly}
                 className="max-w-none"
+                onTranspose={transposition.transpose}
               />
             </div>
           </ResizablePanel>

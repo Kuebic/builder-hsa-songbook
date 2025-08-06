@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AlertCircle } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { useChordTransposition } from "../hooks/useChordTransposition";
 import { isCorruptedChordData } from "./ChordProEditorHelpers";
 import { ChordProEditorHeader } from "./ChordProEditorHeader";
 import { ChordProEditorContent } from "./ChordProEditorContent";
@@ -25,50 +26,83 @@ export interface ChordProEditorProps {
   onCancel: () => void;
   isLoading?: boolean;
   readOnly?: boolean;
+  debounceMs?: number;
+  fontSize?: number;
+  theme?: "light" | "dark" | "stage";
 }
 
-
-export default function ChordProEditor({
+function ChordProEditor({
   initialContent,
   songTitle,
   onSave,
   onCancel,
   isLoading = false,
   readOnly = false,
+  debounceMs = 300,
+  fontSize = 14, // eslint-disable-line @typescript-eslint/no-unused-vars
+  theme = "light", // eslint-disable-line @typescript-eslint/no-unused-vars
 }: ChordProEditorProps) {
   const [content, setContent] = useState(initialContent);
+  const [debouncedContent, setDebouncedContent] = useState(initialContent);
   const [hasChanges, setHasChanges] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [isCorrupted, setIsCorrupted] = useState(false);
+  const [undoStack, setUndoStack] = useState<string[]>([]);
+  const [redoStack, setRedoStack] = useState<string[]>([]);
   const isMobile = useMediaQuery("(max-width: 768px)");
+
+  // Debounced content update for live preview
+  const debouncedUpdateContent = useMemo(() => {
+    let timeoutId: NodeJS.Timeout;
+    const debouncedFn = (newContent: string) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setDebouncedContent(newContent);
+      }, debounceMs);
+    };
+
+    debouncedFn.cancel = () => clearTimeout(timeoutId);
+    return debouncedFn;
+  }, [debounceMs]);
 
   useEffect(() => {
     setHasChanges(content !== initialContent);
-  }, [content, initialContent]);
+    debouncedUpdateContent(content);
+    return () => {
+      debouncedUpdateContent.cancel?.();
+    };
+  }, [content, initialContent, debouncedUpdateContent]);
 
   useEffect(() => {
     // Check if initial content appears corrupted
     setIsCorrupted(isCorruptedChordData(initialContent));
   }, [initialContent]);
 
-  const handleSave = () => {
-    onSave(content);
-  };
+  // Set up transposition hook
+  const transposition = useChordTransposition({
+    initialTranspose: 0,
+    content: debouncedContent,
+    enableKeyDetection: true,
+  });
 
-  const handleCancel = () => {
+  const handleSave = useCallback(() => {
+    onSave(content);
+  }, [content, onSave]);
+
+  const handleCancel = useCallback(() => {
     if (hasChanges) {
       setShowCancelDialog(true);
     } else {
       onCancel();
     }
-  };
+  }, [hasChanges, onCancel]);
 
-  const confirmCancel = () => {
+  const confirmCancel = useCallback(() => {
     setShowCancelDialog(false);
     onCancel();
-  };
+  }, [onCancel]);
 
-  const handleFixCorruptedData = () => {
+  const handleFixCorruptedData = useCallback(() => {
     // Clear corrupted data and replace with empty template
     const cleanTemplate = `{title: ${songTitle.split(" - ")[0]}}
 {key: C}
@@ -76,8 +110,38 @@ export default function ChordProEditor({
 [C]Add your lyrics and chords here...`;
     setContent(cleanTemplate);
     setIsCorrupted(false);
-  };
+  }, [songTitle]);
 
+  // Enhanced editor functions
+  const handleUndo = useCallback(() => {
+    if (undoStack.length > 0) {
+      const previousContent = undoStack[undoStack.length - 1];
+      setRedoStack((prev) => [...prev, content]);
+      setUndoStack((prev) => prev.slice(0, -1));
+      setContent(previousContent);
+    }
+  }, [content, undoStack]);
+
+  const handleRedo = useCallback(() => {
+    if (redoStack.length > 0) {
+      const nextContent = redoStack[redoStack.length - 1];
+      setUndoStack((prev) => [...prev, content]);
+      setRedoStack((prev) => prev.slice(0, -1));
+      setContent(nextContent);
+    }
+  }, [content, redoStack]);
+
+  const handleContentChange = useCallback(
+    (newContent: string) => {
+      // Add to undo stack if significant change
+      if (Math.abs(newContent.length - content.length) > 1) {
+        setUndoStack((prev) => [...prev.slice(-19), content]); // Keep last 20 states
+        setRedoStack([]);
+      }
+      setContent(newContent);
+    },
+    [content],
+  );
 
   return (
     <>
@@ -125,9 +189,15 @@ export default function ChordProEditor({
 
         <ChordProEditorContent
           content={content}
-          onChange={setContent}
+          onChange={handleContentChange}
+          debouncedContent={debouncedContent}
           readOnly={readOnly}
           isMobile={isMobile}
+          undoStack={undoStack}
+          redoStack={redoStack}
+          transposition={transposition}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
         />
       </Card>
 
@@ -150,3 +220,26 @@ export default function ChordProEditor({
     </>
   );
 }
+
+// Performance comparison function for React.memo
+const arePropsEqual = (
+  prevProps: ChordProEditorProps,
+  nextProps: ChordProEditorProps,
+): boolean => {
+  // Compare primitive props
+  return (
+    prevProps.initialContent === nextProps.initialContent &&
+    prevProps.songTitle === nextProps.songTitle &&
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.readOnly === nextProps.readOnly &&
+    prevProps.debounceMs === nextProps.debounceMs &&
+    prevProps.fontSize === nextProps.fontSize &&
+    prevProps.theme === nextProps.theme &&
+    // Functions should be memoized by parent
+    prevProps.onSave === nextProps.onSave &&
+    prevProps.onCancel === nextProps.onCancel
+  );
+};
+
+// Export memoized component with custom comparison
+export default memo(ChordProEditor, arePropsEqual);
