@@ -1,7 +1,24 @@
 import { Schema, model, Document, Types, Model } from "mongoose";
 
 // Musical key enum for consistency
-export type MusicalKey = "C" | "C#" | "Db" | "D" | "D#" | "Eb" | "E" | "F" | "F#" | "Gb" | "G" | "G#" | "Ab" | "A" | "A#" | "Bb" | "B";
+export type MusicalKey =
+  | "C"
+  | "C#"
+  | "Db"
+  | "D"
+  | "D#"
+  | "Eb"
+  | "E"
+  | "F"
+  | "F#"
+  | "Gb"
+  | "G"
+  | "G#"
+  | "Ab"
+  | "A"
+  | "A#"
+  | "Bb"
+  | "B";
 
 // Interface for User document - Updated for dual favorites system
 export interface IUser extends Document {
@@ -20,6 +37,18 @@ export interface IUser extends Document {
     website?: string; // Max 200 characters
     location?: string; // Max 100 characters
   };
+  profilePrivacy: {
+    isPublic: boolean; // Master privacy switch - default false for privacy by design
+    showFavorites: boolean; // Show favorite songs/arrangements
+    showActivity: boolean; // Show activity timeline
+    showContributions: boolean; // Show created content - default true for ministry value
+    showReviews: boolean; // Show reviews and ratings
+    allowContact: boolean; // Allow ministry contact via email
+    showStats: boolean; // Show contribution statistics
+    showBio: boolean; // Show bio section
+    showLocation: boolean; // Show location
+    showWebsite: boolean; // Show website link
+  };
   favoriteSongs: Types.ObjectId[]; // Array of song IDs user has favorited
   favoriteArrangements: Types.ObjectId[]; // Array of arrangement IDs user has favorited
   submittedVerses: Types.ObjectId[]; // Array of verse IDs user has submitted
@@ -33,7 +62,7 @@ export interface IUser extends Document {
   lastLoginAt?: Date;
   createdAt: Date;
   updatedAt: Date;
-  
+
   // Instance methods
   incrementSongCount(): Promise<IUser>;
   incrementArrangementCount(): Promise<IUser>;
@@ -41,19 +70,23 @@ export interface IUser extends Document {
   updateLastLogin(): Promise<IUser>;
   deactivate(): Promise<IUser>;
   activate(): Promise<IUser>;
-  
+
   // Favorites methods - Songs
   addFavoriteSong(songId: string | Types.ObjectId): Promise<IUser>;
   removeFavoriteSong(songId: string | Types.ObjectId): Promise<IUser>;
   isFavoriteSong(songId: string | Types.ObjectId): boolean;
   getFavoriteSongs(): Types.ObjectId[];
-  
+
   // Favorites methods - Arrangements
-  addFavoriteArrangement(arrangementId: string | Types.ObjectId): Promise<IUser>;
-  removeFavoriteArrangement(arrangementId: string | Types.ObjectId): Promise<IUser>;
+  addFavoriteArrangement(
+    arrangementId: string | Types.ObjectId,
+  ): Promise<IUser>;
+  removeFavoriteArrangement(
+    arrangementId: string | Types.ObjectId,
+  ): Promise<IUser>;
   isFavoriteArrangement(arrangementId: string | Types.ObjectId): boolean;
   getFavoriteArrangements(): Types.ObjectId[];
-  
+
   // Community content methods
   addSubmittedVerse(verseId: Types.ObjectId): Promise<IUser>;
   addReview(reviewId: Types.ObjectId): Promise<IUser>;
@@ -68,109 +101,180 @@ export interface IUserModel extends Model<IUser> {
 }
 
 // Create the schema - Updated for dual favorites and community features
-const userSchema = new Schema<IUser>({
-  clerkId: {
-    type: String,
-    trim: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    lowercase: true,
-    trim: true,
-    maxlength: 254, // Standard email length limit
-  },
-  name: {
-    type: String,
-    required: true,
-    maxlength: 100,
-    trim: true,
-  },
-  role: {
-    type: String,
-    enum: ["USER", "ADMIN", "MODERATOR"],
-    default: "USER",
-  },
-  preferences: {
-    defaultKey: {
+const userSchema = new Schema<IUser>(
+  {
+    clerkId: {
       type: String,
-      enum: ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"],
-    },
-    fontSize: {
-      type: Number,
-      min: 12,
-      max: 32,
-      default: 16,
-    },
-    theme: {
-      type: String,
-      enum: ["light", "dark", "stage"],
-      default: "light",
-    },
-  },
-  profile: {
-    bio: {
-      type: String,
-      maxlength: 500,
       trim: true,
     },
-    website: {
+    email: {
       type: String,
-      maxlength: 200,
+      required: true,
+      lowercase: true,
       trim: true,
+      maxlength: 254, // Standard email length limit
     },
-    location: {
+    name: {
       type: String,
+      required: true,
       maxlength: 100,
       trim: true,
     },
-  },
-  favoriteSongs: [{
-    type: Schema.Types.ObjectId,
-    ref: "Song",
-    index: true,
-  }],
-  favoriteArrangements: [{
-    type: Schema.Types.ObjectId,
-    ref: "Arrangement",
-    index: true,
-  }],
-  submittedVerses: [{
-    type: Schema.Types.ObjectId,
-    ref: "Verse",
-  }],
-  reviews: [{
-    type: Schema.Types.ObjectId,
-    ref: "Review",
-  }],
-  stats: {
-    songsCreated: {
-      type: Number,
-      default: 0,
-      min: 0,
+    role: {
+      type: String,
+      enum: ["USER", "ADMIN", "MODERATOR"],
+      default: "USER",
     },
-    arrangementsCreated: {
-      type: Number,
-      default: 0,
-      min: 0,
+    preferences: {
+      defaultKey: {
+        type: String,
+        enum: [
+          "C",
+          "C#",
+          "Db",
+          "D",
+          "D#",
+          "Eb",
+          "E",
+          "F",
+          "F#",
+          "Gb",
+          "G",
+          "G#",
+          "Ab",
+          "A",
+          "A#",
+          "Bb",
+          "B",
+        ],
+      },
+      fontSize: {
+        type: Number,
+        min: 12,
+        max: 32,
+        default: 16,
+      },
+      theme: {
+        type: String,
+        enum: ["light", "dark", "stage"],
+        default: "light",
+      },
     },
-    setlistsCreated: {
-      type: Number,
-      default: 0,
-      min: 0,
+    profile: {
+      bio: {
+        type: String,
+        maxlength: 500,
+        trim: true,
+      },
+      website: {
+        type: String,
+        maxlength: 200,
+        trim: true,
+      },
+      location: {
+        type: String,
+        maxlength: 100,
+        trim: true,
+      },
+    },
+    profilePrivacy: {
+      isPublic: {
+        type: Boolean,
+        default: false, // Privacy by design - default private
+      },
+      showFavorites: {
+        type: Boolean,
+        default: false, // Privacy by design - default private
+      },
+      showActivity: {
+        type: Boolean,
+        default: false, // Privacy by design - default private
+      },
+      showContributions: {
+        type: Boolean,
+        default: true, // Allow ministry contributions visibility by default
+      },
+      showReviews: {
+        type: Boolean,
+        default: false, // Privacy by design - default private
+      },
+      allowContact: {
+        type: Boolean,
+        default: false, // Privacy by design - default private
+      },
+      showStats: {
+        type: Boolean,
+        default: false, // Privacy by design - default private
+      },
+      showBio: {
+        type: Boolean,
+        default: false, // Privacy by design - default private
+      },
+      showLocation: {
+        type: Boolean,
+        default: false, // Privacy by design - default private
+      },
+      showWebsite: {
+        type: Boolean,
+        default: false, // Privacy by design - default private
+      },
+    },
+    favoriteSongs: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Song",
+        index: true,
+      },
+    ],
+    favoriteArrangements: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Arrangement",
+        index: true,
+      },
+    ],
+    submittedVerses: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Verse",
+      },
+    ],
+    reviews: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Review",
+      },
+    ],
+    stats: {
+      songsCreated: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+      arrangementsCreated: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+      setlistsCreated: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    lastLoginAt: {
+      type: Date,
     },
   },
-  isActive: {
-    type: Boolean,
-    default: true,
+  {
+    timestamps: true,
+    collection: "users",
   },
-  lastLoginAt: {
-    type: Date,
-  },
-}, {
-  timestamps: true,
-  collection: "users",
-});
+);
 
 // Indexes - Updated per PRD specifications
 userSchema.index({ email: 1, isActive: 1 }, { unique: true }); // Auth lookups with email uniqueness
@@ -211,24 +315,33 @@ userSchema.methods.activate = function () {
 };
 
 // Song favorites methods
-userSchema.methods.addFavoriteSong = function (songId: string | Types.ObjectId) {
-  const objectId = typeof songId === "string" ? new Types.ObjectId(songId) : songId;
-  
+userSchema.methods.addFavoriteSong = function (
+  songId: string | Types.ObjectId,
+) {
+  const objectId =
+    typeof songId === "string" ? new Types.ObjectId(songId) : songId;
+
   if (!this.favoriteSongs.some((id: Types.ObjectId) => id.equals(objectId))) {
     this.favoriteSongs.push(objectId);
   }
   return this.save();
 };
 
-userSchema.methods.removeFavoriteSong = function (songId: string | Types.ObjectId) {
-  const objectId = typeof songId === "string" ? new Types.ObjectId(songId) : songId;
-  
-  this.favoriteSongs = this.favoriteSongs.filter((id: Types.ObjectId) => !id.equals(objectId));
+userSchema.methods.removeFavoriteSong = function (
+  songId: string | Types.ObjectId,
+) {
+  const objectId =
+    typeof songId === "string" ? new Types.ObjectId(songId) : songId;
+
+  this.favoriteSongs = this.favoriteSongs.filter(
+    (id: Types.ObjectId) => !id.equals(objectId),
+  );
   return this.save();
 };
 
 userSchema.methods.isFavoriteSong = function (songId: string | Types.ObjectId) {
-  const objectId = typeof songId === "string" ? new Types.ObjectId(songId) : songId;
+  const objectId =
+    typeof songId === "string" ? new Types.ObjectId(songId) : songId;
   return this.favoriteSongs.some((id: Types.ObjectId) => id.equals(objectId));
 };
 
@@ -237,25 +350,46 @@ userSchema.methods.getFavoriteSongs = function () {
 };
 
 // Arrangement favorites methods
-userSchema.methods.addFavoriteArrangement = function (arrangementId: string | Types.ObjectId) {
-  const objectId = typeof arrangementId === "string" ? new Types.ObjectId(arrangementId) : arrangementId;
-  
-  if (!this.favoriteArrangements.some((id: Types.ObjectId) => id.equals(objectId))) {
+userSchema.methods.addFavoriteArrangement = function (
+  arrangementId: string | Types.ObjectId,
+) {
+  const objectId =
+    typeof arrangementId === "string"
+      ? new Types.ObjectId(arrangementId)
+      : arrangementId;
+
+  if (
+    !this.favoriteArrangements.some((id: Types.ObjectId) => id.equals(objectId))
+  ) {
     this.favoriteArrangements.push(objectId);
   }
   return this.save();
 };
 
-userSchema.methods.removeFavoriteArrangement = function (arrangementId: string | Types.ObjectId) {
-  const objectId = typeof arrangementId === "string" ? new Types.ObjectId(arrangementId) : arrangementId;
-  
-  this.favoriteArrangements = this.favoriteArrangements.filter((id: Types.ObjectId) => !id.equals(objectId));
+userSchema.methods.removeFavoriteArrangement = function (
+  arrangementId: string | Types.ObjectId,
+) {
+  const objectId =
+    typeof arrangementId === "string"
+      ? new Types.ObjectId(arrangementId)
+      : arrangementId;
+
+  this.favoriteArrangements = this.favoriteArrangements.filter(
+    (id: Types.ObjectId) => !id.equals(objectId),
+  );
   return this.save();
 };
 
-userSchema.methods.isFavoriteArrangement = function (arrangementId: string | Types.ObjectId) {
-  const objectId = typeof arrangementId === "string" ? new Types.ObjectId(arrangementId) : arrangementId;
-  return this.favoriteArrangements.some((id: Types.ObjectId) => id.equals(objectId));
+userSchema.methods.isFavoriteArrangement = function (
+  arrangementId: string | Types.ObjectId,
+) {
+  const objectId =
+    typeof arrangementId === "string"
+      ? new Types.ObjectId(arrangementId)
+      : arrangementId;
+  return this.favoriteArrangements.some((id: Types.ObjectId) =>
+    id.equals(objectId),
+  );
 };
 
 userSchema.methods.getFavoriteArrangements = function () {
@@ -288,7 +422,9 @@ userSchema.statics.getTopContributors = function (limit = 10) {
   return this.find({ isActive: true })
     .sort({ "stats.songsCreated": -1 })
     .limit(limit)
-    .select("name email stats.songsCreated stats.arrangementsCreated stats.setlistsCreated");
+    .select(
+      "name email stats.songsCreated stats.arrangementsCreated stats.setlistsCreated",
+    );
 };
 
 userSchema.statics.findByEmail = function (email: string) {

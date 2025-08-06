@@ -19,17 +19,17 @@ vi.mock("../../database/models", () => {
   Object.assign(MockUser, {
     findById: vi.fn(),
   });
-  
+
   const MockSong = vi.fn();
   Object.assign(MockSong, {
     findById: vi.fn(),
   });
-  
+
   const MockArrangement = vi.fn();
   Object.assign(MockArrangement, {
     findById: vi.fn(),
   });
-  
+
   return {
     User: MockUser,
     Song: MockSong,
@@ -72,7 +72,10 @@ describe("Users API Routes - Dual Favorites", () => {
 
   describe("GET /api/users/:userId/favorites", () => {
     it("should return both song and arrangement favorites by default", async () => {
-      const { req, res } = createMockReqRes({}, { userId: "507f1f77bcf86cd799439011" });
+      const { req, res } = createMockReqRes(
+        {},
+        { userId: "507f1f77bcf86cd799439011" },
+      );
 
       const mockUserWithFavorites = {
         _id: "507f1f77bcf86cd799439011",
@@ -194,7 +197,10 @@ describe("Users API Routes - Dual Favorites", () => {
     });
 
     it("should return 404 if user not found", async () => {
-      const { req, res } = createMockReqRes({}, { userId: "507f1f77bcf86cd799439011" });
+      const { req, res } = createMockReqRes(
+        {},
+        { userId: "507f1f77bcf86cd799439011" },
+      );
 
       (User.findById as any).mockResolvedValue(null);
 
@@ -215,7 +221,10 @@ describe("Users API Routes - Dual Favorites", () => {
     it("should add song to favorites", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" },
+        {
+          userId: "507f1f77bcf86cd799439011",
+          songId: "507f1f77bcf86cd799439012",
+        },
       );
 
       const mockUser = {
@@ -233,8 +242,12 @@ describe("Users API Routes - Dual Favorites", () => {
 
       await addSongFavorite(req as Request, res as Response);
 
-      expect(mockUser.isFavoriteSong).toHaveBeenCalledWith("507f1f77bcf86cd799439012");
-      expect(mockUser.addFavoriteSong).toHaveBeenCalledWith("507f1f77bcf86cd799439012");
+      expect(mockUser.isFavoriteSong).toHaveBeenCalledWith(
+        "507f1f77bcf86cd799439012",
+      );
+      expect(mockUser.addFavoriteSong).toHaveBeenCalledWith(
+        "507f1f77bcf86cd799439012",
+      );
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -249,7 +262,10 @@ describe("Users API Routes - Dual Favorites", () => {
     it("should return 409 if song already favorited", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" },
+        {
+          userId: "507f1f77bcf86cd799439011",
+          songId: "507f1f77bcf86cd799439012",
+        },
       );
 
       const mockUser = {
@@ -276,7 +292,10 @@ describe("Users API Routes - Dual Favorites", () => {
     it("should return 404 if song not found", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" },
+        {
+          userId: "507f1f77bcf86cd799439011",
+          songId: "507f1f77bcf86cd799439012",
+        },
       );
 
       const mockUser = { _id: "507f1f77bcf86cd799439011" };
@@ -301,7 +320,10 @@ describe("Users API Routes - Dual Favorites", () => {
     it("should remove song from favorites", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" },
+        {
+          userId: "507f1f77bcf86cd799439011",
+          songId: "507f1f77bcf86cd799439012",
+        },
       );
 
       const mockUser = {
@@ -314,7 +336,9 @@ describe("Users API Routes - Dual Favorites", () => {
 
       await removeSongFavorite(req as Request, res as Response);
 
-      expect(mockUser.removeFavoriteSong).toHaveBeenCalledWith("507f1f77bcf86cd799439012");
+      expect(mockUser.removeFavoriteSong).toHaveBeenCalledWith(
+        "507f1f77bcf86cd799439012",
+      );
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         data: {
@@ -328,7 +352,10 @@ describe("Users API Routes - Dual Favorites", () => {
     it("should return 404 if song not in favorites", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" },
+        {
+          userId: "507f1f77bcf86cd799439011",
+          songId: "507f1f77bcf86cd799439012",
+        },
       );
 
       const mockUser = {
@@ -355,7 +382,10 @@ describe("Users API Routes - Dual Favorites", () => {
     it("should add arrangement to favorites", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", arrangementId: "507f1f77bcf86cd799439013" },
+        {
+          userId: "507f1f77bcf86cd799439011",
+          arrangementId: "507f1f77bcf86cd799439013",
+        },
       );
 
       const mockUser = {
@@ -373,8 +403,12 @@ describe("Users API Routes - Dual Favorites", () => {
 
       await addArrangementFavorite(req as Request, res as Response);
 
-      expect(mockUser.isFavoriteArrangement).toHaveBeenCalledWith("507f1f77bcf86cd799439013");
-      expect(mockUser.addFavoriteArrangement).toHaveBeenCalledWith("507f1f77bcf86cd799439013");
+      expect(mockUser.isFavoriteArrangement).toHaveBeenCalledWith(
+        "507f1f77bcf86cd799439013",
+      );
+      expect(mockUser.addFavoriteArrangement).toHaveBeenCalledWith(
+        "507f1f77bcf86cd799439013",
+      );
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -391,7 +425,10 @@ describe("Users API Routes - Dual Favorites", () => {
     it("should remove arrangement from favorites", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", arrangementId: "507f1f77bcf86cd799439013" },
+        {
+          userId: "507f1f77bcf86cd799439011",
+          arrangementId: "507f1f77bcf86cd799439013",
+        },
       );
 
       const mockUser = {
@@ -404,7 +441,9 @@ describe("Users API Routes - Dual Favorites", () => {
 
       await removeArrangementFavorite(req as Request, res as Response);
 
-      expect(mockUser.removeFavoriteArrangement).toHaveBeenCalledWith("507f1f77bcf86cd799439013");
+      expect(mockUser.removeFavoriteArrangement).toHaveBeenCalledWith(
+        "507f1f77bcf86cd799439013",
+      );
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         data: {
@@ -418,7 +457,10 @@ describe("Users API Routes - Dual Favorites", () => {
 
   describe("Legacy Endpoints", () => {
     it("GET /api/users/:userId/favorites should default to songs", async () => {
-      const { req, res } = createMockReqRes({}, { userId: "507f1f77bcf86cd799439011" });
+      const { req, res } = createMockReqRes(
+        {},
+        { userId: "507f1f77bcf86cd799439011" },
+      );
 
       const mockUserWithSongs = {
         _id: "507f1f77bcf86cd799439011",
@@ -447,7 +489,10 @@ describe("Users API Routes - Dual Favorites", () => {
     it("POST /api/users/:userId/favorites/:songId should add song favorite", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" },
+        {
+          userId: "507f1f77bcf86cd799439011",
+          songId: "507f1f77bcf86cd799439012",
+        },
       );
 
       const mockUser = {
@@ -468,7 +513,10 @@ describe("Users API Routes - Dual Favorites", () => {
     it("DELETE /api/users/:userId/favorites/:songId should remove song favorite", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" },
+        {
+          userId: "507f1f77bcf86cd799439011",
+          songId: "507f1f77bcf86cd799439012",
+        },
       );
 
       const mockUser = {
@@ -489,7 +537,10 @@ describe("Users API Routes - Dual Favorites", () => {
     it("should check if song is favorited", async () => {
       const { req, res } = createMockReqRes(
         {},
-        { userId: "507f1f77bcf86cd799439011", songId: "507f1f77bcf86cd799439012" },
+        {
+          userId: "507f1f77bcf86cd799439011",
+          songId: "507f1f77bcf86cd799439012",
+        },
       );
 
       const mockUser = {
@@ -501,7 +552,9 @@ describe("Users API Routes - Dual Favorites", () => {
 
       await checkFavorite(req as Request, res as Response);
 
-      expect(mockUser.isFavoriteSong).toHaveBeenCalledWith("507f1f77bcf86cd799439012");
+      expect(mockUser.isFavoriteSong).toHaveBeenCalledWith(
+        "507f1f77bcf86cd799439012",
+      );
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         data: {

@@ -5,7 +5,7 @@ import { User } from "../database/models";
 export const syncUser = async (req: Request, res: Response) => {
   try {
     const { clerkId, email, name } = req.body;
-    
+
     if (!clerkId || !email) {
       return res.status(400).json({
         success: false,
@@ -18,11 +18,11 @@ export const syncUser = async (req: Request, res: Response) => {
 
     // Check if user already exists with this Clerk ID
     let user = await User.findByClerkId(clerkId);
-    
+
     if (!user) {
       // Check if user exists with this email (migration case)
       user = await User.findByEmail(email);
-      
+
       if (user) {
         // Update existing user with Clerk ID
         user.clerkId = clerkId;

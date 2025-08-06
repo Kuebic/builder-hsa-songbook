@@ -146,7 +146,24 @@ export interface ChordTranspositionResult extends TranspositionState {
 /**
  * Valid musical keys for transposition
  */
-export type MusicalKey = "C" | "C#" | "Db" | "D" | "D#" | "Eb" | "E" | "F" | "F#" | "Gb" | "G" | "G#" | "Ab" | "A" | "A#" | "Bb" | "B";
+export type MusicalKey =
+  | "C"
+  | "C#"
+  | "Db"
+  | "D"
+  | "D#"
+  | "Eb"
+  | "E"
+  | "F"
+  | "F#"
+  | "Gb"
+  | "G"
+  | "G#"
+  | "Ab"
+  | "A"
+  | "A#"
+  | "Bb"
+  | "B";
 
 /**
  * Font size variants for responsive chord display
@@ -195,7 +212,25 @@ export const TranspositionLevelSchema = z.number().int().min(-11).max(11);
 /**
  * Zod schema for musical key validation
  */
-export const MusicalKeySchema = z.enum(["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"]);
+export const MusicalKeySchema = z.enum([
+  "C",
+  "C#",
+  "Db",
+  "D",
+  "D#",
+  "Eb",
+  "E",
+  "F",
+  "F#",
+  "Gb",
+  "G",
+  "G#",
+  "Ab",
+  "A",
+  "A#",
+  "Bb",
+  "B",
+]);
 
 /**
  * Zod schema for font size validation
@@ -212,12 +247,33 @@ export const DisplayThemeSchema = z.enum(["light", "dark", "stage"]);
 /**
  * Array of all valid musical keys in chromatic order
  */
-export const MUSICAL_KEYS: MusicalKey[] = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"];
+export const MUSICAL_KEYS: MusicalKey[] = [
+  "C",
+  "C#",
+  "Db",
+  "D",
+  "D#",
+  "Eb",
+  "E",
+  "F",
+  "F#",
+  "Gb",
+  "G",
+  "G#",
+  "Ab",
+  "A",
+  "A#",
+  "Bb",
+  "B",
+];
 
 /**
  * Font size configuration with Tailwind CSS classes
  */
-export const FONT_SIZE_CONFIG: Record<FontSize, { label: string; classes: string }> = {
+export const FONT_SIZE_CONFIG: Record<
+  FontSize,
+  { label: string; classes: string }
+> = {
   sm: { label: "Small", classes: "chord-size-sm" },
   base: { label: "Medium", classes: "chord-size-base" },
   lg: { label: "Large", classes: "chord-size-lg" },
@@ -227,7 +283,10 @@ export const FONT_SIZE_CONFIG: Record<FontSize, { label: string; classes: string
 /**
  * Theme configuration with CSS classes
  */
-export const THEME_CONFIG: Record<DisplayTheme, { label: string; classes: string }> = {
+export const THEME_CONFIG: Record<
+  DisplayTheme,
+  { label: string; classes: string }
+> = {
   light: { label: "Light", classes: "chord-display--light" },
   dark: { label: "Dark", classes: "chord-display--dark" },
   stage: { label: "Stage", classes: "chord-display--stage" },

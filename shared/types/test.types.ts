@@ -1,16 +1,27 @@
 // Type definitions for test utilities and mocks
-import { ReactElement, ReactNode, MouseEventHandler, ChangeEventHandler } from 'react';
+import {
+  ReactElement,
+  ReactNode,
+  MouseEventHandler,
+  ChangeEventHandler,
+} from "react";
 
 // Common button props
 export interface ButtonProps {
   children: ReactNode;
   onClick?: MouseEventHandler<HTMLButtonElement>;
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
+  variant?:
+    | "default"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link";
+  size?: "default" | "sm" | "lg" | "icon";
   className?: string;
   asChild?: boolean;
   disabled?: boolean;
-  type?: 'button' | 'submit' | 'reset';
+  type?: "button" | "submit" | "reset";
   [key: string]: unknown;
 }
 
@@ -28,7 +39,7 @@ export interface InputProps {
 // Badge props
 export interface BadgeProps {
   children: ReactNode;
-  variant?: 'default' | 'secondary' | 'destructive' | 'outline';
+  variant?: "default" | "secondary" | "destructive" | "outline";
   className?: string;
 }
 
@@ -63,7 +74,7 @@ export interface DropdownMenuProps {
 
 export interface DropdownMenuContentProps {
   children: ReactNode;
-  align?: 'start' | 'center' | 'end';
+  align?: "start" | "center" | "end";
   className?: string;
 }
 
@@ -87,7 +98,7 @@ export interface SheetProps {
 
 export interface SheetContentProps {
   children: ReactNode;
-  side?: 'top' | 'right' | 'bottom' | 'left';
+  side?: "top" | "right" | "bottom" | "left";
   className?: string;
 }
 
@@ -180,7 +191,7 @@ export interface IconProps {
 // Clerk mock props
 export interface ClerkSignInButtonProps {
   children: ReactNode;
-  mode?: 'modal' | 'redirect';
+  mode?: "modal" | "redirect";
   redirectUrl?: string;
   [key: string]: unknown;
 }

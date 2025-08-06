@@ -30,7 +30,7 @@ export const FormItemContext = React.createContext<FormItemContextValue>(
 /**
  * Hook to access form field state within a FormField component.
  * Must be used within a FormField component.
- * 
+ *
  * @returns Form field state including error, isDirty, isTouched, etc.
  * @throws Error if used outside of FormField component
  */

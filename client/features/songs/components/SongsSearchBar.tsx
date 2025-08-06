@@ -10,10 +10,10 @@ export interface SongsSearchBarProps {
 /**
  * Search bar component for filtering songs
  */
-export const SongsSearchBar = ({ 
-  searchQuery, 
+export const SongsSearchBar = ({
+  searchQuery,
   onSearchChange,
-  placeholder = "Search songs, artists, or themes..."
+  placeholder = "Search songs, artists, or themes...",
 }: SongsSearchBarProps) => {
   return (
     <div className="relative">

@@ -1,10 +1,6 @@
 import { Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import SongCard from "../SongCard";
 import { ClientSong } from "../../types/song.types";
 import { ViewMode } from "../../hooks/useFilteredSongs";

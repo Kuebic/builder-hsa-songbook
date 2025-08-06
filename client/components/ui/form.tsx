@@ -11,7 +11,11 @@ import {
 
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
-import { FormFieldContext, FormItemContext, useFormField } from "./utils/form-field";
+import {
+  FormFieldContext,
+  FormItemContext,
+  useFormField,
+} from "./utils/form-field";
 
 const Form = FormProvider;
 
@@ -63,7 +67,8 @@ const FormControl = React.forwardRef<
   React.ElementRef<typeof Slot>,
   React.ComponentPropsWithoutRef<typeof Slot>
 >(({ ...props }, ref) => {
-  const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
+  const { error, formItemId, formDescriptionId, formMessageId } =
+    useFormField();
 
   return (
     <Slot

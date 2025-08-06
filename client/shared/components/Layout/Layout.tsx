@@ -27,8 +27,8 @@ import {
   Monitor,
   Menu,
   Home,
-  BookOpen,
   PlusCircle,
+  User,
 } from "lucide-react";
 
 export interface LayoutProps {
@@ -40,14 +40,15 @@ export default function Layout({ children }: LayoutProps) {
   const [isOffline] = useState(false);
   const location = useLocation();
 
-  const navigation = useMemo(() => [
-    { name: "Dashboard", href: "/", icon: Home },
-    { name: "Songs", href: "/songs", icon: Music },
-    { name: "Setlists", href: "/setlists", icon: List },
-    { name: "Arrangements", href: "/arrangements", icon: BookOpen },
-  ], []);
-
-
+  const navigation = useMemo(
+    () => [
+      { name: "Dashboard", href: "/", icon: Home },
+      { name: "Songs", href: "/songs", icon: Music },
+      { name: "Setlists", href: "/setlists", icon: List },
+      { name: "Profile", href: "/profile", icon: User },
+    ],
+    [],
+  );
 
   const themeIcon = useMemo(() => {
     switch (theme) {
@@ -196,7 +197,7 @@ export default function Layout({ children }: LayoutProps) {
               </SignInButton>
             </SignedOut>
             <SignedIn>
-              <UserButton afterSignOutUrl="/" />  
+              <UserButton afterSignOutUrl="/" />
             </SignedIn>
           </div>
         </div>

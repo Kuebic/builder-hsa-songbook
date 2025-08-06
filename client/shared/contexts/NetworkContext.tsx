@@ -47,14 +47,21 @@ export function useConnectionInfo(): {
   effectiveType: string;
   quality: "excellent" | "good" | "poor" | "offline";
 } {
-  const { isOnline, isSlowConnection, effectiveType, downlink } = useNetworkContext();
+  const { isOnline, isSlowConnection, effectiveType, downlink } =
+    useNetworkContext();
 
   const quality: "excellent" | "good" | "poor" | "offline" = (() => {
-    if (!isOnline) {return "offline";}
-    
-    if (effectiveType === "4g" && downlink > 1.5) {return "excellent";}
-    if (effectiveType === "4g" || (effectiveType === "3g" && downlink > 0.7)) {return "good";}
-    
+    if (!isOnline) {
+      return "offline";
+    }
+
+    if (effectiveType === "4g" && downlink > 1.5) {
+      return "excellent";
+    }
+    if (effectiveType === "4g" || (effectiveType === "3g" && downlink > 0.7)) {
+      return "good";
+    }
+
     return "poor";
   })();
 

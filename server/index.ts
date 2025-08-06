@@ -48,10 +48,21 @@ export async function createServer() {
 
   // Categories API
   app.get("/api/categories/stats", categoriesRoutes.getCategoryStats);
-  app.get("/api/categories/:categoryId/songs", categoriesRoutes.getCategorySongs);
+  app.get(
+    "/api/categories/:categoryId/songs",
+    categoriesRoutes.getCategorySongs,
+  );
 
   // Arrangements API
-  app.get("/api/songs/:songId/arrangements", arrangementsRoutes.getArrangementsBySong);
+  app.get(
+    "/api/songs/:songId/arrangements",
+    arrangementsRoutes.getArrangementsBySong,
+  );
+  app.get(
+    "/api/arrangements/slug/:slug",
+    arrangementsRoutes.getArrangementBySlug,
+  );
+  app.get("/api/arrangements/:id", arrangementsRoutes.getArrangementById);
   app.post("/api/arrangements", arrangementsRoutes.createArrangement);
   app.put("/api/arrangements/:id", arrangementsRoutes.updateArrangement);
   app.delete("/api/arrangements/:id", arrangementsRoutes.deleteArrangement);
@@ -66,7 +77,10 @@ export async function createServer() {
 
   // Reviews API
   app.get("/api/arrangements/:arrangementId/reviews", reviewsRoutes.getReviews);
-  app.post("/api/arrangements/:arrangementId/reviews", reviewsRoutes.createOrUpdateReview);
+  app.post(
+    "/api/arrangements/:arrangementId/reviews",
+    reviewsRoutes.createOrUpdateReview,
+  );
   app.post("/api/reviews/:id/helpful", reviewsRoutes.markHelpful);
   app.post("/api/reviews/:id/report", reviewsRoutes.reportReview);
   app.get("/api/reviews/reported", reviewsRoutes.getReportedReviews);
@@ -81,7 +95,10 @@ export async function createServer() {
   app.delete("/api/setlists/:id", setlistsRoutes.deleteSetlist);
   app.get("/api/setlists/share/:token", setlistsRoutes.getSetlistByToken);
   app.post("/api/setlists/:id/songs", setlistsRoutes.addSongToSetlist);
-  app.delete("/api/setlists/:id/songs/:arrangementId", setlistsRoutes.removeSongFromSetlist);
+  app.delete(
+    "/api/setlists/:id/songs/:arrangementId",
+    setlistsRoutes.removeSongFromSetlist,
+  );
   app.put("/api/setlists/:id/reorder", setlistsRoutes.reorderSetlistSongs);
 
   // Storage monitoring API
@@ -97,18 +114,42 @@ export async function createServer() {
   // User sync endpoint for development/testing
   const userSyncRoutes = await import("./routes/test-user-sync");
   app.post("/api/users/sync", userSyncRoutes.syncUser);
-  
+
+  // Users Profile API
+  app.get("/api/users/:userId/profile", usersRoutes.getUserProfile);
+  app.put("/api/users/:userId/profile", usersRoutes.updateUserProfile);
+  app.get("/api/users/:userId/contributions", usersRoutes.getUserContributions);
+  app.get("/api/users/:userId/activity", usersRoutes.getUserActivity);
+
   // Users API - Enhanced favorites with dual support
   app.get("/api/users/:userId/favorites", usersRoutes.getFavorites); // New endpoint with type parameter
-  app.post("/api/users/:userId/favorites/songs/:songId", usersRoutes.addSongFavorite);
-  app.delete("/api/users/:userId/favorites/songs/:songId", usersRoutes.removeSongFavorite);
-  app.post("/api/users/:userId/favorites/arrangements/:arrangementId", usersRoutes.addArrangementFavorite);
-  app.delete("/api/users/:userId/favorites/arrangements/:arrangementId", usersRoutes.removeArrangementFavorite);
-  
+  app.post(
+    "/api/users/:userId/favorites/songs/:songId",
+    usersRoutes.addSongFavorite,
+  );
+  app.delete(
+    "/api/users/:userId/favorites/songs/:songId",
+    usersRoutes.removeSongFavorite,
+  );
+  app.post(
+    "/api/users/:userId/favorites/arrangements/:arrangementId",
+    usersRoutes.addArrangementFavorite,
+  );
+  app.delete(
+    "/api/users/:userId/favorites/arrangements/:arrangementId",
+    usersRoutes.removeArrangementFavorite,
+  );
+
   // Legacy favorites endpoints for backward compatibility
   app.post("/api/users/:userId/favorites/:songId", usersRoutes.addFavorite);
-  app.delete("/api/users/:userId/favorites/:songId", usersRoutes.removeFavorite);
-  app.get("/api/users/:userId/favorites/check/:songId", usersRoutes.checkFavorite);
+  app.delete(
+    "/api/users/:userId/favorites/:songId",
+    usersRoutes.removeFavorite,
+  );
+  app.get(
+    "/api/users/:userId/favorites/check/:songId",
+    usersRoutes.checkFavorite,
+  );
 
   // Database status endpoint
   app.get("/api/health", async (_req, res) => {
@@ -145,46 +186,55 @@ export async function createServer() {
 // Initialize database connection
 export async function initializeServer() {
   console.log("🚀 Starting server initialization...");
-  
+
   try {
     // Check if MongoDB URI is available
     if (!process.env.MONGODB_URI) {
       throw new Error("MONGODB_URI environment variable is not set");
     }
-    
+
     // Log connection attempt (with masked URI)
     const maskedUri = process.env.MONGODB_URI.replace(
       /mongodb(?:\+srv)?:\/\/([^:]+):([^@]+)@/,
       "mongodb://*****:*****@",
     );
     console.log(`🔌 Attempting to connect to MongoDB: ${maskedUri}`);
-    
+
     await database.connect();
     console.log("✅ Database connection established");
-    
+
     // Get connection info for debugging
     const connInfo = database.getConnectionInfo();
-    console.log(`📊 Database info: ${connInfo.name || "default"} on ${connInfo.host}:${connInfo.port}`);
+    console.log(
+      `📊 Database info: ${connInfo.name || "default"} on ${connInfo.host}:${connInfo.port}`,
+    );
 
     // Check if we need to run migrations
     await runInitialMigration();
-    
-    console.log("✅ Server initialization complete");
 
+    console.log("✅ Server initialization complete");
   } catch (error) {
     console.error("❌ Failed to initialize server:", error);
-    
+
     // Provide specific error messages based on error type
     if (error instanceof Error) {
       if (error.message.includes("ECONNREFUSED")) {
         console.error("💡 Connection refused - is MongoDB running?");
         console.error("   For local MongoDB: ensure mongod is running");
-        console.error("   For MongoDB Atlas: check your connection string and IP whitelist");
+        console.error(
+          "   For MongoDB Atlas: check your connection string and IP whitelist",
+        );
       } else if (error.message.includes("authentication failed")) {
-        console.error("💡 Authentication failed - check your MongoDB credentials");
-        console.error("   Ensure username and password in MONGODB_URI are correct");
+        console.error(
+          "💡 Authentication failed - check your MongoDB credentials",
+        );
+        console.error(
+          "   Ensure username and password in MONGODB_URI are correct",
+        );
       } else if (error.message.includes("ETIMEDOUT")) {
-        console.error("💡 Connection timeout - check network and firewall settings");
+        console.error(
+          "💡 Connection timeout - check network and firewall settings",
+        );
         console.error("   For MongoDB Atlas: ensure your IP is whitelisted");
       } else if (error.message.includes("MONGODB_URI")) {
         console.error("💡 Environment configuration issue");
@@ -195,9 +245,13 @@ export async function initializeServer() {
 
     // For development, allow continuing without database but with warnings
     if (process.env.NODE_ENV === "development") {
-      console.warn("\n⚠️  WARNING: Continuing in development mode without database");
+      console.warn(
+        "\n⚠️  WARNING: Continuing in development mode without database",
+      );
       console.warn("⚠️  API endpoints will return errors");
-      console.warn("⚠️  Fix the database connection to restore full functionality\n");
+      console.warn(
+        "⚠️  Fix the database connection to restore full functionality\n",
+      );
       return;
     }
 
@@ -213,14 +267,19 @@ async function runInitialMigration() {
 
     if (songCount === 0) {
       console.log("📦 Database is empty, running initial migration...");
-      const { migrateMockData } = await import("./migrations/migrate-mock-data");
+      const { migrateMockData } = await import(
+        "./migrations/migrate-mock-data"
+      );
       const result = await migrateMockData();
       console.log("✅ Initial migration completed:", result);
     } else {
       console.log(`📊 Database already has ${songCount} songs`);
     }
   } catch (error) {
-    console.warn("⚠️  Could not run migration:", error instanceof Error ? error.message : error);
+    console.warn(
+      "⚠️  Could not run migration:",
+      error instanceof Error ? error.message : error,
+    );
     console.log("💡 The app will continue with an empty database");
   }
 }

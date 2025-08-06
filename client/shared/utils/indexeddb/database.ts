@@ -124,7 +124,9 @@ class IndexedDBManager {
 
           // Setlists store
           if (!db.objectStoreNames.contains("setlists")) {
-            const setlistsStore = db.createObjectStore("setlists", { keyPath: "id" });
+            const setlistsStore = db.createObjectStore("setlists", {
+              keyPath: "id",
+            });
             setlistsStore.createIndex("by-created-by", "createdBy");
             setlistsStore.createIndex("by-sync-status", "syncStatus");
             setlistsStore.createIndex("by-last-modified", "lastModified");
@@ -137,7 +139,9 @@ class IndexedDBManager {
 
           // Sync queue store
           if (!db.objectStoreNames.contains("syncQueue")) {
-            const syncStore = db.createObjectStore("syncQueue", { keyPath: "id" });
+            const syncStore = db.createObjectStore("syncQueue", {
+              keyPath: "id",
+            });
             syncStore.createIndex("by-status", "status");
             syncStore.createIndex("by-timestamp", "timestamp");
             syncStore.createIndex("by-entity", "entity");
@@ -182,7 +186,9 @@ class IndexedDBManager {
     await this.checkQuotaAndCleanup();
   }
 
-  async getSong(id: string): Promise<HSASongbookDB["songs"]["value"] | undefined> {
+  async getSong(
+    id: string,
+  ): Promise<HSASongbookDB["songs"]["value"] | undefined> {
     const db = this.ensureDB();
     const song = await db.get("songs", id);
 
@@ -197,25 +203,32 @@ class IndexedDBManager {
     return song;
   }
 
-  async searchCachedSongs(query: string): Promise<HSASongbookDB["songs"]["value"][]> {
+  async searchCachedSongs(
+    query: string,
+  ): Promise<HSASongbookDB["songs"]["value"][]> {
     const db = this.ensureDB();
     const allSongs = await db.getAll("songs");
 
     const lowerQuery = query.toLowerCase();
-    return allSongs.filter(song => 
-      song.title.toLowerCase().includes(lowerQuery) ||
-      song.artist?.toLowerCase().includes(lowerQuery) ||
-      song.themes.some(theme => theme.toLowerCase().includes(lowerQuery)),
+    return allSongs.filter(
+      (song) =>
+        song.title.toLowerCase().includes(lowerQuery) ||
+        song.artist?.toLowerCase().includes(lowerQuery) ||
+        song.themes.some((theme) => theme.toLowerCase().includes(lowerQuery)),
     );
   }
 
-  async getSongsByDifficulty(difficulty: "beginner" | "intermediate" | "advanced"): Promise<HSASongbookDB["songs"]["value"][]> {
+  async getSongsByDifficulty(
+    difficulty: "beginner" | "intermediate" | "advanced",
+  ): Promise<HSASongbookDB["songs"]["value"][]> {
     const db = this.ensureDB();
     return await db.getAllFromIndex("songs", "by-difficulty", difficulty);
   }
 
   // Setlist operations
-  async cacheSetlist(setlist: HSASongbookDB["setlists"]["value"]): Promise<void> {
+  async cacheSetlist(
+    setlist: HSASongbookDB["setlists"]["value"],
+  ): Promise<void> {
     const db = this.ensureDB();
     const setlistWithTimestamp = {
       ...setlist,
@@ -231,24 +244,31 @@ class IndexedDBManager {
     await this.updateStorageStats();
   }
 
-  async getSetlist(id: string): Promise<HSASongbookDB["setlists"]["value"] | undefined> {
+  async getSetlist(
+    id: string,
+  ): Promise<HSASongbookDB["setlists"]["value"] | undefined> {
     const db = this.ensureDB();
     return await db.get("setlists", id);
   }
 
-  async getSetlistsByUser(userId: string): Promise<HSASongbookDB["setlists"]["value"][]> {
+  async getSetlistsByUser(
+    userId: string,
+  ): Promise<HSASongbookDB["setlists"]["value"][]> {
     const db = this.ensureDB();
     return await db.getAllFromIndex("setlists", "by-created-by", userId);
   }
 
-  async updateSetlistSyncStatus(id: string, status: "synced" | "pending" | "conflict"): Promise<void> {
+  async updateSetlistSyncStatus(
+    id: string,
+    status: "synced" | "pending" | "conflict",
+  ): Promise<void> {
     const db = this.ensureDB();
     const setlist = await db.get("setlists", id);
-    
+
     if (setlist) {
       setlist.syncStatus = status;
       setlist.lastModified = Date.now();
-      
+
       const tx = db.transaction("setlists", "readwrite");
       await tx.store.put(setlist);
       await tx.done;
@@ -256,7 +276,12 @@ class IndexedDBManager {
   }
 
   // Sync queue operations
-  async addToSyncQueue(operation: Omit<HSASongbookDB["syncQueue"]["value"], "id" | "timestamp" | "retries" | "status">): Promise<void> {
+  async addToSyncQueue(
+    operation: Omit<
+      HSASongbookDB["syncQueue"]["value"],
+      "id" | "timestamp" | "retries" | "status"
+    >,
+  ): Promise<void> {
     const db = this.ensureDB();
     const queueItem: HSASongbookDB["syncQueue"]["value"] = {
       ...operation,
@@ -276,16 +301,20 @@ class IndexedDBManager {
     return await db.getAllFromIndex("syncQueue", "by-status", "pending");
   }
 
-  async updateSyncItemStatus(id: string, status: "pending" | "processing" | "failed", incrementRetries = false): Promise<void> {
+  async updateSyncItemStatus(
+    id: string,
+    status: "pending" | "processing" | "failed",
+    incrementRetries = false,
+  ): Promise<void> {
     const db = this.ensureDB();
     const item = await db.get("syncQueue", id);
-    
+
     if (item) {
       item.status = status;
       if (incrementRetries) {
         item.retries += 1;
       }
-      
+
       const tx = db.transaction("syncQueue", "readwrite");
       await tx.store.put(item);
       await tx.done;
@@ -302,7 +331,7 @@ class IndexedDBManager {
   // Storage management
   async updateStorageStats(): Promise<void> {
     const db = this.ensureDB();
-    
+
     const [songs, setlists] = await Promise.all([
       db.getAll("songs"),
       db.getAll("setlists"),
@@ -326,7 +355,9 @@ class IndexedDBManager {
     await tx.done;
   }
 
-  async getStorageStats(): Promise<HSASongbookDB["storageStats"]["value"] | undefined> {
+  async getStorageStats(): Promise<
+    HSASongbookDB["storageStats"]["value"] | undefined
+  > {
     const db = this.ensureDB();
     const result = await db.get("storageStats", "stats");
     return result;
@@ -344,7 +375,9 @@ class IndexedDBManager {
       const quota = estimate.quota || 0;
       const usagePercent = quota > 0 ? (used / quota) * 100 : 0;
 
-      console.log(`📊 Storage usage: ${Math.round(used / 1024 / 1024)}MB / ${Math.round(quota / 1024 / 1024)}MB (${usagePercent.toFixed(1)}%)`);
+      console.log(
+        `📊 Storage usage: ${Math.round(used / 1024 / 1024)}MB / ${Math.round(quota / 1024 / 1024)}MB (${usagePercent.toFixed(1)}%)`,
+      );
 
       // Update storage stats
       const stats = await this.getStorageStats();
@@ -361,7 +394,6 @@ class IndexedDBManager {
         console.warn("⚠️ Storage usage high, triggering cleanup");
         await this.cleanupOldEntries();
       }
-
     } catch (error) {
       console.error("❌ Error checking storage quota:", error);
     }
@@ -369,21 +401,21 @@ class IndexedDBManager {
 
   async cleanupOldEntries(): Promise<void> {
     const db = this.ensureDB();
-    
+
     // Get songs sorted by last accessed (LRU)
     const songs = await db.getAllFromIndex("songs", "by-last-accessed");
-    
+
     // Remove oldest 20% of songs if we have more than 50
     if (songs.length > 50) {
       const removeCount = Math.floor(songs.length * 0.2);
       const songsToRemove = songs.slice(0, removeCount);
-      
+
       const tx = db.transaction("songs", "readwrite");
       for (const song of songsToRemove) {
         await tx.store.delete(song.id);
       }
       await tx.done;
-      
+
       console.log(`🧹 Cleaned up ${removeCount} old songs`);
     }
 
@@ -391,14 +423,18 @@ class IndexedDBManager {
   }
 
   // Preferences operations
-  async savePreferences(preferences: HSASongbookDB["preferences"]["value"]): Promise<void> {
+  async savePreferences(
+    preferences: HSASongbookDB["preferences"]["value"],
+  ): Promise<void> {
     const db = this.ensureDB();
     const tx = db.transaction("preferences", "readwrite");
     await tx.store.put(preferences);
     await tx.done;
   }
 
-  async getPreferences(userId: string): Promise<HSASongbookDB["preferences"]["value"] | undefined> {
+  async getPreferences(
+    userId: string,
+  ): Promise<HSASongbookDB["preferences"]["value"] | undefined> {
     const db = this.ensureDB();
     return await db.get("preferences", userId);
   }
@@ -406,8 +442,11 @@ class IndexedDBManager {
   // Utility methods
   async clearAllData(): Promise<void> {
     const db = this.ensureDB();
-    const tx = db.transaction(["songs", "setlists", "syncQueue", "preferences", "storageStats"], "readwrite");
-    
+    const tx = db.transaction(
+      ["songs", "setlists", "syncQueue", "preferences", "storageStats"],
+      "readwrite",
+    );
+
     await Promise.all([
       tx.objectStore("songs").clear(),
       tx.objectStore("setlists").clear(),
@@ -415,7 +454,7 @@ class IndexedDBManager {
       tx.objectStore("preferences").clear(),
       tx.objectStore("storageStats").clear(),
     ]);
-    
+
     await tx.done;
     console.log("🗑️ All IndexedDB data cleared");
   }

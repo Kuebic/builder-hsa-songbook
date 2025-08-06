@@ -62,56 +62,91 @@ export interface ReportReviewRequest {
 }
 
 // API functions
-const fetchReviewsByArrangement = async (arrangementId: string, userId?: string): Promise<ReviewsResponse> => {
+const fetchReviewsByArrangement = async (
+  arrangementId: string,
+  userId?: string,
+): Promise<ReviewsResponse> => {
   const params = userId ? `?userId=${userId}` : "";
-  const response = await fetch(`${window.location.origin}/api/arrangements/${arrangementId}/reviews${params}`);
+  const response = await fetch(
+    `${window.location.origin}/api/arrangements/${arrangementId}/reviews${params}`,
+  );
   const data = await response.json();
-  if (!data.success) {throw new Error(data.error?.message || "Failed to fetch reviews");}
+  if (!data.success) {
+    throw new Error(data.error?.message || "Failed to fetch reviews");
+  }
   return data.data;
 };
 
-const createOrUpdateReview = async (data: CreateOrUpdateReviewRequest): Promise<Review> => {
-  const response = await fetch(`${window.location.origin}/api/arrangements/${data.arrangementId}/reviews`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      rating: data.rating,
-      comment: data.comment,
-      userId: data.userId,
-    }),
-  });
+const createOrUpdateReview = async (
+  data: CreateOrUpdateReviewRequest,
+): Promise<Review> => {
+  const response = await fetch(
+    `${window.location.origin}/api/arrangements/${data.arrangementId}/reviews`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        rating: data.rating,
+        comment: data.comment,
+        userId: data.userId,
+      }),
+    },
+  );
   const result = await response.json();
-  if (!result.success) {throw new Error(result.error?.message || "Failed to save review");}
+  if (!result.success) {
+    throw new Error(result.error?.message || "Failed to save review");
+  }
   return result.data;
 };
 
-const markReviewHelpful = async (data: MarkHelpfulRequest): Promise<{ reviewId: string; helpfulCount: number; hasMarkedHelpful: boolean }> => {
-  const response = await fetch(`${window.location.origin}/api/reviews/${data.reviewId}/helpful`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId: data.userId }),
-  });
+const markReviewHelpful = async (
+  data: MarkHelpfulRequest,
+): Promise<{
+  reviewId: string;
+  helpfulCount: number;
+  hasMarkedHelpful: boolean;
+}> => {
+  const response = await fetch(
+    `${window.location.origin}/api/reviews/${data.reviewId}/helpful`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: data.userId }),
+    },
+  );
   const result = await response.json();
-  if (!result.success) {throw new Error(result.error?.message || "Failed to mark helpful");}
+  if (!result.success) {
+    throw new Error(result.error?.message || "Failed to mark helpful");
+  }
   return result.data;
 };
 
-const reportReview = async (data: ReportReviewRequest): Promise<{ message: string; reviewId: string }> => {
-  const response = await fetch(`${window.location.origin}/api/reviews/${data.reviewId}/report`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      userId: data.userId,
-      reason: data.reason,
-    }),
-  });
+const reportReview = async (
+  data: ReportReviewRequest,
+): Promise<{ message: string; reviewId: string }> => {
+  const response = await fetch(
+    `${window.location.origin}/api/reviews/${data.reviewId}/report`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: data.userId,
+        reason: data.reason,
+      }),
+    },
+  );
   const result = await response.json();
-  if (!result.success) {throw new Error(result.error?.message || "Failed to report review");}
+  if (!result.success) {
+    throw new Error(result.error?.message || "Failed to report review");
+  }
   return result.data;
 };
 
 // Hooks
-export const useReviewsByArrangement = (arrangementId: string, userId?: string) => {
+export const useReviewsByArrangement = (
+  arrangementId: string,
+  userId?: string,
+) => {
   return useQuery({
     queryKey: ["reviews", arrangementId, userId],
     queryFn: () => fetchReviewsByArrangement(arrangementId, userId),
@@ -122,12 +157,14 @@ export const useReviewsByArrangement = (arrangementId: string, userId?: string) 
 
 export const useCreateOrUpdateReview = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: createOrUpdateReview,
     onSuccess: (_, variables) => {
       // Invalidate reviews for the arrangement to refetch
-      queryClient.invalidateQueries({ queryKey: ["reviews", variables.arrangementId] });
+      queryClient.invalidateQueries({
+        queryKey: ["reviews", variables.arrangementId],
+      });
     },
   });
 };

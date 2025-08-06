@@ -6,11 +6,11 @@ import * as express from "express";
 // Initialize server with database connection
 async function startServer() {
   const port = process.env.PORT || 3000;
-  
+
   try {
     // Initialize database connection first
     await initializeServer();
-    
+
     // Create express app
     const app = await createServer();
 
@@ -37,7 +37,6 @@ async function startServer() {
       console.log(`🔧 API: http://localhost:${port}/api`);
       console.log("💾 Database: Connected to MongoDB Atlas");
     });
-    
   } catch (error) {
     console.error("❌ Failed to start server:", error);
     process.exit(1);

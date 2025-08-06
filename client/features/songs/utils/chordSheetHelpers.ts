@@ -4,7 +4,13 @@
  */
 
 import { ChordProParser, HtmlDivFormatter, Song } from "chordsheetjs";
-import { ChordParsingError, ChordSheetMeta, MusicalKey, MUSICAL_KEYS, TRANSPOSITION_BOUNDS } from "../types/chord.types";
+import {
+  ChordParsingError,
+  ChordSheetMeta,
+  MusicalKey,
+  MUSICAL_KEYS,
+  TRANSPOSITION_BOUNDS,
+} from "../types/chord.types";
 
 // ==================== Parser Instances ====================
 
@@ -46,7 +52,10 @@ export function getHtmlDivFormatter(): HtmlDivFormatter {
  * @param content - Raw ChordPro format content
  * @returns Parsed Song object or null if parsing fails
  */
-export function parseChordProContent(content: string): { song: Song | null; error: ChordParsingError | null } {
+export function parseChordProContent(content: string): {
+  song: Song | null;
+  error: ChordParsingError | null;
+} {
   if (!content || content.trim() === "") {
     return {
       song: null,
@@ -108,7 +117,10 @@ export function transposeSong(
   semitones: number,
 ): { transposedSong: Song; error: ChordParsingError | null } {
   // Validate transposition bounds
-  if (semitones < TRANSPOSITION_BOUNDS.MIN || semitones > TRANSPOSITION_BOUNDS.MAX) {
+  if (
+    semitones < TRANSPOSITION_BOUNDS.MIN ||
+    semitones > TRANSPOSITION_BOUNDS.MAX
+  ) {
     return {
       transposedSong: song,
       error: {
@@ -132,7 +144,8 @@ export function transposeSong(
       transposedSong: song,
       error: {
         type: "transpose_error",
-        message: error instanceof Error ? error.message : "Transposition failed",
+        message:
+          error instanceof Error ? error.message : "Transposition failed",
         originalContent: "",
       },
     };
@@ -170,13 +183,35 @@ export function extractSongMetadata(song: Song): ChordSheetMeta {
 
   try {
     // Extract standard ChordPro directives
-    if (song.title) {metadata.title = Array.isArray(song.title) ? song.title[0] : song.title;}
-    if (song.subtitle) {metadata.artist = Array.isArray(song.subtitle) ? song.subtitle[0] : song.subtitle;}
-    if (song.artist) {metadata.artist = Array.isArray(song.artist) ? song.artist[0] : song.artist;}
-    if (song.key) {metadata.key = Array.isArray(song.key) ? song.key[0] : song.key;}
-    if (song.tempo) {metadata.tempo = (Array.isArray(song.tempo) ? song.tempo[0] : song.tempo).toString();}
-    if (song.time) {metadata.time = Array.isArray(song.time) ? song.time[0] : song.time;}
-    if (song.capo) {metadata.capo = (Array.isArray(song.capo) ? song.capo[0] : song.capo).toString();}
+    if (song.title) {
+      metadata.title = Array.isArray(song.title) ? song.title[0] : song.title;
+    }
+    if (song.subtitle) {
+      metadata.artist = Array.isArray(song.subtitle)
+        ? song.subtitle[0]
+        : song.subtitle;
+    }
+    if (song.artist) {
+      metadata.artist = Array.isArray(song.artist)
+        ? song.artist[0]
+        : song.artist;
+    }
+    if (song.key) {
+      metadata.key = Array.isArray(song.key) ? song.key[0] : song.key;
+    }
+    if (song.tempo) {
+      metadata.tempo = (
+        Array.isArray(song.tempo) ? song.tempo[0] : song.tempo
+      ).toString();
+    }
+    if (song.time) {
+      metadata.time = Array.isArray(song.time) ? song.time[0] : song.time;
+    }
+    if (song.capo) {
+      metadata.capo = (
+        Array.isArray(song.capo) ? song.capo[0] : song.capo
+      ).toString();
+    }
 
     // Extract any additional custom metadata
     const customKeys = ["composer", "lyricist", "copyright", "album", "year"];
@@ -201,7 +236,10 @@ export function extractSongMetadata(song: Song): ChordSheetMeta {
  * @param metadata - Optional metadata object
  * @returns Detected key or null if not found
  */
-export function detectMusicalKey(content: string, metadata?: ChordSheetMeta): MusicalKey | null {
+export function detectMusicalKey(
+  content: string,
+  metadata?: ChordSheetMeta,
+): MusicalKey | null {
   // First check metadata
   if (metadata?.key && isValidMusicalKey(metadata.key)) {
     return metadata.key as MusicalKey;
@@ -231,11 +269,17 @@ export function detectMusicalKey(content: string, metadata?: ChordSheetMeta): Mu
  * @param semitones - Transposition in semitones
  * @returns Target key after transposition
  */
-export function calculateTransposedKey(originalKey: MusicalKey, semitones: number): MusicalKey {
+export function calculateTransposedKey(
+  originalKey: MusicalKey,
+  semitones: number,
+): MusicalKey {
   const keyIndex = MUSICAL_KEYS.indexOf(originalKey);
-  if (keyIndex === -1) {return originalKey;}
+  if (keyIndex === -1) {
+    return originalKey;
+  }
 
-  const newIndex = (keyIndex + semitones + MUSICAL_KEYS.length) % MUSICAL_KEYS.length;
+  const newIndex =
+    (keyIndex + semitones + MUSICAL_KEYS.length) % MUSICAL_KEYS.length;
   return MUSICAL_KEYS[newIndex];
 }
 
@@ -260,12 +304,14 @@ export function extractChordsFromContent(content: string): string[] {
   const chordRegex = /\[([A-G][#b]?[^/\]]*(?:\/[A-G][#b]?)?)\]/g;
   const matches = content.match(chordRegex);
 
-  if (!matches) {return [];}
+  if (!matches) {
+    return [];
+  }
 
   return matches
-    .map(match => match.slice(1, -1)) // Remove brackets
+    .map((match) => match.slice(1, -1)) // Remove brackets
     .filter((chord, index, array) => array.indexOf(chord) === index) // Remove duplicates
-    .filter(chord => chord.trim() !== ""); // Remove empty chords
+    .filter((chord) => chord.trim() !== ""); // Remove empty chords
 }
 
 /**
@@ -275,7 +321,8 @@ export function extractChordsFromContent(content: string): string[] {
  */
 export function isValidChord(chord: string): boolean {
   // Basic chord validation - starts with note, optional accidental, optional extensions
-  const chordPattern = /^[A-G][#b]?(?:m|maj|min|dim|aug|sus[24]?|\d+|add\d+|\/[A-G][#b]?)*$/;
+  const chordPattern =
+    /^[A-G][#b]?(?:m|maj|min|dim|aug|sus[24]?|\d+|add\d+|\/[A-G][#b]?)*$/;
   return chordPattern.test(chord);
 }
 
@@ -285,27 +332,41 @@ export function isValidChord(chord: string): boolean {
  * @returns Most likely key or null
  */
 function guessKeyFromChords(chords: string[]): MusicalKey | null {
-  if (chords.length === 0) {return null;}
+  if (chords.length === 0) {
+    return null;
+  }
 
   // Simplified key detection - look for common chord patterns
-  const rootNotes = chords.map(chord => {
-    const match = chord.match(/^([A-G][#b]?)/);
-    return match ? match[1] : null;
-  }).filter(Boolean);
+  const rootNotes = chords
+    .map((chord) => {
+      const match = chord.match(/^([A-G][#b]?)/);
+      return match ? match[1] : null;
+    })
+    .filter(Boolean);
 
-  if (rootNotes.length === 0) {return null;}
+  if (rootNotes.length === 0) {
+    return null;
+  }
 
   // Count frequency of root notes
-  const noteFrequency = rootNotes.reduce((acc, note) => {
-    if (note) {acc[note] = (acc[note] || 0) + 1;}
-    return acc;
-  }, {} as Record<string, number>);
+  const noteFrequency = rootNotes.reduce(
+    (acc, note) => {
+      if (note) {
+        acc[note] = (acc[note] || 0) + 1;
+      }
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 
   // Return the most frequent root note as likely key
-  const mostFrequentNote = Object.entries(noteFrequency)
-    .sort((a, b) => b[1] - a[1])[0]?.[0];
+  const mostFrequentNote = Object.entries(noteFrequency).sort(
+    (a, b) => b[1] - a[1],
+  )[0]?.[0];
 
-  return isValidMusicalKey(mostFrequentNote) ? mostFrequentNote as MusicalKey : null;
+  return isValidMusicalKey(mostFrequentNote)
+    ? (mostFrequentNote as MusicalKey)
+    : null;
 }
 
 // ==================== Validation Functions ====================
@@ -341,14 +402,19 @@ export function validateChordProContent(content: string): {
   const openBrackets = (content.match(/\[/g) || []).length;
   const closeBrackets = (content.match(/\]/g) || []).length;
   if (openBrackets !== closeBrackets) {
-    errors.push(`Unmatched chord brackets: ${openBrackets} opening, ${closeBrackets} closing`);
+    errors.push(
+      `Unmatched chord brackets: ${openBrackets} opening, ${closeBrackets} closing`,
+    );
   }
 
   // Check for malformed directives
   const directivePattern = /\{[^}]*\}/g;
   const directives = content.match(directivePattern) || [];
   for (const directive of directives) {
-    if (!directive.includes(":") && !directive.match(/\{(chorus|verse|bridge|tag|comment|c)\}/i)) {
+    if (
+      !directive.includes(":") &&
+      !directive.match(/\{(chorus|verse|bridge|tag|comment|c)\}/i)
+    ) {
       warnings.push(`Possibly malformed directive: ${directive}`);
     }
   }
@@ -393,7 +459,7 @@ export function measureChordOperation<T>(
 
 /**
  * Create a performance-optimized parser result cache key
- * @param content - ChordPro content  
+ * @param content - ChordPro content
  * @param transpose - Transposition level
  * @returns Cache key string
  */
@@ -402,7 +468,7 @@ export function createCacheKey(content: string, transpose: number = 0): string {
   let hash = 0;
   for (let i = 0; i < content.length; i++) {
     const char = content.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
   return `chord_${hash}_t${transpose}`;
@@ -441,11 +507,18 @@ export function createChordParsingError(
  * @param originalContent - Content that caused the error
  * @returns ChordParsingError object
  */
-export function normalizeChordError(error: unknown, originalContent: string): ChordParsingError {
+export function normalizeChordError(
+  error: unknown,
+  originalContent: string,
+): ChordParsingError {
   if (error instanceof Error) {
-    return createChordParsingError("parse_error", error.message, originalContent);
+    return createChordParsingError(
+      "parse_error",
+      error.message,
+      originalContent,
+    );
   }
-  
+
   return createChordParsingError(
     "parse_error",
     "Unknown error occurred during chord processing",

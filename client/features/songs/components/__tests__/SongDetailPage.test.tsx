@@ -6,7 +6,9 @@ import SongDetailPage from "../SongDetailPage";
 
 // Mock the Layout component
 vi.mock("@/shared/components/Layout", () => ({
-  Layout: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Layout: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 
 // Mock the hooks
@@ -98,14 +100,14 @@ describe("SongDetailPage Component", () => {
       isLoading: true,
       error: null,
     } as any);
-    
+
     vi.mocked(useArrangementsBySong).mockReturnValue({
       data: undefined,
       isLoading: true,
     } as any);
 
     renderWithRouter("amazing-grace-jn-4k7p2");
-    
+
     expect(screen.getByTestId("song-detail-skeleton")).toBeInTheDocument();
   });
 
@@ -115,16 +117,18 @@ describe("SongDetailPage Component", () => {
       isLoading: false,
       error: new Error("Not found"),
     } as any);
-    
+
     vi.mocked(useArrangementsBySong).mockReturnValue({
       data: undefined,
       isLoading: false,
     } as any);
 
     renderWithRouter("non-existent-slug");
-    
+
     expect(screen.getByText("Song not found")).toBeInTheDocument();
-    expect(screen.getByText(/We couldn't find a song with the slug/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/We couldn't find a song with the slug/),
+    ).toBeInTheDocument();
   });
 
   it("displays song details when data is loaded", async () => {
@@ -133,14 +137,14 @@ describe("SongDetailPage Component", () => {
       isLoading: false,
       error: null,
     } as any);
-    
+
     vi.mocked(useArrangementsBySong).mockReturnValue({
       data: mockArrangements,
       isLoading: false,
     } as any);
 
     renderWithRouter("amazing-grace-jn-4k7p2");
-    
+
     await waitFor(() => {
       expect(screen.getByText("Amazing Grace")).toBeInTheDocument();
       expect(screen.getByText("John Newton")).toBeInTheDocument();
@@ -156,18 +160,24 @@ describe("SongDetailPage Component", () => {
       isLoading: false,
       error: null,
     } as any);
-    
+
     vi.mocked(useArrangementsBySong).mockReturnValue({
       data: mockArrangements,
       isLoading: false,
     } as any);
 
     renderWithRouter("amazing-grace-jn-4k7p2");
-    
+
     await waitFor(() => {
-      expect(screen.getByRole("tab", { name: /Song Info/i })).toBeInTheDocument();
-      expect(screen.getByRole("tab", { name: /Arrangements \(1\)/i })).toBeInTheDocument();
-      expect(screen.getByRole("tab", { name: /Rating & Reviews/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("tab", { name: /Song Info/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("tab", { name: /Arrangements \(1\)/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("tab", { name: /Rating & Reviews/i }),
+      ).toBeInTheDocument();
     });
   });
 
@@ -177,17 +187,19 @@ describe("SongDetailPage Component", () => {
       isLoading: false,
       error: null,
     } as any);
-    
+
     vi.mocked(useArrangementsBySong).mockReturnValue({
       data: mockArrangements,
       isLoading: false,
     } as any);
 
     renderWithRouter("amazing-grace-jn-4k7p2");
-    
+
     // Just verify the tab shows the arrangement count
     await waitFor(() => {
-      expect(screen.getByRole("tab", { name: /Arrangements \(1\)/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("tab", { name: /Arrangements \(1\)/i }),
+      ).toBeInTheDocument();
     });
   });
 });

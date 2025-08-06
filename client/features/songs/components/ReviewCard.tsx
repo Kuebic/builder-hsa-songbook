@@ -59,7 +59,7 @@ export const ReviewCard = ({
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-sm leading-relaxed">{review.comment}</p>
-        
+
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Button

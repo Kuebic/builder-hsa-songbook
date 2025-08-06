@@ -1,5 +1,5 @@
 // MongoDB and Mongoose type definitions
-import { Document, Types } from 'mongoose';
+import { Document, Types } from "mongoose";
 
 // Base MongoDB document interface
 export interface MongoDocument extends Document {
@@ -42,7 +42,7 @@ export interface ArrangementDocument extends MongoDocument {
   key?: string;
   tempo?: number;
   timeSignature?: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  difficulty: "beginner" | "intermediate" | "advanced";
   description?: string;
   tags: string[];
   metadata: {
@@ -116,11 +116,11 @@ export interface UserDocument extends MongoDocument {
   clerkId: string;
   email: string;
   name?: string;
-  role: 'USER' | 'ADMIN' | 'MODERATOR';
+  role: "USER" | "ADMIN" | "MODERATOR";
   preferences: {
     defaultKey?: string;
     fontSize: number;
-    theme: 'light' | 'dark' | 'stage';
+    theme: "light" | "dark" | "stage";
   };
   profile: {
     bio?: string;
@@ -139,7 +139,7 @@ export interface UserDocument extends MongoDocument {
 // MongoDB index definition
 export interface MongoIndex {
   name: string;
-  key: Record<string, 1 | -1 | 'text'>;
+  key: Record<string, 1 | -1 | "text">;
   unique?: boolean;
   sparse?: boolean;
   background?: boolean;

@@ -39,7 +39,7 @@ export default function SongRating({
     const stars = [];
     const displayRating = hoveredRating || userRating || currentRating;
     const starSize = size === "lg" ? "h-8 w-8" : "h-4 w-4";
-    
+
     for (let i = 1; i <= 5; i++) {
       stars.push(
         <button
@@ -50,17 +50,17 @@ export default function SongRating({
           className="p-1 transition-all hover:scale-110 disabled:hover:scale-100"
           disabled={isRating}
         >
-          <Star 
+          <Star
             className={`${starSize} transition-colors ${
-              i <= displayRating 
-                ? "fill-yellow-500 text-yellow-500" 
+              i <= displayRating
+                ? "fill-yellow-500 text-yellow-500"
                 : "text-muted-foreground hover:text-yellow-500"
             }`}
           />
         </button>,
       );
     }
-    
+
     return stars;
   };
 
@@ -74,7 +74,7 @@ export default function SongRating({
       { stars: 2, count: Math.floor(totalRatings * 0.03) },
       { stars: 1, count: Math.floor(totalRatings * 0.02) },
     ];
-    
+
     return distribution;
   };
 
@@ -114,12 +114,11 @@ export default function SongRating({
             <p className="text-sm font-medium mb-2 text-center">
               {userRating ? "Your rating:" : "Rate this song:"}
             </p>
-            <div className="flex justify-center gap-1">
-              {renderStars()}
-            </div>
+            <div className="flex justify-center gap-1">{renderStars()}</div>
             {userRating && (
               <p className="text-xs text-muted-foreground text-center mt-2">
-                You rated this song {userRating} star{userRating !== 1 ? "s" : ""}
+                You rated this song {userRating} star
+                {userRating !== 1 ? "s" : ""}
               </p>
             )}
           </div>

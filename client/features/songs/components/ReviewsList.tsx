@@ -17,7 +17,12 @@ import { Edit2, MessageSquare, Star } from "lucide-react";
 import { formatDistanceToNow } from "@/shared/utils/formatRelativeTime";
 import { useToast } from "@/hooks/use-toast";
 import { useUserId } from "@/shared/hooks/useAuth";
-import { useReviewsByArrangement, useCreateOrUpdateReview, useMarkReviewHelpful, useReportReview } from "../hooks/useReviews";
+import {
+  useReviewsByArrangement,
+  useCreateOrUpdateReview,
+  useMarkReviewHelpful,
+  useReportReview,
+} from "@features/songs/hooks/useReviews";
 import { StarRating } from "./StarRating";
 import { ReviewCard } from "./ReviewCard";
 import { ReviewsSummary } from "./ReviewsSummary";
@@ -32,7 +37,10 @@ export interface ReviewFormData {
   comment: string;
 }
 
-export default function ReviewsList({ arrangementId, arrangementName }: ReviewsListProps) {
+export default function ReviewsList({
+  arrangementId,
+  arrangementName,
+}: ReviewsListProps) {
   const userId = useUserId();
   const { toast } = useToast();
   const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
@@ -41,7 +49,11 @@ export default function ReviewsList({ arrangementId, arrangementName }: ReviewsL
     comment: "",
   });
 
-  const { data: reviewsData, isLoading, refetch } = useReviewsByArrangement(arrangementId);
+  const {
+    data: reviewsData,
+    isLoading,
+    refetch,
+  } = useReviewsByArrangement(arrangementId);
   const createOrUpdateReviewMutation = useCreateOrUpdateReview();
   const markHelpfulMutation = useMarkReviewHelpful();
   const reportReviewMutation = useReportReview();
@@ -93,59 +105,75 @@ export default function ReviewsList({ arrangementId, arrangementName }: ReviewsL
     } catch (error) {
       toast({
         title: "Failed to submit review",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description:
+          error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     }
-  }, [userId, formData, arrangementId, createOrUpdateReviewMutation, toast, refetch]);
+  }, [
+    userId,
+    formData,
+    arrangementId,
+    createOrUpdateReviewMutation,
+    toast,
+    refetch,
+  ]);
 
-  const handleMarkHelpful = useCallback(async (reviewId: string) => {
-    if (!userId) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to mark reviews as helpful",
-        variant: "default",
-      });
-      return;
-    }
+  const handleMarkHelpful = useCallback(
+    async (reviewId: string) => {
+      if (!userId) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to mark reviews as helpful",
+          variant: "default",
+        });
+        return;
+      }
 
-    try {
-      await markHelpfulMutation.mutateAsync({ reviewId, userId });
-      refetch();
-    } catch (error) {
-      toast({
-        title: "Failed to update",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
-    }
-  }, [userId, markHelpfulMutation, toast, refetch]);
+      try {
+        await markHelpfulMutation.mutateAsync({ reviewId, userId });
+        refetch();
+      } catch (error) {
+        toast({
+          title: "Failed to update",
+          description:
+            error instanceof Error ? error.message : "An error occurred",
+          variant: "destructive",
+        });
+      }
+    },
+    [userId, markHelpfulMutation, toast, refetch],
+  );
 
-  const handleReportReview = useCallback(async (reviewId: string) => {
-    if (!userId) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to report reviews",
-        variant: "default",
-      });
-      return;
-    }
+  const handleReportReview = useCallback(
+    async (reviewId: string) => {
+      if (!userId) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to report reviews",
+          variant: "default",
+        });
+        return;
+      }
 
-    try {
-      await reportReviewMutation.mutateAsync({ reviewId, userId });
-      toast({
-        title: "Review reported",
-        description: "Thank you for helping keep our community safe",
-      });
-      refetch();
-    } catch (error) {
-      toast({
-        title: "Failed to report",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
-    }
-  }, [userId, reportReviewMutation, toast, refetch]);
+      try {
+        await reportReviewMutation.mutateAsync({ reviewId, userId });
+        toast({
+          title: "Review reported",
+          description: "Thank you for helping keep our community safe",
+        });
+        refetch();
+      } catch (error) {
+        toast({
+          title: "Failed to report",
+          description:
+            error instanceof Error ? error.message : "An error occurred",
+          variant: "destructive",
+        });
+      }
+    },
+    [userId, reportReviewMutation, toast, refetch],
+  );
 
   const handleEditReview = useCallback(() => {
     if (reviewsData?.currentUserReview) {
@@ -156,8 +184,6 @@ export default function ReviewsList({ arrangementId, arrangementName }: ReviewsL
       setIsReviewDialogOpen(true);
     }
   }, [reviewsData]);
-
-
 
   if (isLoading) {
     return (
@@ -178,14 +204,17 @@ export default function ReviewsList({ arrangementId, arrangementName }: ReviewsL
           <MessageSquare className="h-5 w-5" />
           Reviews for {arrangementName}
         </h2>
-        
+
         {reviewsData?.currentUserReview ? (
           <Button size="sm" onClick={handleEditReview} className="gap-1">
             <Edit2 className="h-4 w-4" />
             Edit Your Review
           </Button>
         ) : (
-          <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
+          <Dialog
+            open={isReviewDialogOpen}
+            onOpenChange={setIsReviewDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button size="sm" className="gap-1">
                 <Star className="h-4 w-4" />
@@ -222,7 +251,9 @@ export default function ReviewsList({ arrangementId, arrangementName }: ReviewsL
                   <Textarea
                     id="comment"
                     value={formData.comment}
-                    onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, comment: e.target.value })
+                    }
                     placeholder="What did you think of this arrangement?"
                     rows={4}
                     minLength={10}
@@ -249,7 +280,9 @@ export default function ReviewsList({ arrangementId, arrangementName }: ReviewsL
                   onClick={handleSubmitReview}
                   disabled={createOrUpdateReviewMutation.isPending}
                 >
-                  {createOrUpdateReviewMutation.isPending ? "Submitting..." : "Submit Review"}
+                  {createOrUpdateReviewMutation.isPending
+                    ? "Submitting..."
+                    : "Submit Review"}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -264,10 +297,17 @@ export default function ReviewsList({ arrangementId, arrangementName }: ReviewsL
           <AlertDescription>
             <div className="space-y-2">
               <div className="font-medium">Your Review</div>
-              <StarRating rating={reviewsData.currentUserReview.rating} readOnly size="small" />
+              <StarRating
+                rating={reviewsData.currentUserReview.rating}
+                readOnly
+                size="small"
+              />
               <p className="text-sm">{reviewsData.currentUserReview.comment}</p>
               <p className="text-xs text-muted-foreground">
-                Posted {formatDistanceToNow(new Date(reviewsData.currentUserReview.createdAt))}
+                Posted{" "}
+                {formatDistanceToNow(
+                  new Date(reviewsData.currentUserReview.createdAt),
+                )}
               </p>
             </div>
           </AlertDescription>
@@ -278,7 +318,7 @@ export default function ReviewsList({ arrangementId, arrangementName }: ReviewsL
       <div className="grid gap-4 lg:grid-cols-[300px_1fr]">
         {/* Rating Summary */}
         {reviewsData && reviewsData.summary.totalReviews > 0 && (
-          <ReviewsSummary 
+          <ReviewsSummary
             averageRating={reviewsData.summary.averageRating}
             totalReviews={reviewsData.summary.totalReviews}
           />

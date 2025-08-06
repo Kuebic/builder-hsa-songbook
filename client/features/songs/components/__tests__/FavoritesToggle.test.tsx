@@ -2,7 +2,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import FavoritesToggle from "../FavoritesToggle";
-import { useCheckFavorite, useAddFavorite, useRemoveFavorite } from "../../hooks/useFavorites";
+import {
+  useCheckFavorite,
+  useAddFavorite,
+  useRemoveFavorite,
+} from "../../hooks/useFavorites";
 import { useUserId } from "@/shared/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -21,10 +25,7 @@ vi.mock("../../hooks/useFavorites", () => ({
 // Mock lucide icons
 vi.mock("lucide-react", () => ({
   Heart: ({ className }: any) => (
-    <div 
-      data-testid="heart-icon" 
-      className={className}
-    />
+    <div data-testid="heart-icon" className={className} />
   ),
 }));
 
@@ -40,7 +41,7 @@ const createWrapper = () => {
       mutations: { retry: false },
     },
   });
-  
+
   return ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
@@ -53,19 +54,19 @@ describe("FavoritesToggle", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Mock useUserId
     (useUserId as any).mockReturnValue("user123");
-    
+
     // Mock useToast
     (useToast as any).mockReturnValue({ toast: mockToast });
-    
+
     // Default mock for mutations
     (useAddFavorite as any).mockReturnValue({
       mutateAsync: mockAddFavorite,
       isPending: false,
     });
-    
+
     (useRemoveFavorite as any).mockReturnValue({
       mutateAsync: mockRemoveFavorite,
       isPending: false,
@@ -182,7 +183,7 @@ describe("FavoritesToggle", () => {
     it("should show login prompt when not authenticated", async () => {
       // Mock no user
       (useUserId as any).mockReturnValue(null);
-      
+
       (useCheckFavorite as any).mockReturnValue({
         data: { isFavorite: false },
         isLoading: false,
@@ -234,7 +235,7 @@ describe("FavoritesToggle", () => {
         data: { isFavorite: false },
         isLoading: false,
       });
-      
+
       (useAddFavorite as any).mockReturnValue({
         mutateAsync: mockAddFavorite,
         isPending: true,
@@ -346,7 +347,7 @@ describe("FavoritesToggle", () => {
 
     it("should call onToggle callback when provided", async () => {
       const mockOnToggle = vi.fn();
-      
+
       (useCheckFavorite as any).mockReturnValue({
         data: { isFavorite: false },
         isLoading: false,
@@ -405,7 +406,7 @@ describe("FavoritesToggle", () => {
 
     it("should show correct message for arrangement authentication", async () => {
       (useUserId as any).mockReturnValue(null);
-      
+
       (useCheckFavorite as any).mockReturnValue({
         data: { isFavorite: false },
         isLoading: false,
@@ -437,7 +438,7 @@ describe("FavoritesToggle", () => {
     it("should handle add favorite error", async () => {
       const errorMessage = "Failed to add favorite";
       mockAddFavorite.mockRejectedValueOnce(new Error(errorMessage));
-      
+
       (useCheckFavorite as any).mockReturnValue({
         data: { isFavorite: false },
         isLoading: false,
@@ -467,7 +468,7 @@ describe("FavoritesToggle", () => {
     it("should handle remove favorite error", async () => {
       const errorMessage = "Failed to remove favorite";
       mockRemoveFavorite.mockRejectedValueOnce(new Error(errorMessage));
-      
+
       (useCheckFavorite as any).mockReturnValue({
         data: { isFavorite: true },
         isLoading: false,

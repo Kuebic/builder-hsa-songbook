@@ -11,7 +11,10 @@ export interface ReviewsSummaryProps {
 /**
  * Rating summary component showing average rating and distribution
  */
-export const ReviewsSummary = ({ averageRating, totalReviews }: ReviewsSummaryProps) => {
+export const ReviewsSummary = ({
+  averageRating,
+  totalReviews,
+}: ReviewsSummaryProps) => {
   if (totalReviews === 0) {
     return null;
   }
@@ -33,7 +36,11 @@ export const ReviewsSummary = ({ averageRating, totalReviews }: ReviewsSummaryPr
       <CardContent className="space-y-4">
         <div className="text-center">
           <div className="text-3xl font-bold">{averageRating.toFixed(1)}</div>
-          <StarRating rating={Math.round(averageRating)} readOnly size="large" />
+          <StarRating
+            rating={Math.round(averageRating)}
+            readOnly
+            size="large"
+          />
           <p className="text-sm text-muted-foreground mt-1">
             {totalReviews} {totalReviews === 1 ? "review" : "reviews"}
           </p>
@@ -43,8 +50,13 @@ export const ReviewsSummary = ({ averageRating, totalReviews }: ReviewsSummaryPr
             <div key={stars} className="flex items-center gap-2">
               <span className="text-sm w-3">{stars}</span>
               <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-              <Progress value={(count / totalReviews) * 100} className="h-2 flex-1" />
-              <span className="text-sm text-muted-foreground w-8 text-right">{count}</span>
+              <Progress
+                value={(count / totalReviews) * 100}
+                className="h-2 flex-1"
+              />
+              <span className="text-sm text-muted-foreground w-8 text-right">
+                {count}
+              </span>
             </div>
           ))}
         </div>

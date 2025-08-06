@@ -11,9 +11,9 @@ import { AlertTriangle, RefreshCw, FileWarning } from "lucide-react";
 
 /**
  * Error boundary component specifically designed for ChordPro preview rendering.
- * 
+ *
  * Provides context-aware error messages and recovery options for chord parsing failures.
- * 
+ *
  * @component
  * @example
  * ```tsx
@@ -22,7 +22,11 @@ import { AlertTriangle, RefreshCw, FileWarning } from "lucide-react";
  * </ChordProPreviewErrorBoundary>
  * ```
  */
-export function ChordProPreviewErrorBoundary({ children }: { children: React.ReactNode }): ReactElement {
+export function ChordProPreviewErrorBoundary({
+  children,
+}: {
+  children: React.ReactNode;
+}): ReactElement {
   return (
     <ErrorBoundary
       errorTitle="Preview Error"
@@ -34,21 +38,24 @@ export function ChordProPreviewErrorBoundary({ children }: { children: React.Rea
             <AlertTitle>Unable to render chord preview</AlertTitle>
             <AlertDescription className="space-y-3 mt-2">
               <p>
-                There was an error rendering your ChordPro content. This might be due to:
+                There was an error rendering your ChordPro content. This might
+                be due to:
               </p>
               <ul className="list-disc list-inside space-y-1 text-sm">
                 <li>Invalid chord notation (e.g., unmatched brackets)</li>
                 <li>Malformed ChordPro directives</li>
                 <li>Special characters that couldn&apos;t be processed</li>
               </ul>
-              
+
               <div className="bg-muted/50 p-3 rounded-md mt-3">
                 <p className="text-sm font-medium mb-1 flex items-center gap-2">
                   <AlertTriangle className="h-3 w-3" />
                   Common fixes:
                 </p>
                 <ul className="text-xs space-y-1 text-muted-foreground">
-                  <li>• Check that all chord brackets [ ] are properly closed</li>
+                  <li>
+                    • Check that all chord brackets [ ] are properly closed
+                  </li>
                   <li>• Ensure directives use format: {"{key: value}"}</li>
                   <li>• Remove any special formatting characters</li>
                 </ul>
@@ -66,11 +73,7 @@ export function ChordProPreviewErrorBoundary({ children }: { children: React.Rea
               )}
 
               <div className="flex gap-2 mt-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={resetError}
-                >
+                <Button variant="outline" size="sm" onClick={resetError}>
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Try again
                 </Button>
@@ -79,7 +82,10 @@ export function ChordProPreviewErrorBoundary({ children }: { children: React.Rea
                   size="sm"
                   onClick={() => {
                     // Could implement a help modal or link to docs
-                    window.open("https://www.chordpro.org/chordpro/chordpro-introduction/", "_blank");
+                    window.open(
+                      "https://www.chordpro.org/chordpro/chordpro-introduction/",
+                      "_blank",
+                    );
                   }}
                 >
                   View ChordPro Guide

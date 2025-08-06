@@ -48,8 +48,12 @@ describe("ErrorBoundary", () => {
     );
 
     expect(screen.getByText("An error occurred")).toBeInTheDocument();
-    expect(screen.getByText("Something went wrong while rendering this content.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
+    expect(
+      screen.getByText("Something went wrong while rendering this content."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /try again/i }),
+    ).toBeInTheDocument();
   });
 
   it("uses custom error title and description when provided", () => {
@@ -63,7 +67,9 @@ describe("ErrorBoundary", () => {
     );
 
     expect(screen.getByText("Custom Error Title")).toBeInTheDocument();
-    expect(screen.getByText("Custom error description text")).toBeInTheDocument();
+    expect(
+      screen.getByText("Custom error description text"),
+    ).toBeInTheDocument();
   });
 
   it("calls onError callback when error occurs", () => {
@@ -158,9 +164,9 @@ describe("withErrorBoundary HOC", () => {
 
   it("wraps component with error boundary", () => {
     const WrappedComponent = withErrorBoundary(TestComponent);
-    
+
     render(<WrappedComponent />);
-    
+
     expect(screen.getByText("Test Component")).toBeInTheDocument();
   });
 
@@ -183,6 +189,8 @@ describe("withErrorBoundary HOC", () => {
 
   it("preserves component display name", () => {
     const WrappedComponent = withErrorBoundary(TestComponent);
-    expect(WrappedComponent.displayName).toBe("withErrorBoundary(TestComponent)");
+    expect(WrappedComponent.displayName).toBe(
+      "withErrorBoundary(TestComponent)",
+    );
   });
 });

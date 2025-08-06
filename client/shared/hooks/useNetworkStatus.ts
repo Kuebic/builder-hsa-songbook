@@ -1,12 +1,24 @@
+/// <reference path="../../types/network.d.ts" />
 import { useState, useEffect, useCallback } from "react";
 
+/**
+ * Network connection status information
+ * @interface NetworkStatus
+ */
 export interface NetworkStatus {
+  /** Whether the device is connected to the internet */
   isOnline: boolean;
+  /** Whether the connection is slow (2G or slow-2g) */
   isSlowConnection: boolean;
+  /** Type of network connection (wifi, cellular, ethernet, etc.) */
   connectionType: string;
+  /** Effective connection type based on quality (slow-2g, 2g, 3g, 4g) */
   effectiveType: string;
+  /** Estimated bandwidth in megabits per second */
   downlink: number;
+  /** Round-trip time in milliseconds */
   rtt: number;
+  /** Timestamp of last status check */
   lastChecked: number;
 }
 
@@ -28,16 +40,20 @@ export function useNetworkStatus(): UseNetworkStatusReturn {
 
   // Get connection info if available (Chrome/Edge)
   const getConnectionInfo = useCallback((): Partial<NetworkStatus> => {
-    // @ts-expect-error - NetworkInformation is not in TypeScript types yet
-    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    
+    const connection =
+      navigator.connection ||
+      navigator.mozConnection ||
+      navigator.webkitConnection;
+
     if (connection) {
       return {
         connectionType: connection.type || "unknown",
         effectiveType: connection.effectiveType || "unknown",
         downlink: connection.downlink || 0,
         rtt: connection.rtt || 0,
-        isSlowConnection: connection.effectiveType === "slow-2g" || connection.effectiveType === "2g",
+        isSlowConnection:
+          connection.effectiveType === "slow-2g" ||
+          connection.effectiveType === "2g",
       };
     }
 
@@ -61,7 +77,7 @@ export function useNetworkStatus(): UseNetworkStatusReturn {
           "Cache-Control": "no-cache",
         },
       });
-      
+
       return response.ok;
     } catch (error) {
       console.warn("Connection check failed:", error);
@@ -74,7 +90,7 @@ export function useNetworkStatus(): UseNetworkStatusReturn {
     const connectionInfo = getConnectionInfo();
     const actuallyOnline = navigator.onLine ? await checkConnection() : false;
 
-    setNetworkStatus(prev => ({
+    setNetworkStatus((prev) => ({
       ...prev,
       ...connectionInfo,
       isOnline: actuallyOnline,
@@ -100,7 +116,7 @@ export function useNetworkStatus(): UseNetworkStatusReturn {
 
     const handleOffline = () => {
       console.log("📴 Network: Offline event detected");
-      setNetworkStatus(prev => ({
+      setNetworkStatus((prev) => ({
         ...prev,
         isOnline: false,
         lastChecked: Date.now(),
@@ -111,9 +127,11 @@ export function useNetworkStatus(): UseNetworkStatusReturn {
     window.addEventListener("offline", handleOffline);
 
     // Connection change events (Chrome/Edge)
-    // @ts-expect-error - NetworkInformation is not in TypeScript types yet
-    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    
+    const connection =
+      navigator.connection ||
+      navigator.mozConnection ||
+      navigator.webkitConnection;
+
     if (connection) {
       const handleConnectionChange = () => {
         console.log("🔄 Network: Connection change detected");
@@ -137,12 +155,14 @@ export function useNetworkStatus(): UseNetworkStatusReturn {
 
   // Periodic connectivity check (every 30 seconds when online)
   useEffect(() => {
-    if (!networkStatus.isOnline) {return;}
+    if (!networkStatus.isOnline) {
+      return;
+    }
 
     const interval = setInterval(async () => {
       const isStillOnline = await checkConnection();
       if (!isStillOnline) {
-        setNetworkStatus(prev => ({
+        setNetworkStatus((prev) => ({
           ...prev,
           isOnline: false,
           lastChecked: Date.now(),
@@ -155,7 +175,9 @@ export function useNetworkStatus(): UseNetworkStatusReturn {
 
   // Retry connection check when offline (every 10 seconds)
   useEffect(() => {
-    if (networkStatus.isOnline) {return;}
+    if (networkStatus.isOnline) {
+      return;
+    }
 
     const interval = setInterval(async () => {
       if (navigator.onLine) {
@@ -178,7 +200,10 @@ export function useNetworkStatus(): UseNetworkStatusReturn {
 }
 
 // Hook for simple online/offline status
-export function useOnlineStatus(): { isOnline: boolean; isSlowConnection: boolean } {
+export function useOnlineStatus(): {
+  isOnline: boolean;
+  isSlowConnection: boolean;
+} {
   const { isOnline, isSlowConnection } = useNetworkStatus();
   return { isOnline, isSlowConnection };
 }
@@ -193,11 +218,17 @@ export function useConnectionQuality(): {
   const { isOnline, effectiveType, downlink, rtt } = useNetworkStatus();
 
   const quality = (() => {
-    if (!isOnline) {return "offline";}
-    
-    if (effectiveType === "4g" && downlink > 1.5) {return "excellent";}
-    if (effectiveType === "4g" || (effectiveType === "3g" && downlink > 0.7)) {return "good";}
-    
+    if (!isOnline) {
+      return "offline";
+    }
+
+    if (effectiveType === "4g" && downlink > 1.5) {
+      return "excellent";
+    }
+    if (effectiveType === "4g" || (effectiveType === "3g" && downlink > 0.7)) {
+      return "good";
+    }
+
     return "poor";
   })();
 

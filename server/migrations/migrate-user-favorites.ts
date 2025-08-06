@@ -32,7 +32,8 @@ export async function migrateUserFavorites(): Promise<MigrationStats> {
   try {
     // Connect to database if not already connected
     if (!(global as any).mongoose?.connection?.readyState) {
-      const mongoUri = process.env.MONGO_URI || "mongodb://localhost:27017/hsa-songbook";
+      const mongoUri =
+        process.env.MONGO_URI || "mongodb://localhost:27017/hsa-songbook";
       await connect(mongoUri);
       console.log("📊 Connected to database for migration");
     }
@@ -49,16 +50,24 @@ export async function migrateUserFavorites(): Promise<MigrationStats> {
     for (const user of users) {
       try {
         stats.usersProcessed++;
-        
+
         // Skip if user doesn't have favorites or already migrated
         const userWithFavorites = user as any;
-        if (!userWithFavorites.favorites || userWithFavorites.favorites.length === 0) {
+        if (
+          !userWithFavorites.favorites ||
+          userWithFavorites.favorites.length === 0
+        ) {
           continue;
         }
 
         // Check if user already has new fields populated
-        if (user.favoriteSongs?.length > 0 || user.favoriteArrangements?.length > 0) {
-          console.log(`⚠️  User ${user._id} already has new favorites fields, skipping...`);
+        if (
+          user.favoriteSongs?.length > 0 ||
+          user.favoriteArrangements?.length > 0
+        ) {
+          console.log(
+            `⚠️  User ${user._id} already has new favorites fields, skipping...`,
+          );
           continue;
         }
 
@@ -85,7 +94,9 @@ export async function migrateUserFavorites(): Promise<MigrationStats> {
             }
 
             // If neither, log as error but continue
-            console.warn(`⚠️  Favorite ID ${favoriteId} for user ${user._id} is neither a song nor arrangement`);
+            console.warn(
+              `⚠️  Favorite ID ${favoriteId} for user ${user._id} is neither a song nor arrangement`,
+            );
           } catch (error) {
             console.error(`Error checking favorite ${favoriteId}:`, error);
           }
@@ -94,14 +105,18 @@ export async function migrateUserFavorites(): Promise<MigrationStats> {
         // Update user with new fields
         user.favoriteSongs = songFavorites;
         user.favoriteArrangements = arrangementFavorites;
-        
+
         // Save the user
         await user.save();
-        stats.favoritesConverted += songFavorites.length + arrangementFavorites.length;
-        
-        console.log(`✅ Migrated user ${user._id}: ${songFavorites.length} songs, ${arrangementFavorites.length} arrangements`);
+        stats.favoritesConverted +=
+          songFavorites.length + arrangementFavorites.length;
+
+        console.log(
+          `✅ Migrated user ${user._id}: ${songFavorites.length} songs, ${arrangementFavorites.length} arrangements`,
+        );
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         stats.errors.push({
           userId: user._id.toString(),
           error: errorMessage,
@@ -120,8 +135,9 @@ export async function migrateUserFavorites(): Promise<MigrationStats> {
     }
 
     stats.endTime = new Date();
-    const duration = (stats.endTime.getTime() - stats.startTime.getTime()) / 1000;
-    
+    const duration =
+      (stats.endTime.getTime() - stats.startTime.getTime()) / 1000;
+
     console.log("\n📊 Migration Summary:");
     console.log(`- Users processed: ${stats.usersProcessed}`);
     console.log(`- Total favorites converted: ${stats.favoritesConverted}`);
@@ -167,7 +183,10 @@ async function createBackup(): Promise<void> {
 async function saveMigrationReport(stats: MigrationStats): Promise<void> {
   const reportsDir = path.join(__dirname, "../../migration-reports");
   const timestamp = new Date().toISOString().replace(/:/g, "-");
-  const reportFile = path.join(reportsDir, `favorites-migration-${timestamp}.json`);
+  const reportFile = path.join(
+    reportsDir,
+    `favorites-migration-${timestamp}.json`,
+  );
 
   // Ensure reports directory exists
   await fs.mkdir(reportsDir, { recursive: true });
@@ -180,10 +199,12 @@ async function saveMigrationReport(stats: MigrationStats): Promise<void> {
 /**
  * Rollback migration (restore from backup)
  */
-export async function rollbackFavoritesMigration(backupFile: string): Promise<void> {
+export async function rollbackFavoritesMigration(
+  backupFile: string,
+): Promise<void> {
   try {
     console.log("🔄 Starting rollback...");
-    
+
     // Read backup file
     const backupData = await fs.readFile(backupFile, "utf-8");
     const users = JSON.parse(backupData);
@@ -196,7 +217,9 @@ export async function rollbackFavoritesMigration(backupFile: string): Promise<vo
       });
     }
 
-    console.log(`✅ Rollback completed. Restored ${users.length} users from backup.`);
+    console.log(
+      `✅ Rollback completed. Restored ${users.length} users from backup.`,
+    );
   } catch (error) {
     console.error("❌ Rollback failed:", error);
     throw error;

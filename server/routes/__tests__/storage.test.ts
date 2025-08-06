@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Request, Response } from "express";
-import type { MockRequest, MockResponse } from '../../../shared/types/express.types';
 import {
   getStorageStats,
   triggerCleanup,
@@ -50,42 +49,34 @@ const mockConsole = {
 vi.stubGlobal("console", mockConsole);
 
 // Helper to create mock request and response objects
-const createMockReqRes = <TBody = Record<string, unknown>, TQuery = Record<string, unknown>, TParams = Record<string, unknown>>(
+const createMockReqRes = <
+  TBody = Record<string, unknown>,
+  TQuery = Record<string, unknown>,
+  TParams = Record<string, unknown>,
+>(
   query: TQuery = {} as TQuery,
   params: TParams = {} as TParams,
   body: TBody = {} as TBody,
-): { req: MockRequest<TBody, TQuery, TParams>; res: MockResponse } => {
-  const req: MockRequest<TBody, TQuery, TParams> = {
+): {
+  req: Partial<Request> & { query: TQuery; params: TParams; body: TBody };
+  res: Partial<Response>;
+} => {
+  const req = {
     query,
     params,
     body,
     headers: {},
-    get: vi.fn((header: string) => undefined),
-    header: vi.fn((header: string) => undefined),
+    get: vi.fn((_header: string) => undefined),
+    header: vi.fn((_header: string) => undefined),
   };
 
-  const res: MockResponse = {
+  const res = {
     statusCode: 200,
-    headers: {},
-    json: vi.fn(function(this: MockResponse, data: unknown) {
-      this.jsonData = data;
-      return this;
-    }),
-    status: vi.fn(function(this: MockResponse, code: number) {
-      this.statusCode = code;
-      return this;
-    }),
-    send: vi.fn(function(this: MockResponse, data: unknown) {
-      this.sentData = data;
-      return this;
-    }),
-    set: vi.fn(function(this: MockResponse, field: string, value: string) {
-      this.headers[field] = value;
-      return this;
-    }),
-    end: vi.fn(function(this: MockResponse) {
-      return this;
-    }),
+    json: vi.fn().mockReturnThis(),
+    status: vi.fn().mockReturnThis(),
+    send: vi.fn().mockReturnThis(),
+    set: vi.fn().mockReturnThis(),
+    end: vi.fn().mockReturnThis(),
   };
 
   return { req, res };
@@ -132,12 +123,14 @@ const mockArrangements = [
 const mockSongDocuments = [
   {
     _id: "song1",
-    chordData: "{title: Amazing Grace}\n{artist: John Newton}\nAmazing grace...",
+    chordData:
+      "{title: Amazing Grace}\n{artist: John Newton}\nAmazing grace...",
     documentSize: 2048,
   },
   {
     _id: "song2",
-    chordData: "{title: How Great}\n{artist: Chris Tomlin}\nHow great is our God...",
+    chordData:
+      "{title: How Great}\n{artist: Chris Tomlin}\nHow great is our God...",
     documentSize: 1536,
   },
 ];
@@ -190,7 +183,7 @@ describe("Storage API Routes", () => {
       (Song.find as any).mockReturnValue(mockSongQuery);
       (Arrangement.find as any).mockReturnValue(mockArrangementQuery);
 
-      await getStorageStats(req as Request, res as Response);
+      await getStorageStats(req, res);
 
       expect(database.getStorageStats).toHaveBeenCalled();
       expect(Song.countDocuments).toHaveBeenCalled();
@@ -239,7 +232,7 @@ describe("Storage API Routes", () => {
       (Song.find as any).mockReturnValue(mockQuery);
       (Arrangement.find as any).mockReturnValue(mockQuery);
 
-      await getStorageStats(req as Request, res as Response);
+      await getStorageStats(req, res);
 
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -255,9 +248,11 @@ describe("Storage API Routes", () => {
     it("handles database errors", async () => {
       const { req, res } = createMockReqRes();
 
-      (database.getStorageStats as any).mockRejectedValue(new Error("Database error"));
+      (database.getStorageStats as any).mockRejectedValue(
+        new Error("Database error"),
+      );
 
-      await getStorageStats(req as Request, res as Response);
+      await getStorageStats(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
@@ -286,16 +281,12 @@ describe("Storage API Routes", () => {
       ]);
 
       // Mock old unused songs
-      (Song.find as any).mockResolvedValue([
-        { _id: "old1" },
-      ]);
+      (Song.find as any).mockResolvedValue([{ _id: "old1" }]);
 
       // Mock empty setlists
-      (Setlist.find as any).mockResolvedValue([
-        { _id: "empty1" },
-      ]);
+      (Setlist.find as any).mockResolvedValue([{ _id: "empty1" }]);
 
-      await triggerCleanup(req as Request, res as Response);
+      await triggerCleanup(req, res);
 
       expect(Song.aggregate).toHaveBeenCalled();
       expect(Arrangement.find).toHaveBeenCalled();
@@ -347,14 +338,22 @@ describe("Storage API Routes", () => {
       (Arrangement.deleteMany as any).mockResolvedValue({ deletedCount: 2 });
       (Setlist.deleteMany as any).mockResolvedValue({ deletedCount: 1 });
 
-      await triggerCleanup(req as Request, res as Response);
+      await triggerCleanup(req, res);
 
       // Should perform actual deletions - called twice for Song (duplicates and old songs)
       expect(Song.deleteMany).toHaveBeenCalledTimes(2);
-      expect(Song.deleteMany).toHaveBeenNthCalledWith(1, { _id: { $in: ["id2"] } });
-      expect(Song.deleteMany).toHaveBeenNthCalledWith(2, { _id: { $in: ["old1"] } });
-      expect(Arrangement.deleteMany).toHaveBeenCalledWith({ _id: { $in: ["unused1", "unused2"] } });
-      expect(Setlist.deleteMany).toHaveBeenCalledWith({ _id: { $in: ["empty1"] } });
+      expect(Song.deleteMany).toHaveBeenNthCalledWith(1, {
+        _id: { $in: ["id2"] },
+      });
+      expect(Song.deleteMany).toHaveBeenNthCalledWith(2, {
+        _id: { $in: ["old1"] },
+      });
+      expect(Arrangement.deleteMany).toHaveBeenCalledWith({
+        _id: { $in: ["unused1", "unused2"] },
+      });
+      expect(Setlist.deleteMany).toHaveBeenCalledWith({
+        _id: { $in: ["empty1"] },
+      });
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -376,7 +375,7 @@ describe("Storage API Routes", () => {
 
       (Song.aggregate as any).mockRejectedValue(new Error("Database error"));
 
-      await triggerCleanup(req as Request, res as Response);
+      await triggerCleanup(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
@@ -410,15 +409,19 @@ describe("Storage API Routes", () => {
       (Song.find as any).mockReturnValue(mockSongQuery);
       (Arrangement.find as any).mockReturnValue(mockArrangementQuery);
 
-      await getCompressionStats(req as Request, res as Response);
+      await getCompressionStats(req, res);
 
       expect(Song.find).toHaveBeenCalledWith({});
       expect(mockSongQuery.limit).toHaveBeenCalledWith(100);
-      expect(mockSongQuery.select).toHaveBeenCalledWith("chordData documentSize");
+      expect(mockSongQuery.select).toHaveBeenCalledWith(
+        "chordData documentSize",
+      );
 
       expect(Arrangement.find).toHaveBeenCalledWith({});
       expect(mockArrangementQuery.limit).toHaveBeenCalledWith(50);
-      expect(mockArrangementQuery.select).toHaveBeenCalledWith("chordData documentSize");
+      expect(mockArrangementQuery.select).toHaveBeenCalledWith(
+        "chordData documentSize",
+      );
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -444,7 +447,7 @@ describe("Storage API Routes", () => {
       (Song.find as any).mockReturnValue(mockQuery);
       (Arrangement.find as any).mockReturnValue(mockQuery);
 
-      await getCompressionStats(req as Request, res as Response);
+      await getCompressionStats(req, res);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -465,7 +468,7 @@ describe("Storage API Routes", () => {
         throw new Error("Database error");
       });
 
-      await getCompressionStats(req as Request, res as Response);
+      await getCompressionStats(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
@@ -488,7 +491,7 @@ describe("Storage API Routes", () => {
         percentage: 50,
       });
 
-      await healthCheck(req as Request, res as Response);
+      await healthCheck(req, res);
 
       expect(database.isConnectedToDatabase).toHaveBeenCalled();
       expect(database.getStorageStats).toHaveBeenCalled();
@@ -517,7 +520,7 @@ describe("Storage API Routes", () => {
         percentage: 95,
       });
 
-      await healthCheck(req as Request, res as Response);
+      await healthCheck(req, res);
 
       expect(res.status).toHaveBeenCalledWith(503);
       expect(res.json).toHaveBeenCalledWith({
@@ -543,7 +546,7 @@ describe("Storage API Routes", () => {
         percentage: 85,
       });
 
-      await healthCheck(req as Request, res as Response);
+      await healthCheck(req, res);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -564,7 +567,7 @@ describe("Storage API Routes", () => {
 
       (database.isConnectedToDatabase as any).mockReturnValue(false);
 
-      await healthCheck(req as Request, res as Response);
+      await healthCheck(req, res);
 
       expect(res.status).toHaveBeenCalledWith(503);
       expect(res.json).toHaveBeenCalledWith({
@@ -584,7 +587,7 @@ describe("Storage API Routes", () => {
         throw new Error("Connection check failed");
       });
 
-      await healthCheck(req as Request, res as Response);
+      await healthCheck(req, res);
 
       expect(res.status).toHaveBeenCalledWith(503);
       expect(res.json).toHaveBeenCalledWith({
@@ -607,7 +610,7 @@ describe("Storage API Routes", () => {
       (Song.find as any).mockResolvedValue([]);
       (Setlist.find as any).mockResolvedValue([]);
 
-      await triggerCleanup(req as Request, res as Response);
+      await triggerCleanup(req, res);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -641,7 +644,7 @@ describe("Storage API Routes", () => {
       (Song.find as any).mockReturnValue(mockQuery);
       (Arrangement.find as any).mockReturnValue(mockQuery);
 
-      await getCompressionStats(req as Request, res as Response);
+      await getCompressionStats(req, res);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -660,12 +663,17 @@ describe("Storage API Routes", () => {
 
       (database.getStorageStats as any).mockResolvedValue(mockStorageStats);
       (Song.countDocuments as any).mockResolvedValue(150);
-      (Setlist.countDocuments as any).mockRejectedValue(new Error("Count failed"));
+      (Setlist.countDocuments as any).mockRejectedValue(
+        new Error("Count failed"),
+      );
 
-      await getStorageStats(req as Request, res as Response);
+      await getStorageStats(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(mockConsole.error).toHaveBeenCalledWith("Error fetching storage stats:", expect.any(Error));
+      expect(mockConsole.error).toHaveBeenCalledWith(
+        "Error fetching storage stats:",
+        expect.any(Error),
+      );
     });
   });
 });

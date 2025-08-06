@@ -3,11 +3,11 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ReviewsList from "../ReviewsList";
 import { useAuthContext } from "@/shared/contexts/AuthContext";
-import { 
-  useReviewsByArrangement, 
-  useCreateOrUpdateReview, 
-  useMarkReviewHelpful, 
-  useReportReview, 
+import {
+  useReviewsByArrangement,
+  useCreateOrUpdateReview,
+  useMarkReviewHelpful,
+  useReportReview,
 } from "../../hooks/useReviews";
 
 // Mock hooks
@@ -39,14 +39,18 @@ vi.mock("lucide-react", () => ({
 
 // Mock UI components
 vi.mock("@/components/ui/card", () => ({
-  Card: ({ children, className }: any) => <div className={className}>{children}</div>,
+  Card: ({ children, className }: any) => (
+    <div className={className}>{children}</div>
+  ),
   CardHeader: ({ children }: any) => <div>{children}</div>,
   CardTitle: ({ children }: any) => <h3>{children}</h3>,
   CardContent: ({ children }: any) => <div>{children}</div>,
 }));
 
 vi.mock("@/components/ui/skeleton", () => ({
-  Skeleton: ({ className }: any) => <div className={className} data-testid="skeleton" />,
+  Skeleton: ({ className }: any) => (
+    <div className={className} data-testid="skeleton" />
+  ),
 }));
 
 vi.mock("@/components/ui/progress", () => ({
@@ -62,7 +66,7 @@ const createWrapper = () => {
       mutations: { retry: false },
     },
   });
-  
+
   return ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
@@ -133,7 +137,10 @@ describe("ReviewsList", () => {
       });
 
       render(
-        <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
+        <ReviewsList
+          arrangementId="arr123"
+          arrangementName="Test Arrangement"
+        />,
         { wrapper: createWrapper() },
       );
 
@@ -150,15 +157,24 @@ describe("ReviewsList", () => {
       });
 
       render(
-        <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
+        <ReviewsList
+          arrangementId="arr123"
+          arrangementName="Test Arrangement"
+        />,
         { wrapper: createWrapper() },
       );
 
       expect(screen.getByText("Reviews")).toBeInTheDocument();
       expect(screen.getByText("John Doe")).toBeInTheDocument();
-      expect(screen.getByText("Excellent arrangement! Perfect for our worship team.")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "Excellent arrangement! Perfect for our worship team.",
+        ),
+      ).toBeInTheDocument();
       expect(screen.getByText("Jane Smith")).toBeInTheDocument();
-      expect(screen.getByText("Good arrangement, but could use more dynamics.")).toBeInTheDocument();
+      expect(
+        screen.getByText("Good arrangement, but could use more dynamics."),
+      ).toBeInTheDocument();
     });
 
     it("should display average rating and total count", () => {
@@ -169,7 +185,10 @@ describe("ReviewsList", () => {
       });
 
       render(
-        <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
+        <ReviewsList
+          arrangementId="arr123"
+          arrangementName="Test Arrangement"
+        />,
         { wrapper: createWrapper() },
       );
 
@@ -179,8 +198,8 @@ describe("ReviewsList", () => {
 
     it("should display rating breakdown", () => {
       (useReviewsByArrangement as any).mockReturnValue({
-        data: { 
-          reviews: mockReviews, 
+        data: {
+          reviews: mockReviews,
           summary: mockSummary,
           ratingBreakdown: {
             5: 15,
@@ -195,7 +214,10 @@ describe("ReviewsList", () => {
       });
 
       render(
-        <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
+        <ReviewsList
+          arrangementId="arr123"
+          arrangementName="Test Arrangement"
+        />,
         { wrapper: createWrapper() },
       );
 
@@ -207,26 +229,36 @@ describe("ReviewsList", () => {
 
     it("should show empty state when no reviews", () => {
       (useReviewsByArrangement as any).mockReturnValue({
-        data: { reviews: [], summary: { ...mockSummary, totalReviews: 0, averageRating: 0 } },
+        data: {
+          reviews: [],
+          summary: { ...mockSummary, totalReviews: 0, averageRating: 0 },
+        },
         isLoading: false,
         error: null,
       });
 
       render(
-        <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
+        <ReviewsList
+          arrangementId="arr123"
+          arrangementName="Test Arrangement"
+        />,
         { wrapper: createWrapper() },
       );
 
       expect(screen.getByText("No reviews yet")).toBeInTheDocument();
-      expect(screen.getByText("Be the first to share your experience with this arrangement!")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "Be the first to share your experience with this arrangement!",
+        ),
+      ).toBeInTheDocument();
     });
   });
 
   describe("Current User Review", () => {
     it("should display current user review separately", () => {
       (useReviewsByArrangement as any).mockReturnValue({
-        data: { 
-          reviews: mockReviews, 
+        data: {
+          reviews: mockReviews,
           summary: mockSummary,
           currentUserReview: mockCurrentUserReview,
         },
@@ -235,18 +267,23 @@ describe("ReviewsList", () => {
       });
 
       render(
-        <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
+        <ReviewsList
+          arrangementId="arr123"
+          arrangementName="Test Arrangement"
+        />,
         { wrapper: createWrapper() },
       );
 
       expect(screen.getByText("Your Review")).toBeInTheDocument();
-      expect(screen.getByText("Nice arrangement, works well for our congregation.")).toBeInTheDocument();
+      expect(
+        screen.getByText("Nice arrangement, works well for our congregation."),
+      ).toBeInTheDocument();
     });
 
     it("should show edit button for user's own review", () => {
       (useReviewsByArrangement as any).mockReturnValue({
-        data: { 
-          reviews: mockReviews, 
+        data: {
+          reviews: mockReviews,
           summary: mockSummary,
           currentUserReview: mockCurrentUserReview,
         },
@@ -255,7 +292,10 @@ describe("ReviewsList", () => {
       });
 
       render(
-        <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
+        <ReviewsList
+          arrangementId="arr123"
+          arrangementName="Test Arrangement"
+        />,
         { wrapper: createWrapper() },
       );
 
@@ -272,7 +312,10 @@ describe("ReviewsList", () => {
       });
 
       render(
-        <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
+        <ReviewsList
+          arrangementId="arr123"
+          arrangementName="Test Arrangement"
+        />,
         { wrapper: createWrapper() },
       );
 
@@ -297,7 +340,10 @@ describe("ReviewsList", () => {
       });
 
       render(
-        <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
+        <ReviewsList
+          arrangementId="arr123"
+          arrangementName="Test Arrangement"
+        />,
         { wrapper: createWrapper() },
       );
 
@@ -310,8 +356,10 @@ describe("ReviewsList", () => {
 
       // Enter comment
       const commentInput = screen.getByPlaceholderText(/Share your experience/);
-      fireEvent.change(commentInput, { 
-        target: { value: "This is an excellent arrangement for our worship team!" }, 
+      fireEvent.change(commentInput, {
+        target: {
+          value: "This is an excellent arrangement for our worship team!",
+        },
       });
 
       // Submit
@@ -338,7 +386,10 @@ describe("ReviewsList", () => {
       });
 
       render(
-        <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
+        <ReviewsList
+          arrangementId="arr123"
+          arrangementName="Test Arrangement"
+        />,
         { wrapper: createWrapper() },
       );
 
@@ -363,11 +414,16 @@ describe("ReviewsList", () => {
       });
 
       render(
-        <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
+        <ReviewsList
+          arrangementId="arr123"
+          arrangementName="Test Arrangement"
+        />,
         { wrapper: createWrapper() },
       );
 
-      const helpfulButtons = screen.getAllByRole("button", { name: /helpful/i });
+      const helpfulButtons = screen.getAllByRole("button", {
+        name: /helpful/i,
+      });
       fireEvent.click(helpfulButtons[0]);
 
       expect(mockMarkHelpful).toHaveBeenCalledWith({
@@ -384,11 +440,16 @@ describe("ReviewsList", () => {
       });
 
       render(
-        <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
+        <ReviewsList
+          arrangementId="arr123"
+          arrangementName="Test Arrangement"
+        />,
         { wrapper: createWrapper() },
       );
 
-      const helpfulButtons = screen.getAllByRole("button", { name: /helpful/i });
+      const helpfulButtons = screen.getAllByRole("button", {
+        name: /helpful/i,
+      });
       expect(helpfulButtons[0]).not.toHaveClass("text-blue-600");
       expect(helpfulButtons[1]).toHaveClass("text-blue-600");
     });
@@ -403,7 +464,10 @@ describe("ReviewsList", () => {
       });
 
       render(
-        <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
+        <ReviewsList
+          arrangementId="arr123"
+          arrangementName="Test Arrangement"
+        />,
         { wrapper: createWrapper() },
       );
 
@@ -412,7 +476,9 @@ describe("ReviewsList", () => {
 
       await waitFor(() => {
         expect(screen.getByText("Report Review")).toBeInTheDocument();
-        expect(screen.getByText("Why are you reporting this review?")).toBeInTheDocument();
+        expect(
+          screen.getByText("Why are you reporting this review?"),
+        ).toBeInTheDocument();
       });
     });
 
@@ -428,7 +494,10 @@ describe("ReviewsList", () => {
       });
 
       render(
-        <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
+        <ReviewsList
+          arrangementId="arr123"
+          arrangementName="Test Arrangement"
+        />,
         { wrapper: createWrapper() },
       );
 
@@ -438,7 +507,9 @@ describe("ReviewsList", () => {
 
       // Enter reason
       const reasonInput = screen.getByPlaceholderText(/Explain why/);
-      fireEvent.change(reasonInput, { target: { value: "Inappropriate content" } });
+      fireEvent.change(reasonInput, {
+        target: { value: "Inappropriate content" },
+      });
 
       // Submit
       const submitButton = screen.getByText("Submit Report");
@@ -461,14 +532,19 @@ describe("ReviewsList", () => {
       });
 
       render(
-        <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
+        <ReviewsList
+          arrangementId="arr123"
+          arrangementName="Test Arrangement"
+        />,
         { wrapper: createWrapper() },
       );
 
       const reviewCards = screen.getAllByTestId(/review-/);
-      const firstReviewStars = reviewCards[0].querySelectorAll('[data-testid="star-icon"]');
+      const firstReviewStars = reviewCards[0].querySelectorAll(
+        '[data-testid="star-icon"]',
+      );
       const filledStars = Array.from(firstReviewStars).filter(
-        star => star.getAttribute("data-fill") === "currentColor",
+        (star) => star.getAttribute("data-fill") === "currentColor",
       );
 
       expect(filledStars).toHaveLength(5); // 5-star review
@@ -484,7 +560,10 @@ describe("ReviewsList", () => {
       });
 
       render(
-        <ReviewsList arrangementId="arr123" arrangementName="Test Arrangement" />,
+        <ReviewsList
+          arrangementId="arr123"
+          arrangementName="Test Arrangement"
+        />,
         { wrapper: createWrapper() },
       );
 

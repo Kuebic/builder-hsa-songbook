@@ -10,10 +10,10 @@ export interface LoadingSpinnerProps {
 
 /**
  * Loading spinner component for Suspense fallbacks.
- * 
+ *
  * Displays a centered spinning loader with optional message.
  * Used as fallback while lazy-loaded components are being fetched.
- * 
+ *
  * @component
  * @example
  * ```tsx
@@ -21,7 +21,7 @@ export interface LoadingSpinnerProps {
  *   <LazyComponent />
  * </Suspense>
  * ```
- * 
+ *
  * @example
  * ```tsx
  * <Suspense fallback={<LoadingSpinner message="Loading data..." />}>
@@ -29,7 +29,9 @@ export interface LoadingSpinnerProps {
  * </Suspense>
  * ```
  */
-export function LoadingSpinner({ message = "Loading..." }: LoadingSpinnerProps) {
+export function LoadingSpinner({
+  message = "Loading...",
+}: LoadingSpinnerProps) {
   return (
     <div className="flex min-h-[400px] w-full items-center justify-center">
       <div className="text-center">

@@ -1,4 +1,10 @@
-import { createContext, useContext, ReactNode, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  ReactNode,
+  useEffect,
+  useState,
+} from "react";
 import { useUser, useClerk, useAuth } from "@clerk/clerk-react";
 
 // User interface matching the backend User model
@@ -51,7 +57,10 @@ interface AuthProviderProps {
 }
 
 // Helper function to create user object from Clerk user
-function createUserFromClerk(clerkUser: any, backendUser?: Partial<User>): User {
+function createUserFromClerk(
+  clerkUser: any,
+  backendUser?: Partial<User>,
+): User {
   return {
     _id: backendUser?._id || clerkUser.id,
     clerkId: clerkUser.id,
@@ -78,9 +87,20 @@ function createUserFromClerk(clerkUser: any, backendUser?: Partial<User>): User 
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const { user: clerkUser, isLoaded: clerkLoaded, isSignedIn } = useUser();
-  const { signOut } = useClerk();
-  const { getToken } = useAuth();
+  const clerkHooks = {
+    user: useUser(),
+    clerk: useClerk(),
+    auth: useAuth(),
+  };
+
+  const {
+    user: clerkUser,
+    isLoaded: clerkLoaded,
+    isSignedIn,
+  } = clerkHooks.user;
+  const { signOut } = clerkHooks.clerk;
+  const { getToken } = clerkHooks.auth;
+
   const [backendUser, setBackendUser] = useState<Partial<User> | null>(null);
   const [authState, setAuthState] = useState<AuthState>({
     currentUser: null,
@@ -93,7 +113,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const syncUser = async () => {
       if (!clerkLoaded) {
-        setAuthState(prev => ({ ...prev, isLoading: true }));
+        setAuthState((prev) => ({ ...prev, isLoading: true }));
         return;
       }
 
@@ -110,13 +130,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         // Get auth token for API calls
         const token = await getToken();
-        
+
         // Sync user with backend
         const syncResponse = await fetch("/api/users/sync", {
           method: "POST",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             clerkId: clerkUser.id,
@@ -124,16 +144,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
             name: clerkUser.fullName || clerkUser.firstName || "User",
           }),
         });
-        
+
         let backendUserData = undefined;
         if (syncResponse.ok) {
           const result = await syncResponse.json();
           backendUserData = result.data;
         }
-        
+
         // Create user from Clerk data, enhanced with backend data if available
-        const user = createUserFromClerk(clerkUser, backendUserData || backendUser || undefined);
-        
+        const user = createUserFromClerk(
+          clerkUser,
+          backendUserData || backendUser || undefined,
+        );
+
         setAuthState({
           currentUser: user,
           isAuthenticated: true,
@@ -141,10 +164,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
           error: null,
         });
       } catch (error) {
-        setAuthState(prev => ({
+        setAuthState((prev) => ({
           ...prev,
           isLoading: false,
-          error: error instanceof Error ? error.message : "Failed to sync user data",
+          error:
+            error instanceof Error ? error.message : "Failed to sync user data",
         }));
       }
     };
@@ -163,62 +187,69 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const updateUser = (updates: Partial<User>): void => {
     // Update local state
-    setAuthState(prev => ({
+    setAuthState((prev) => ({
       ...prev,
-      currentUser: prev.currentUser ? { ...prev.currentUser, ...updates } : null,
+      currentUser: prev.currentUser
+        ? { ...prev.currentUser, ...updates }
+        : null,
     }));
-    
+
     // Save updates to backend state
     if (authState.currentUser) {
-      setBackendUser(prev => ({ ...prev, ...updates }));
+      setBackendUser((prev) => ({ ...prev, ...updates }));
     }
-    
+
     // TODO: Persist updates to backend API
   };
 
   const refreshUser = async (): Promise<void> => {
-    if (!clerkUser || !isSignedIn) {return;}
+    if (!clerkUser || !isSignedIn) {
+      return;
+    }
 
-    setAuthState(prev => ({ ...prev, isLoading: true }));
-    
+    setAuthState((prev) => ({ ...prev, isLoading: true }));
+
     try {
       // const token = await getToken();
       await getToken(); // Ready for when we need to fetch from backend
-      
+
       // TODO: Fetch fresh user data from backend
       // const response = await fetch('/api/users/me', {
       //   headers: { Authorization: `Bearer ${token}` }
       // });
       // const userData = await response.json();
       // setBackendUser(userData);
-      
+
       const user = createUserFromClerk(clerkUser, backendUser || undefined);
-      setAuthState(prev => ({
+      setAuthState((prev) => ({
         ...prev,
         currentUser: user,
         isLoading: false,
       }));
     } catch (error) {
-      setAuthState(prev => ({
+      setAuthState((prev) => ({
         ...prev,
         isLoading: false,
-        error: error instanceof Error ? error.message : "Failed to refresh user data",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to refresh user data",
       }));
     }
   };
 
   const contextValue: AuthContextValue = {
     ...authState,
-    login,
-    logout,
-    updateUser,
-    refreshUser,
+    login: clerkLoaded ? login : () => {},
+    logout: clerkLoaded ? logout : () => {},
+    updateUser: clerkLoaded ? updateUser : () => {},
+    refreshUser: clerkLoaded ? refreshUser : async () => {},
+    // Override loading state if Clerk is not loaded
+    isLoading: !clerkLoaded ? true : authState.isLoading,
   };
 
   return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 }
 

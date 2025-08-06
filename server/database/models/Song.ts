@@ -26,7 +26,7 @@ export interface ISong extends Document {
   documentSize: number; // Calculated bytes for monitoring
   createdAt: Date;
   updatedAt: Date;
-  
+
   // Instance methods
   updateViews(): Promise<ISong>;
   addRating(rating: number): Promise<ISong>;
@@ -40,120 +40,125 @@ export interface ISongModel extends Model<ISong> {
 }
 
 // Create the schema
-const songSchema = new Schema<ISong>({
-  title: {
-    type: String,
-    required: true,
-    maxlength: 200,
-    trim: true,
-    index: "text",
-  },
-  artist: {
-    type: String,
-    maxlength: 100,
-    trim: true,
-    index: "text",
-  },
-  slug: {
-    type: String,
-    unique: true,
-    index: true,
-  },
-  compositionYear: {
-    type: Number,
-    min: 1000,
-    max: new Date().getFullYear() + 1,
-    index: true,
-  },
-  ccli: {
-    type: String,
-    trim: true,
-    index: true,
-    sparse: true, // Allows null values while maintaining uniqueness
-    validate: {
-      validator: function(v: string) {
-        return !v || /^\d+$/.test(v); // CCLI numbers are numeric strings
-      },
-      message: "CCLI must be a numeric string",
+const songSchema = new Schema<ISong>(
+  {
+    title: {
+      type: String,
+      required: true,
+      maxlength: 200,
+      trim: true,
+      index: "text",
     },
-  },
-  themes: [{
-    type: String,
-    maxlength: 50,
-    index: true,
-  }],
-  source: {
-    type: String,
-    maxlength: 100,
-    index: true,
-  },
-  lyrics: {
-    type: String,
-    maxlength: 10000,
-  },
-  notes: {
-    type: String,
-    maxlength: 2000,
-  },
-  defaultArrangement: {
-    type: Schema.Types.ObjectId,
-    ref: "Arrangement",
-  },
-  metadata: {
-    createdBy: { 
+    artist: {
+      type: String,
+      maxlength: 100,
+      trim: true,
+      index: "text",
+    },
+    slug: {
+      type: String,
+      unique: true,
+      index: true,
+    },
+    compositionYear: {
+      type: Number,
+      min: 1000,
+      max: new Date().getFullYear() + 1,
+      index: true,
+    },
+    ccli: {
+      type: String,
+      trim: true,
+      index: true,
+      sparse: true, // Allows null values while maintaining uniqueness
+      validate: {
+        validator: function (v: string) {
+          return !v || /^\d+$/.test(v); // CCLI numbers are numeric strings
+        },
+        message: "CCLI must be a numeric string",
+      },
+    },
+    themes: [
+      {
+        type: String,
+        maxlength: 50,
+        index: true,
+      },
+    ],
+    source: {
+      type: String,
+      maxlength: 100,
+      index: true,
+    },
+    lyrics: {
+      type: String,
+      maxlength: 10000,
+    },
+    notes: {
+      type: String,
+      maxlength: 2000,
+    },
+    defaultArrangement: {
       type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true, 
-      index: true, 
+      ref: "Arrangement",
     },
-    lastModifiedBy: { 
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true, 
-    },
-    isPublic: { 
-      type: Boolean, 
-      default: true, 
-      index: true, 
-    },
-    ratings: {
-      average: { 
-        type: Number, 
-        default: 0, 
-        min: 0, 
-        max: 5, 
+    metadata: {
+      createdBy: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+        index: true,
       },
-      count: { 
-        type: Number, 
-        default: 0, 
-        min: 0, 
+      lastModifiedBy: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
+      isPublic: {
+        type: Boolean,
+        default: true,
+        index: true,
+      },
+      ratings: {
+        average: {
+          type: Number,
+          default: 0,
+          min: 0,
+          max: 5,
+        },
+        count: {
+          type: Number,
+          default: 0,
+          min: 0,
+        },
+      },
+      views: {
+        type: Number,
+        default: 0,
+        min: 0,
       },
     },
-    views: { 
-      type: Number, 
-      default: 0, 
-      min: 0, 
+    documentSize: {
+      type: Number,
+      default: 0,
     },
   },
-  documentSize: { 
-    type: Number, 
-    default: 0,
+  {
+    timestamps: true,
+    collection: "songs",
   },
-}, {
-  timestamps: true,
-  collection: "songs",
-});
+);
 
 // Strategic indexes for searching
 songSchema.index(
-  { 
-    title: "text", 
-    artist: "text", 
+  {
+    title: "text",
+    artist: "text",
     themes: "text",
     source: "text",
     lyrics: "text",
-  }, 
-  { 
+  },
+  {
     weights: { title: 10, artist: 8, themes: 6, source: 4, lyrics: 2 },
     name: "song_search_index",
   },
@@ -174,7 +179,7 @@ songSchema.pre("save", async function (this: ISong, next) {
       .replace(/[^a-z0-9\s-]/g, "")
       .replace(/\s+/g, "-")
       .trim();
-    
+
     // Add random suffix to ensure uniqueness
     const randomSuffix = Math.random().toString(36).substring(2, 8);
     this.slug = `${baseSlug}-${randomSuffix}`;
@@ -184,7 +189,7 @@ songSchema.pre("save", async function (this: ISong, next) {
 });
 
 // Post-save middleware to calculate document size
-songSchema.post("save", async function(doc: ISong) {
+songSchema.post("save", async function (doc: ISong) {
   if (doc.documentSize === 0) {
     // Calculate and update document size after save
     const docObject = doc.toObject();
@@ -200,9 +205,11 @@ songSchema.methods.updateViews = function () {
 };
 
 songSchema.methods.addRating = function (rating: number) {
-  const currentTotal = this.metadata.ratings.average * this.metadata.ratings.count;
+  const currentTotal =
+    this.metadata.ratings.average * this.metadata.ratings.count;
   this.metadata.ratings.count += 1;
-  this.metadata.ratings.average = (currentTotal + rating) / this.metadata.ratings.count;
+  this.metadata.ratings.average =
+    (currentTotal + rating) / this.metadata.ratings.count;
   return this.save();
 };
 
@@ -212,13 +219,12 @@ songSchema.statics.searchSongs = function (query: string, limit = 20) {
     { $text: { $search: query } },
     { score: { $meta: "textScore" } },
   )
-  .sort({ score: { $meta: "textScore" } })
-  .limit(limit);
+    .sort({ score: { $meta: "textScore" } })
+    .limit(limit);
 };
 
 songSchema.statics.findByTheme = function (theme: string) {
-  return this.find({ themes: theme })
-    .sort({ "metadata.ratings.average": -1 });
+  return this.find({ themes: theme }).sort({ "metadata.ratings.average": -1 });
 };
 
 songSchema.statics.findByCCLI = function (ccli: string) {

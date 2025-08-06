@@ -1,4 +1,10 @@
-import { AlertCircle, Wifi, WifiOff, Loader2, AlertTriangle } from "lucide-react";
+import {
+  AlertCircle,
+  Wifi,
+  WifiOff,
+  Loader2,
+  AlertTriangle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useConnectionInfo } from "../../contexts/NetworkContext";
 import { useSync } from "../../hooks/useSync";
@@ -8,12 +14,21 @@ export interface OfflineIndicatorProps {
   showDetails?: boolean;
 }
 
-export function OfflineIndicator({ className, showDetails = false }: OfflineIndicatorProps) {
-  const { isOnline, isSlowConnection, effectiveType, quality } = useConnectionInfo();
+export function OfflineIndicator({
+  className,
+  showDetails = false,
+}: OfflineIndicatorProps) {
+  const { isOnline, isSlowConnection, effectiveType, quality } =
+    useConnectionInfo();
   const { syncStatus } = useSync();
 
   // Don't show anything if fully online and no sync issues
-  if (isOnline && !isSlowConnection && syncStatus.pendingCount === 0 && syncStatus.failedCount === 0) {
+  if (
+    isOnline &&
+    !isSlowConnection &&
+    syncStatus.pendingCount === 0 &&
+    syncStatus.failedCount === 0
+  ) {
     return null;
   }
 
@@ -67,12 +82,15 @@ export function OfflineIndicator({ className, showDetails = false }: OfflineIndi
   };
 
   const statusInfo = getStatusInfo();
-  if (!statusInfo) {return null;}
+  if (!statusInfo) {
+    return null;
+  }
 
   const { icon: Icon, text, description, variant } = statusInfo;
 
-  const baseClasses = "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors";
-  
+  const baseClasses =
+    "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors";
+
   const variantClasses = {
     offline: "bg-gray-100 text-gray-800 border-gray-200",
     syncing: "bg-blue-50 text-blue-800 border-blue-200",
@@ -82,18 +100,15 @@ export function OfflineIndicator({ className, showDetails = false }: OfflineIndi
   };
 
   return (
-    <div className={cn(baseClasses, variantClasses[variant], "border", className)}>
-      <Icon 
-        className={cn(
-          "h-4 w-4",
-          variant === "syncing" && "animate-spin",
-        )} 
+    <div
+      className={cn(baseClasses, variantClasses[variant], "border", className)}
+    >
+      <Icon
+        className={cn("h-4 w-4", variant === "syncing" && "animate-spin")}
       />
       <span className="font-medium">{text}</span>
       {showDetails && (
-        <span className="text-xs opacity-75 ml-1">
-          {description}
-        </span>
+        <span className="text-xs opacity-75 ml-1">{description}</span>
       )}
     </div>
   );

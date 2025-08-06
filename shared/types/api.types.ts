@@ -101,7 +101,16 @@ export interface SyncOperationData {
 
 // Filter types for database queries
 export interface QueryFilter {
-  [key: string]: string | number | boolean | undefined | QueryFilter | QueryFilter[] | RegExp | RegExp[] | { [operator: string]: unknown };
+  [key: string]:
+    | string
+    | number
+    | boolean
+    | undefined
+    | QueryFilter
+    | QueryFilter[]
+    | RegExp
+    | RegExp[]
+    | { [operator: string]: unknown };
   $or?: QueryFilter[];
   $and?: QueryFilter[];
   $text?: { $search: string };
@@ -109,7 +118,7 @@ export interface QueryFilter {
 
 // Sort criteria
 export interface SortCriteria {
-  [field: string]: 1 | -1 | 'asc' | 'desc' | { $meta: string };
+  [field: string]: 1 | -1 | "asc" | "desc" | { $meta: string };
 }
 
 // Pagination options
@@ -121,7 +130,7 @@ export interface PaginationOptions {
 }
 
 // User role permissions
-export type UserRole = 'USER' | 'ADMIN' | 'MODERATOR';
+export type UserRole = "USER" | "ADMIN" | "MODERATOR";
 
 // Permission check result
 export interface PermissionCheck {

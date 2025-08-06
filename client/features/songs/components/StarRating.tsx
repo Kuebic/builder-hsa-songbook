@@ -12,14 +12,14 @@ export interface StarRatingProps {
 /**
  * Reusable star rating component with hover effects and accessibility
  */
-export const StarRating = ({ 
-  rating, 
-  onRate, 
-  readOnly = false, 
-  size = "default", 
+export const StarRating = ({
+  rating,
+  onRate,
+  readOnly = false,
+  size = "default",
 }: StarRatingProps) => {
   const [hoverRating, setHoverRating] = useState(0);
-  
+
   const sizeClasses = {
     small: "h-4 w-4",
     default: "h-5 w-5",
@@ -27,7 +27,7 @@ export const StarRating = ({
   };
 
   return (
-    <div 
+    <div
       className="flex gap-1"
       role="group"
       aria-label="Star rating"

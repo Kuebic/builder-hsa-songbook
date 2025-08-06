@@ -12,13 +12,13 @@ export type {
   CategoryCardProps,
   CategoryGridProps,
   CategoryFiltersProps,
-} from './types/category.types';
+} from "./types/category.types";
 
 export {
   categoryStatsSchema,
   categoryBrowsingFiltersSchema,
   isCategoryStats,
-} from './types/category.types';
+} from "./types/category.types";
 
 // Category mappings and utilities
 export {
@@ -32,7 +32,7 @@ export {
   categoryIdToSlug,
   slugToCategoryId,
   getCategoryBreadcrumb,
-} from './utils/categoryMappings';
+} from "./utils/categoryMappings";
 
 export {
   sortCategories,
@@ -47,28 +47,28 @@ export {
   hasRecentActivity,
   getCategoryRecommendations,
   assignClientSongCategories,
-} from './utils/categoryHelpers';
+} from "./utils/categoryHelpers";
 
 // Components
-export { CategoryGrid, CategoryGridCompact } from './components/CategoryGrid';
-export { CategoryCard } from './components/CategoryCard';
-export { CategoryBrowser } from './components/CategoryBrowser';
+export { CategoryGrid, CategoryGridCompact } from "./components/CategoryGrid";
+export { CategoryCard } from "./components/CategoryCard";
+export { CategoryBrowser } from "./components/CategoryBrowser";
 // export { CategoryFilters } from './components/CategoryFilters';
 
 // Hooks
-export { 
-  useCategoryStats, 
-  useCategoryStatsById, 
-  useCategoriesWithRecentActivity, 
-  usePopularCategories 
-} from './hooks/useCategoryStats';
+export {
+  useCategoryStats,
+  useCategoryStatsById,
+  useCategoriesWithRecentActivity,
+  usePopularCategories,
+} from "./hooks/useCategoryStats";
 
-export { 
-  useCategoryBrowsing, 
-  useCategoryBrowsingInfinite, 
-  useMultiCategorySongs, 
-  useCategoryBrowsingState 
-} from './hooks/useCategoryBrowsing';
+export {
+  useCategoryBrowsing,
+  useCategoryBrowsingInfinite,
+  useMultiCategorySongs,
+  useCategoryBrowsingState,
+} from "./hooks/useCategoryBrowsing";
 
 export {
   useCategoryAnalytics,
@@ -78,4 +78,4 @@ export {
   useCategoryPerformance,
   useCategoryHealth,
   useCategorySearchAnalytics,
-} from './hooks/useCategoryAnalytics';
+} from "./hooks/useCategoryAnalytics";

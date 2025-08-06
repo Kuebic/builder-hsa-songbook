@@ -1,7 +1,13 @@
 import { Request, Response } from "express";
-import { Arrangement, Song } from "../database/models";
+import {
+  Arrangement,
+  Song,
+  type IArrangement,
+  type ISong,
+} from "../database/models";
 import { z } from "zod";
-import { Types } from "mongoose";
+import { Types, type Document } from "mongoose";
+import { createArrangementSlug } from "../utils/slug";
 
 // Validation schemas
 const createArrangementSchema = z.object({
@@ -29,7 +35,9 @@ const createArrangementSchema = z.object({
   ]),
   tempo: z.number().min(40).max(200).optional(),
   timeSignature: z.string().default("4/4"),
-  difficulty: z.enum(["beginner", "intermediate", "advanced"]).default("intermediate"),
+  difficulty: z
+    .enum(["beginner", "intermediate", "advanced"])
+    .default("intermediate"),
   description: z.string().max(1000).optional(),
   tags: z.array(z.string().max(50)).default([]),
   createdBy: z.string(), // User ID
@@ -52,55 +60,89 @@ const updateArrangementSchema = createArrangementSchema.partial();
  * Validates if chord data is readable and not corrupted
  */
 function isValidChordData(chordData: string): boolean {
-  if (!chordData) {return true;} // Empty is valid
-  
+  if (!chordData) {
+    return true;
+  } // Empty is valid
+
   // Check for base64-like patterns (corrupted data)
   const base64Pattern = /^[A-Za-z0-9+/]{20,}={0,2}$/;
   if (base64Pattern.test(chordData.replace(/\s/g, ""))) {
     return false;
   }
-  
+
   // Check for excessive non-printable characters
   // eslint-disable-next-line no-control-regex
-  const nonPrintableCount = (chordData.match(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\xFF]/g) || []).length;
+  const nonPrintableCount = (
+    chordData.match(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\xFF]/g) || []
+  ).length;
   if (nonPrintableCount > chordData.length * 0.1) {
     return false;
   }
-  
+
   // Check for binary/compressed data patterns
   if (chordData.startsWith("�") || chordData.includes("\x00")) {
     return false;
   }
-  
+
   return true;
 }
 
 // Transform arrangement to client format
-function transformArrangementToClientFormat(arrangement: any): any {
+interface ClientArrangement {
+  _id: string;
+  title: string;
+  artist?: string;
+  arrangedBy?: string;
+  description?: string;
+  songIds: string[];
+  songs?: Array<{ _id: string; title: string; artist?: string }>;
+  tags?: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+function transformArrangementToClientFormat(
+  arrangement: IArrangement & Document,
+): ClientArrangement {
   if (!arrangement) {
     console.error("Received null arrangement");
     return null;
   }
-  
+
   const doc = arrangement.toObject ? arrangement.toObject() : arrangement;
-  
+
   if (!doc._id) {
     console.error("Arrangement missing _id", doc);
     return null;
   }
-  
+
   return {
     _id: doc._id.toString(),
+    slug:
+      doc.slug ||
+      createArrangementSlug(doc.songs?.[0]?.title || doc.name || "untitled"),
     name: doc.name || "Untitled Arrangement",
-    songIds: (doc.songIds || []).map((id: any) => {
-      if (!id) {return null;}
-      return typeof id === "object" && id._id ? id._id.toString() : id.toString();
-    }).filter(Boolean),
-    createdBy: doc.createdBy ? (typeof doc.createdBy === "object" && doc.createdBy._id ? doc.createdBy._id.toString() : doc.createdBy.toString()) : null,
+    songIds: (doc.songIds || [])
+      .map((id: string | { toString(): string }) => {
+        if (!id) {
+          return null;
+        }
+        return typeof id === "object" && id._id
+          ? id._id.toString()
+          : id.toString();
+      })
+      .filter(Boolean),
+    createdBy: doc.createdBy
+      ? typeof doc.createdBy === "object" && doc.createdBy._id
+        ? doc.createdBy._id.toString()
+        : doc.createdBy.toString()
+      : null,
     chordData: (() => {
       const chordData = doc.chordData || "";
       if (!isValidChordData(chordData)) {
-        console.warn(`Corrupted chord data detected for arrangement ${doc._id}, returning empty string`);
+        console.warn(
+          `Corrupted chord data detected for arrangement ${doc._id}, returning empty string`,
+        );
         return "";
       }
       return chordData;
@@ -121,19 +163,24 @@ function transformArrangementToClientFormat(arrangement: any): any {
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
     // Add populated data if available
-    songs: (doc.songIds || []).map((song: any) => {
-      if (typeof song === "object" && song && song.title) {
-        return {
-          _id: song._id ? song._id.toString() : null,
-          title: song.title,
-          artist: song.artist,
-        };
-      }
-      return null;
-    }).filter(Boolean),
-    createdByUser: doc.createdBy && typeof doc.createdBy === "object" && doc.createdBy.name ? {
-      displayName: doc.createdBy.name || "Unknown User",
-    } : null,
+    songs: (doc.songIds || [])
+      .map((song: ISong | string) => {
+        if (typeof song === "object" && song && song.title) {
+          return {
+            _id: song._id ? song._id.toString() : null,
+            title: song.title,
+            artist: song.artist,
+          };
+        }
+        return null;
+      })
+      .filter(Boolean),
+    createdByUser:
+      doc.createdBy && typeof doc.createdBy === "object" && doc.createdBy.name
+        ? {
+            displayName: doc.createdBy.name || "Unknown User",
+          }
+        : null,
   };
 }
 
@@ -175,8 +222,10 @@ export async function getArrangementsBySong(req: Request, res: Response) {
       .populate("createdBy", "name email")
       .sort({ "metadata.ratings.average": -1, "metadata.views": -1 })
       .lean();
-    
-    console.log(`📊 Found ${arrangements.length} arrangements for song ${songId}`);
+
+    console.log(
+      `📊 Found ${arrangements.length} arrangements for song ${songId}`,
+    );
 
     const transformedArrangements = arrangements
       .map((arrangement, index) => {
@@ -184,14 +233,19 @@ export async function getArrangementsBySong(req: Request, res: Response) {
           return transformArrangementToClientFormat(arrangement);
         } catch (error) {
           console.error(`❌ Error transforming arrangement ${index}:`, error);
-          console.error("Arrangement data:", JSON.stringify(arrangement, null, 2));
+          console.error(
+            "Arrangement data:",
+            JSON.stringify(arrangement, null, 2),
+          );
           return null;
         }
       })
       .filter(Boolean); // Filter out any null results
-    
-    console.log(`✅ Successfully transformed ${transformedArrangements.length} arrangements`);
-    
+
+    console.log(
+      `✅ Successfully transformed ${transformedArrangements.length} arrangements`,
+    );
+
     res.json({
       success: true,
       data: transformedArrangements,
@@ -200,8 +254,12 @@ export async function getArrangementsBySong(req: Request, res: Response) {
       },
     });
   } catch (error) {
-    console.error("❌ Error fetching arrangements for song:", req.params.songId, error);
-    
+    console.error(
+      "❌ Error fetching arrangements for song:",
+      req.params.songId,
+      error,
+    );
+
     // Log additional context for debugging
     if (error instanceof Error) {
       console.error("Error details:", {
@@ -210,14 +268,14 @@ export async function getArrangementsBySong(req: Request, res: Response) {
         stack: error.stack,
       });
     }
-    
+
     res.status(500).json({
       success: false,
       error: {
         code: "INTERNAL_ERROR",
         message: "Failed to fetch arrangements",
-        ...(process.env.NODE_ENV === "development" && { 
-          details: error instanceof Error ? error.message : String(error), 
+        ...(process.env.NODE_ENV === "development" && {
+          details: error instanceof Error ? error.message : String(error),
         }),
       },
     });
@@ -227,19 +285,24 @@ export async function getArrangementsBySong(req: Request, res: Response) {
 // Create new arrangement
 export async function createArrangement(req: Request, res: Response) {
   try {
-    console.log("📝 Creating arrangement with data:", JSON.stringify(req.body, null, 2));
+    console.log(
+      "📝 Creating arrangement with data:",
+      JSON.stringify(req.body, null, 2),
+    );
     const arrangementData = createArrangementSchema.parse(req.body);
     console.log("✅ Validated arrangement data:", arrangementData);
 
-    // Validate all songIds exist
+    // Validate all songIds exist and fetch song details for slug generation
     console.log("🔍 Validating song IDs:", arrangementData.songIds);
     const songIds = arrangementData.songIds.map((id) => new Types.ObjectId(id));
-    const songsCount = await Song.countDocuments({
+    const songs = await Song.find({
       _id: { $in: songIds },
     });
-    console.log(`📊 Found ${songsCount} songs out of ${songIds.length} requested`);
+    console.log(
+      `📊 Found ${songs.length} songs out of ${songIds.length} requested`,
+    );
 
-    if (songsCount !== songIds.length) {
+    if (songs.length !== songIds.length) {
       return res.status(400).json({
         success: false,
         error: {
@@ -250,13 +313,20 @@ export async function createArrangement(req: Request, res: Response) {
     }
 
     // Create arrangement
-    console.log("🔍 Creating arrangement with user ID:", arrangementData.createdBy);
+    console.log(
+      "🔍 Creating arrangement with user ID:",
+      arrangementData.createdBy,
+    );
     let createdByObjectId;
     try {
       createdByObjectId = new Types.ObjectId(arrangementData.createdBy);
       console.log("✅ Successfully created ObjectId from user ID");
     } catch (error) {
-      console.error("❌ Failed to create ObjectId from user ID:", arrangementData.createdBy, error);
+      console.error(
+        "❌ Failed to create ObjectId from user ID:",
+        arrangementData.createdBy,
+        error,
+      );
       return res.status(400).json({
         success: false,
         error: {
@@ -265,8 +335,16 @@ export async function createArrangement(req: Request, res: Response) {
         },
       });
     }
-    
+
+    // Generate slug using the first song's title
+    const firstSong = songs[0];
+    const slug = createArrangementSlug(firstSong.title);
+    console.log(
+      `🏷️ Generated slug: ${slug} from song title: ${firstSong.title}`,
+    );
+
     const arrangement = new Arrangement({
+      slug: slug,
       name: arrangementData.name,
       songIds: songIds,
       createdBy: createdByObjectId,
@@ -280,7 +358,10 @@ export async function createArrangement(req: Request, res: Response) {
       metadata: {
         isMashup: songIds.length > 1,
         mashupSections: arrangementData.mashupSections,
-        isPublic: arrangementData.isPublic !== undefined ? arrangementData.isPublic : true,
+        isPublic:
+          arrangementData.isPublic !== undefined
+            ? arrangementData.isPublic
+            : true,
         ratings: {
           average: 0,
           count: 0,
@@ -348,16 +429,30 @@ export async function updateArrangement(req: Request, res: Response) {
     // TODO: Add authorization check - only owner or admin can update
 
     // Update fields
-    if (updateData.name !== undefined) {arrangement.name = updateData.name;}
+    if (updateData.name !== undefined) {
+      arrangement.name = updateData.name;
+    }
     if (updateData.chordData !== undefined) {
       arrangement.chordData = updateData.chordData;
     }
-    if (updateData.key !== undefined) {arrangement.key = updateData.key;}
-    if (updateData.tempo !== undefined) {arrangement.tempo = updateData.tempo;}
-    if (updateData.timeSignature !== undefined) {arrangement.timeSignature = updateData.timeSignature;}
-    if (updateData.difficulty !== undefined) {arrangement.difficulty = updateData.difficulty;}
-    if (updateData.description !== undefined) {arrangement.description = updateData.description;}
-    if (updateData.tags !== undefined) {arrangement.tags = updateData.tags;}
+    if (updateData.key !== undefined) {
+      arrangement.key = updateData.key;
+    }
+    if (updateData.tempo !== undefined) {
+      arrangement.tempo = updateData.tempo;
+    }
+    if (updateData.timeSignature !== undefined) {
+      arrangement.timeSignature = updateData.timeSignature;
+    }
+    if (updateData.difficulty !== undefined) {
+      arrangement.difficulty = updateData.difficulty;
+    }
+    if (updateData.description !== undefined) {
+      arrangement.description = updateData.description;
+    }
+    if (updateData.tags !== undefined) {
+      arrangement.tags = updateData.tags;
+    }
     if (updateData.isPublic !== undefined) {
       (arrangement as any).isPublic = updateData.isPublic;
       arrangement.metadata.isPublic = updateData.isPublic;
@@ -365,12 +460,14 @@ export async function updateArrangement(req: Request, res: Response) {
 
     // Handle mashup sections update
     if (updateData.mashupSections !== undefined) {
-      arrangement.metadata.mashupSections = updateData.mashupSections.map((section) => ({
-        songId: new Types.ObjectId(section.songId),
-        title: section.title,
-        startBar: section.startBar,
-        endBar: section.endBar,
-      }));
+      arrangement.metadata.mashupSections = updateData.mashupSections.map(
+        (section) => ({
+          songId: new Types.ObjectId(section.songId),
+          title: section.title,
+          startBar: section.startBar,
+          endBar: section.endBar,
+        }),
+      );
     }
 
     // Update songIds if provided
@@ -400,7 +497,6 @@ export async function updateArrangement(req: Request, res: Response) {
     const updatedArrangement = await Arrangement.findById(arrangement._id)
       .populate("songIds", "title artist")
       .populate("createdBy", "name email");
-
 
     res.json({
       success: true,
@@ -516,6 +612,106 @@ export async function rateArrangement(req: Request, res: Response) {
       error: {
         code: "INTERNAL_ERROR",
         message: "Failed to rate arrangement",
+      },
+    });
+  }
+}
+
+// GET /api/arrangements/:id - Get a single arrangement by ID
+export async function getArrangementById(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+
+    // Validate ID format
+    if (!Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: "INVALID_ID",
+          message: "Invalid arrangement ID format",
+        },
+      });
+    }
+
+    // Find arrangement and populate song data
+    const arrangement = await Arrangement.findById(id)
+      .populate("songIds", "title artist slug")
+      .lean();
+
+    if (!arrangement) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: "NOT_FOUND",
+          message: "Arrangement not found",
+        },
+      });
+    }
+
+    // Transform to client format (handles slug generation if missing)
+    const enhancedArrangement = transformArrangementToClientFormat(arrangement);
+
+    res.json({
+      success: true,
+      data: enhancedArrangement,
+    });
+  } catch (error) {
+    console.error("Error fetching arrangement by ID:", error);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: "INTERNAL_ERROR",
+        message: "Failed to fetch arrangement",
+      },
+    });
+  }
+}
+
+// GET /api/arrangements/slug/:slug - Get a single arrangement by slug
+export async function getArrangementBySlug(req: Request, res: Response) {
+  try {
+    const { slug } = req.params;
+
+    if (!slug) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: "MISSING_SLUG",
+          message: "Slug parameter is required",
+        },
+      });
+    }
+
+    // Find arrangement by slug and populate song data
+    const arrangement = await Arrangement.findOne({ slug })
+      .populate("songIds", "title artist slug")
+      .lean();
+
+    if (!arrangement) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: "NOT_FOUND",
+          message: "Arrangement not found",
+        },
+      });
+    }
+
+    // Transform to client format
+    const transformedArrangement =
+      transformArrangementToClientFormat(arrangement);
+
+    res.json({
+      success: true,
+      data: transformedArrangement,
+    });
+  } catch (error) {
+    console.error("Error fetching arrangement by slug:", error);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: "INTERNAL_ERROR",
+        message: "Failed to fetch arrangement",
       },
     });
   }

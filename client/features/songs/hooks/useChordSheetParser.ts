@@ -5,18 +5,18 @@
 
 import { useMemo, useState, useCallback } from "react";
 import type { Song } from "chordsheetjs";
-import { 
-  ChordSheetParserResult, 
-  ChordParsingError, 
-  ChordSheetMeta, 
-} from "../types/chord.types";
-import { 
-  parseChordProContent, 
-  extractSongMetadata, 
+import {
+  ChordSheetParserResult,
+  ChordParsingError,
+  ChordSheetMeta,
+} from "@features/songs/types/chord.types";
+import {
+  parseChordProContent,
+  extractSongMetadata,
   validateChordProContent,
   measureChordOperation,
-  createCacheKey, 
-} from "../utils/chordSheetHelpers";
+  createCacheKey,
+} from "@features/songs/utils/chordSheetHelpers";
 
 /**
  * Options for the useChordSheetParser hook
@@ -34,7 +34,10 @@ interface UseChordSheetParserOptions {
  * Internal cache for parsed results to avoid re-parsing unchanged content
  * This is a simple in-memory cache - in production, consider using React Query
  */
-const parseCache = new Map<string, { song: Song; metadata: ChordSheetMeta; timestamp: number }>();
+const parseCache = new Map<
+  string,
+  { song: Song; metadata: ChordSheetMeta; timestamp: number }
+>();
 
 /**
  * Cache cleanup interval (5 minutes)
@@ -48,23 +51,23 @@ const MAX_CACHE_SIZE = 100;
 
 /**
  * React hook for parsing ChordPro content using ChordSheetJS
- * 
+ *
  * Provides performance-optimized parsing with caching, error handling,
  * and metadata extraction. Results are memoized to prevent unnecessary
  * re-parsing of unchanged content.
- * 
+ *
  * @param content - ChordPro format content to parse
  * @param options - Configuration options for the parser
  * @returns Parser result with song, error, metadata, and status information
- * 
+ *
  * @example
  * ```tsx
  * const { parsedSong, error, metadata, isValid, isLoading } = useChordSheetParser(chordProContent);
- * 
+ *
  * if (error) {
  *   return <div>Error: {error.message}</div>;
  * }
- * 
+ *
  * if (parsedSong) {
  *   return <ChordDisplay song={parsedSong} metadata={metadata} />;
  * }
@@ -88,17 +91,20 @@ export function useChordSheetParser(
   const cleanupCache = useCallback(() => {
     const now = Date.now();
     const entries = Array.from(parseCache.entries());
-    
+
     // Remove entries older than 5 minutes or if cache is too large
-    const shouldCleanup = entries.length > MAX_CACHE_SIZE || 
-      entries.some(([, value]) => now - value.timestamp > CACHE_CLEANUP_INTERVAL);
-    
+    const shouldCleanup =
+      entries.length > MAX_CACHE_SIZE ||
+      entries.some(
+        ([, value]) => now - value.timestamp > CACHE_CLEANUP_INTERVAL,
+      );
+
     if (shouldCleanup) {
       // Sort by timestamp and keep only the most recent entries
       const sortedEntries = entries
         .sort((a, b) => b[1].timestamp - a[1].timestamp)
         .slice(0, Math.floor(MAX_CACHE_SIZE * 0.8)); // Keep 80% of max size
-      
+
       parseCache.clear();
       sortedEntries.forEach(([key, value]) => {
         parseCache.set(key, value);
@@ -158,9 +164,12 @@ export function useChordSheetParser(
 
     // Parse content with optional performance measurement
     const parseOperation = () => parseChordProContent(content);
-    
+
     const { result: parseResult, duration } = enablePerformanceMeasurement
-      ? measureChordOperation(parseOperation, `Parse ChordPro (${content.length} chars)`)
+      ? measureChordOperation(
+          parseOperation,
+          `Parse ChordPro (${content.length} chars)`,
+        )
       : { result: parseOperation(), duration: 0 };
 
     // Handle parsing errors
@@ -178,10 +187,12 @@ export function useChordSheetParser(
     }
 
     // Extract metadata from parsed song
-    const extractMetadataOperation = () => extractSongMetadata(parseResult.song!);
-    
+    const extractMetadataOperation = () =>
+      extractSongMetadata(parseResult.song!);
+
     const metadata = enablePerformanceMeasurement
-      ? measureChordOperation(extractMetadataOperation, "Extract metadata").result
+      ? measureChordOperation(extractMetadataOperation, "Extract metadata")
+          .result
       : extractMetadataOperation();
 
     // Cache successful parse result
@@ -195,8 +206,13 @@ export function useChordSheetParser(
     cleanupCache();
 
     // Log performance info in development
-    if (enablePerformanceMeasurement && process.env.NODE_ENV === "development") {
-      console.log(`[useChordSheetParser] Total parsing time: ${duration.toFixed(2)}ms`);
+    if (
+      enablePerformanceMeasurement &&
+      process.env.NODE_ENV === "development"
+    ) {
+      console.log(
+        `[useChordSheetParser] Total parsing time: ${duration.toFixed(2)}ms`,
+      );
     }
 
     return {
@@ -205,14 +221,21 @@ export function useChordSheetParser(
       metadata,
       isValid: true,
     };
-  }, [content, cacheKeyPrefix, enableValidation, enablePerformanceMeasurement, cleanupCache]);
+  }, [
+    content,
+    cacheKeyPrefix,
+    enableValidation,
+    enablePerformanceMeasurement,
+    cleanupCache,
+  ]);
 
   /**
    * Simulate loading state for very large content
    * In practice, ChordSheetJS parsing is usually very fast
    */
   const simulateLoadingForLargeContent = useCallback(() => {
-    if (content.length > 10000) { // > 10KB
+    if (content.length > 10000) {
+      // > 10KB
       setIsLoading(true);
       const timer = setTimeout(() => setIsLoading(false), 50);
       return () => clearTimeout(timer);
@@ -235,14 +258,14 @@ export function useChordSheetParser(
 /**
  * Alternative hook for when you need to parse content on-demand rather than reactively
  * Useful for scenarios where you want to control when parsing happens
- * 
+ *
  * @param options - Configuration options for the parser
  * @returns Object with parse function and last result
- * 
+ *
  * @example
  * ```tsx
  * const { parseContent, lastResult, isLoading } = useChordSheetParserCallback();
- * 
+ *
  * const handleParse = () => {
  *   const result = parseContent(chordProContent);
  *   if (result.error) {
@@ -259,50 +282,58 @@ export function useChordSheetParserCallback(
   isLoading: boolean;
   clearCache: () => void;
 } {
-  const [lastResult, setLastResult] = useState<ChordSheetParserResult | null>(null);
+  const [lastResult, setLastResult] = useState<ChordSheetParserResult | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(false);
 
-  const parseContent = useCallback((content: string): ChordSheetParserResult => {
-    setIsLoading(true);
-    
-    try {
-      // Use the same parsing logic as the main hook, but without memoization
-      const parseOperation = () => parseChordProContent(content);
-      const parseResult = options.enablePerformanceMeasurement
-        ? measureChordOperation(parseOperation, `Parse ChordPro (${content.length} chars)`).result
-        : parseOperation();
+  const parseContent = useCallback(
+    (content: string): ChordSheetParserResult => {
+      setIsLoading(true);
 
-      let result: ChordSheetParserResult;
+      try {
+        // Use the same parsing logic as the main hook, but without memoization
+        const parseOperation = () => parseChordProContent(content);
+        const parseResult = options.enablePerformanceMeasurement
+          ? measureChordOperation(
+              parseOperation,
+              `Parse ChordPro (${content.length} chars)`,
+            ).result
+          : parseOperation();
 
-      if (parseResult.error || !parseResult.song) {
-        result = {
-          parsedSong: null,
-          error: parseResult.error || {
-            type: "parse_error",
-            message: "Unknown parsing error",
-            originalContent: content,
-          },
-          metadata: null,
-          isValid: false,
-          isLoading: false,
-        };
-      } else {
-        const metadata = extractSongMetadata(parseResult.song);
-        result = {
-          parsedSong: parseResult.song,
-          error: null,
-          metadata,
-          isValid: true,
-          isLoading: false,
-        };
+        let result: ChordSheetParserResult;
+
+        if (parseResult.error || !parseResult.song) {
+          result = {
+            parsedSong: null,
+            error: parseResult.error || {
+              type: "parse_error",
+              message: "Unknown parsing error",
+              originalContent: content,
+            },
+            metadata: null,
+            isValid: false,
+            isLoading: false,
+          };
+        } else {
+          const metadata = extractSongMetadata(parseResult.song);
+          result = {
+            parsedSong: parseResult.song,
+            error: null,
+            metadata,
+            isValid: true,
+            isLoading: false,
+          };
+        }
+
+        setLastResult(result);
+        return result;
+      } finally {
+        setIsLoading(false);
       }
-
-      setLastResult(result);
-      return result;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [options.enablePerformanceMeasurement]);
+    },
+    [options.enablePerformanceMeasurement],
+  );
 
   const clearCache = useCallback(() => {
     parseCache.clear();
@@ -319,7 +350,7 @@ export function useChordSheetParserCallback(
 /**
  * Hook to get cache statistics for debugging and monitoring
  * Only available in development mode
- * 
+ *
  * @returns Cache statistics object
  */
 export function useChordSheetParserCache(): {
@@ -331,9 +362,12 @@ export function useChordSheetParserCache(): {
     return null;
   }
 
-  return useMemo(() => ({
-    cacheSize: parseCache.size,
-    cacheKeys: Array.from(parseCache.keys()),
-    clearCache: () => parseCache.clear(),
-  }), []);
+  return useMemo(
+    () => ({
+      cacheSize: parseCache.size,
+      cacheKeys: Array.from(parseCache.keys()),
+      clearCache: () => parseCache.clear(),
+    }),
+    [],
+  );
 }

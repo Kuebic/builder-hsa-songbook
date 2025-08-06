@@ -39,22 +39,29 @@ function transformAPISongToClientSong(apiSong: APISong): ClientSong {
     createdAt: apiSong.createdAt,
     updatedAt: apiSong.updatedAt,
   };
-  
+
   // Use the existing transformation function
   return songToClientFormat(song);
 }
 
 // Validate API song structure before transformation
 function validateAPISong(apiSong: unknown): apiSong is APISong {
-  if (!apiSong || typeof apiSong !== "object") {return false;}
-  
+  if (!apiSong || typeof apiSong !== "object") {
+    return false;
+  }
+
   const song = apiSong as Partial<APISong>;
-  return !!(song._id && song.title && song.difficulty && Array.isArray(song.themes));
+  return !!(
+    song._id &&
+    song.title &&
+    song.difficulty &&
+    Array.isArray(song.themes)
+  );
 }
 
 // Safe wrapper for transformation with error boundary
 function safeTransformAPISongToClientSong(
-  apiSong: APISong, 
+  apiSong: APISong,
   userFavorites: string[] = [],
 ): { song: ClientSong | null; error: TransformationError | null } {
   // First validate the API song structure
@@ -74,15 +81,19 @@ function safeTransformAPISongToClientSong(
     clientSong.isFavorite = userFavorites.includes(apiSong._id);
     return { song: clientSong, error: null };
   } catch (error) {
-    console.error(`Failed to transform song ${apiSong._id} (${apiSong.title}):`, error);
-    
+    console.error(
+      `Failed to transform song ${apiSong._id} (${apiSong.title}):`,
+      error,
+    );
+
     const transformationError: TransformationError = {
       songId: apiSong._id,
       songTitle: apiSong.title,
-      error: error instanceof Error ? error.message : "Unknown transformation error",
+      error:
+        error instanceof Error ? error.message : "Unknown transformation error",
       severity: "warning",
     };
-    
+
     // Return a fallback ClientSong with minimal safe data
     const fallbackSong: ClientSong = {
       id: apiSong._id,
@@ -100,34 +111,40 @@ function safeTransformAPISongToClientSong(
       isFavorite: userFavorites.includes(apiSong._id), // Set favorite status even for fallback
       chordData: "", // Safe fallback to prevent further errors
     };
-    
+
     return { song: fallbackSong, error: transformationError };
   }
 }
 
 // Transform array of API songs with enhanced error handling
-function safeTransformSongs(apiSongs: unknown[], userFavorites: string[] = []): { 
-  songs: ClientSong[]; 
+function safeTransformSongs(
+  apiSongs: unknown[],
+  userFavorites: string[] = [],
+): {
+  songs: ClientSong[];
   errors: TransformationError[];
   successCount: number;
 } {
   const songs: ClientSong[] = [];
   const errors: TransformationError[] = [];
   let successCount = 0;
-  
+
   for (const apiSong of apiSongs) {
-    const { song, error } = safeTransformAPISongToClientSong(apiSong as APISong, userFavorites);
-    
+    const { song, error } = safeTransformAPISongToClientSong(
+      apiSong as APISong,
+      userFavorites,
+    );
+
     if (song) {
       songs.push(song);
       successCount++;
     }
-    
+
     if (error) {
       errors.push(error);
     }
   }
-  
+
   return { songs, errors, successCount };
 }
 
@@ -153,10 +170,10 @@ export interface UseSongsResult {
   retry: () => Promise<void>;
 }
 
-export function useSongs({ 
-  filters = {}, 
+export function useSongs({
+  filters = {},
   autoFetch = true,
-  userId, 
+  userId,
 }: UseSongsOptions = {}): UseSongsResult {
   const [songs, setSongs] = useState<ClientSong[]>([]);
   const [loading, setLoading] = useState(false);
@@ -164,168 +181,193 @@ export function useSongs({
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
-  const [transformationErrors, setTransformationErrors] = useState<TransformationError[]>([]);
+  const [transformationErrors, setTransformationErrors] = useState<
+    TransformationError[]
+  >([]);
   const [successCount, setSuccessCount] = useState(0);
   const [retryCount, setRetryCount] = useState(0);
   const [currentFilters, setCurrentFilters] = useState<SongFilters>(filters);
   const [userFavorites, setUserFavorites] = useState<string[]>([]);
 
-  const fetchSongs = useCallback(async (newFilters?: SongFilters, isRetry = false) => {
-    setLoading(true);
-    setError(null);
-    setTransformationErrors([]);
-    setSuccessCount(0);
-    
-    if (!isRetry) {
-      setRetryCount(0);
-    }
-    
-    try {
-      const filtersToUse = newFilters || currentFilters;
-      setCurrentFilters(filtersToUse);
-      
-      const response = await apiClient.getSongs(filtersToUse);
-      
-      if (response.success) {
-        // Validate response data structure
-        if (!Array.isArray(response.data)) {
-          throw new Error("API returned invalid data structure - expected array of songs");
-        }
-        
-        const { songs: transformedSongs, errors, successCount: transformSuccessCount } = safeTransformSongs(response.data, userFavorites);
-        setSongs(transformedSongs);
-        setTransformationErrors(errors);
-        setSuccessCount(transformSuccessCount);
-        
-        if (errors.length > 0) {
-          console.warn(`${errors.length} songs failed to transform:`, errors);
-          
-          // Log detailed error information
-          errors.forEach(err => {
-            console.warn(`- ${err.songTitle} (${err.songId}): ${err.error}`);
-          });
-        }
-        
-        if (response.meta) {
-          setTotal(response.meta.total);
-          setPage(response.meta.page);
-          setLimit(response.meta.limit);
-        }
-      } else {
-        const apiError: APIError = {
-          type: "server",
-          message: response.error || "Server returned unsuccessful response",
-          retryable: true,
-        };
-        setError(apiError);
-        return;
-      }
-    } catch (err) {
-      const apiError: APIError = {
-        type: err instanceof TypeError ? "network" : "server",
-        message: err instanceof Error ? err.message : "An unknown error occurred",
-        details: err,
-        retryable: true,
-      };
-      setError(apiError);
-      console.error("Error fetching songs:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentFilters, userFavorites]);
+  const fetchSongs = useCallback(
+    async (newFilters?: SongFilters, isRetry = false) => {
+      setLoading(true);
+      setError(null);
+      setTransformationErrors([]);
+      setSuccessCount(0);
 
-  const searchSongs = useCallback(async (query: string, searchLimit = 20) => {
-    setLoading(true);
-    setError(null);
-    setTransformationErrors([]);
-    
-    try {
-      const response = await apiClient.searchSongs(query, searchLimit);
-      
-      if (response.success) {
-        // Validate response data structure
-        if (!Array.isArray(response.data)) {
-          throw new Error("Search API returned invalid data structure - expected array of songs");
+      if (!isRetry) {
+        setRetryCount(0);
+      }
+
+      try {
+        const filtersToUse = newFilters || currentFilters;
+        setCurrentFilters(filtersToUse);
+
+        const response = await apiClient.getSongs(filtersToUse);
+
+        if (response.success) {
+          // Validate response data structure
+          if (!Array.isArray(response.data)) {
+            throw new Error(
+              "API returned invalid data structure - expected array of songs",
+            );
+          }
+
+          const {
+            songs: transformedSongs,
+            errors,
+            successCount: transformSuccessCount,
+          } = safeTransformSongs(response.data, userFavorites);
+          setSongs(transformedSongs);
+          setTransformationErrors(errors);
+          setSuccessCount(transformSuccessCount);
+
+          if (errors.length > 0) {
+            console.warn(`${errors.length} songs failed to transform:`, errors);
+
+            // Log detailed error information
+            errors.forEach((err) => {
+              console.warn(`- ${err.songTitle} (${err.songId}): ${err.error}`);
+            });
+          }
+
+          if (response.meta) {
+            setTotal(response.meta.total);
+            setPage(response.meta.page);
+            setLimit(response.meta.limit);
+          }
+        } else {
+          const apiError: APIError = {
+            type: "server",
+            message: response.error || "Server returned unsuccessful response",
+            retryable: true,
+          };
+          setError(apiError);
+          return;
         }
-        
-        const { songs: transformedSongs, errors, successCount: transformSuccessCount } = safeTransformSongs(response.data, userFavorites);
-        setSongs(transformedSongs);
-        setTransformationErrors(errors);
-        setSuccessCount(transformSuccessCount);
-        
-        if (errors.length > 0) {
-          console.warn(`${errors.length} songs failed to transform during search:`, errors);
-        }
-        
-        if (response.meta) {
-          setTotal(response.meta.total);
-          setPage(response.meta.page);
-          setLimit(response.meta.limit);
-        }
-      } else {
+      } catch (err) {
         const apiError: APIError = {
-          type: "server",
-          message: response.error || "Search request failed",
+          type: err instanceof TypeError ? "network" : "server",
+          message:
+            err instanceof Error ? err.message : "An unknown error occurred",
+          details: err,
           retryable: true,
         };
         setError(apiError);
-        return;
+        console.error("Error fetching songs:", err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      const apiError: APIError = {
-        type: err instanceof TypeError ? "network" : "server",
-        message: err instanceof Error ? err.message : "Search failed",
-        details: err,
-        retryable: true,
-      };
-      setError(apiError);
-      console.error("Error searching songs:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [userFavorites]);
+    },
+    [currentFilters, userFavorites],
+  );
+
+  const searchSongs = useCallback(
+    async (query: string, searchLimit = 20) => {
+      setLoading(true);
+      setError(null);
+      setTransformationErrors([]);
+
+      try {
+        const response = await apiClient.searchSongs(query, searchLimit);
+
+        if (response.success) {
+          // Validate response data structure
+          if (!Array.isArray(response.data)) {
+            throw new Error(
+              "Search API returned invalid data structure - expected array of songs",
+            );
+          }
+
+          const {
+            songs: transformedSongs,
+            errors,
+            successCount: transformSuccessCount,
+          } = safeTransformSongs(response.data, userFavorites);
+          setSongs(transformedSongs);
+          setTransformationErrors(errors);
+          setSuccessCount(transformSuccessCount);
+
+          if (errors.length > 0) {
+            console.warn(
+              `${errors.length} songs failed to transform during search:`,
+              errors,
+            );
+          }
+
+          if (response.meta) {
+            setTotal(response.meta.total);
+            setPage(response.meta.page);
+            setLimit(response.meta.limit);
+          }
+        } else {
+          const apiError: APIError = {
+            type: "server",
+            message: response.error || "Search request failed",
+            retryable: true,
+          };
+          setError(apiError);
+          return;
+        }
+      } catch (err) {
+        const apiError: APIError = {
+          type: err instanceof TypeError ? "network" : "server",
+          message: err instanceof Error ? err.message : "Search failed",
+          details: err,
+          retryable: true,
+        };
+        setError(apiError);
+        console.error("Error searching songs:", err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userFavorites],
+  );
 
   const refetch = useCallback(async () => {
     await fetchSongs();
   }, [fetchSongs]);
 
-  const toggleFavorite = useCallback(async (songId: string) => {
-    if (!userId) {
-      console.warn("Cannot toggle favorite: No user ID provided");
-      return;
-    }
-
-    // Optimistic update
-    setSongs(prevSongs => 
-      prevSongs.map(song => 
-        song.id === songId 
-          ? { ...song, isFavorite: !song.isFavorite }
-          : song,
-      ),
-    );
-
-    const isCurrentlyFavorite = userFavorites.includes(songId);
-
-    try {
-      if (isCurrentlyFavorite) {
-        await apiClient.removeFavorite(userId, songId);
-        setUserFavorites(prev => prev.filter(id => id !== songId));
-      } else {
-        await apiClient.addFavorite(userId, songId);
-        setUserFavorites(prev => [...prev, songId]);
+  const toggleFavorite = useCallback(
+    async (songId: string) => {
+      if (!userId) {
+        console.warn("Cannot toggle favorite: No user ID provided");
+        return;
       }
-    } catch (error) {
-      // Rollback optimistic update on error
-      setSongs(prevSongs => 
-        prevSongs.map(song => 
-          song.id === songId 
-            ? { ...song, isFavorite: !song.isFavorite }
-            : song,
+
+      // Optimistic update
+      setSongs((prevSongs) =>
+        prevSongs.map((song) =>
+          song.id === songId ? { ...song, isFavorite: !song.isFavorite } : song,
         ),
       );
-      console.error("Failed to toggle favorite:", error);
-    }
-  }, [userId, userFavorites]);
+
+      const isCurrentlyFavorite = userFavorites.includes(songId);
+
+      try {
+        if (isCurrentlyFavorite) {
+          await apiClient.removeFavorite(userId, songId);
+          setUserFavorites((prev) => prev.filter((id) => id !== songId));
+        } else {
+          await apiClient.addFavorite(userId, songId);
+          setUserFavorites((prev) => [...prev, songId]);
+        }
+      } catch (error) {
+        // Rollback optimistic update on error
+        setSongs((prevSongs) =>
+          prevSongs.map((song) =>
+            song.id === songId
+              ? { ...song, isFavorite: !song.isFavorite }
+              : song,
+          ),
+        );
+        console.error("Failed to toggle favorite:", error);
+      }
+    },
+    [userId, userFavorites],
+  );
 
   // Fetch user favorites when userId changes
   useEffect(() => {
@@ -339,17 +381,18 @@ export function useSongs({
         const response = await apiClient.getUserFavorites(userId);
         if (response.success) {
           if (Array.isArray(response.data)) {
-            const favoriteIds = response.data.map(song => song._id);
+            const favoriteIds = response.data.map((song) => song._id);
             setUserFavorites(favoriteIds);
           } else {
             console.warn("User favorites API returned invalid data structure");
             setUserFavorites([]);
           }
-        
-      } else {
-        console.warn("Failed to fetch user favorites: API returned unsuccessful response");
-        setUserFavorites([]);
-      }
+        } else {
+          console.warn(
+            "Failed to fetch user favorites: API returned unsuccessful response",
+          );
+          setUserFavorites([]);
+        }
       } catch (error) {
         console.error("Failed to fetch user favorites:", error);
         setUserFavorites([]);
@@ -372,13 +415,15 @@ export function useSongs({
       console.warn("Current error is not retryable");
       return;
     }
-    
+
     const nextRetryCount = retryCount + 1;
     const delay = Math.min(1000 * Math.pow(2, nextRetryCount - 1), 10000); // Max 10 seconds
-    
-    console.log(`Retrying request (attempt ${nextRetryCount}) after ${delay}ms delay...`);
+
+    console.log(
+      `Retrying request (attempt ${nextRetryCount}) after ${delay}ms delay...`,
+    );
     setRetryCount(nextRetryCount);
-    
+
     setTimeout(() => {
       fetchSongs(currentFilters, true);
     }, delay);

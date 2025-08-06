@@ -8,7 +8,15 @@ import Layout from "../Layout";
 
 // Mock UI components
 vi.mock("@/components/ui/button", () => ({
-  Button: ({ children, onClick, variant, size, className, asChild, ...props }: any) => {
+  Button: ({
+    children,
+    onClick,
+    variant,
+    size,
+    className,
+    asChild,
+    ...props
+  }: any) => {
     const Component = asChild ? "span" : "button";
     return (
       <Component
@@ -39,7 +47,9 @@ vi.mock("@/components/ui/badge", () => ({
 }));
 
 vi.mock("@/components/ui/dropdown-menu", () => ({
-  DropdownMenu: ({ children }: any) => <div data-testid="dropdown-menu">{children}</div>,
+  DropdownMenu: ({ children }: any) => (
+    <div data-testid="dropdown-menu">{children}</div>
+  ),
   DropdownMenuContent: ({ children, align }: any) => (
     <div data-testid="dropdown-content" data-align={align}>
       {children}
@@ -64,7 +74,9 @@ vi.mock("@/components/ui/sheet", () => ({
       {children}
     </div>
   ),
-  SheetHeader: ({ children }: any) => <div data-testid="sheet-header">{children}</div>,
+  SheetHeader: ({ children }: any) => (
+    <div data-testid="sheet-header">{children}</div>
+  ),
   SheetTitle: ({ children, className }: any) => (
     <div data-testid="sheet-title" className={className}>
       {children}
@@ -80,11 +92,12 @@ vi.mock("@/components/ui/sheet", () => ({
 const originalSetAttribute = document.documentElement.setAttribute;
 const originalClassList = document.documentElement.classList;
 
-const renderWithRouter = (component: React.ReactElement, initialRoute = "/") => {
+const renderWithRouter = (
+  component: React.ReactElement,
+  initialRoute = "/",
+) => {
   return render(
-    <MemoryRouter initialEntries={[initialRoute]}>
-      {component}
-    </MemoryRouter>,
+    <MemoryRouter initialEntries={[initialRoute]}>{component}</MemoryRouter>,
   );
 };
 
@@ -191,9 +204,9 @@ describe("Layout Component", () => {
 
       const songLinks = screen.getAllByText("Songs");
       expect(songLinks.length).toBeGreaterThan(0);
-      
+
       // At least one Songs link should have active styling
-      const activeSongsLink = songLinks.find(link => 
+      const activeSongsLink = songLinks.find((link) =>
         link.closest("a")?.className.includes("bg-accent"),
       );
       expect(activeSongsLink).toBeDefined();
@@ -219,10 +232,14 @@ describe("Layout Component", () => {
         </Layout>,
       );
 
-      const dashboardLinks = screen.getAllByRole("link", { name: /dashboard/i });
+      const dashboardLinks = screen.getAllByRole("link", {
+        name: /dashboard/i,
+      });
       const songsLinks = screen.getAllByRole("link", { name: /songs/i });
       const setlistsLinks = screen.getAllByRole("link", { name: /setlists/i });
-      const arrangementsLinks = screen.getAllByRole("link", { name: /arrangements/i });
+      const arrangementsLinks = screen.getAllByRole("link", {
+        name: /arrangements/i,
+      });
 
       expect(dashboardLinks[0]).toHaveAttribute("href", "/");
       expect(songsLinks[0]).toHaveAttribute("href", "/songs");
@@ -251,7 +268,10 @@ describe("Layout Component", () => {
       );
 
       expect(screen.getByTestId("sheet")).toBeInTheDocument();
-      expect(screen.getByTestId("sheet-content")).toHaveAttribute("data-side", "left");
+      expect(screen.getByTestId("sheet-content")).toHaveAttribute(
+        "data-side",
+        "left",
+      );
       expect(screen.getByTestId("sheet-title")).toBeInTheDocument();
     });
   });
@@ -264,7 +284,9 @@ describe("Layout Component", () => {
         </Layout>,
       );
 
-      const searchInput = screen.getByPlaceholderText("Search songs, artists, or themes...");
+      const searchInput = screen.getByPlaceholderText(
+        "Search songs, artists, or themes...",
+      );
       expect(searchInput).toBeInTheDocument();
       expect(searchInput).toHaveClass("pl-10");
     });
@@ -325,7 +347,9 @@ describe("Layout Component", () => {
       );
 
       // Click on Dark theme
-      const darkThemeItem = screen.getByText("Dark").closest("[data-testid='dropdown-item']");
+      const darkThemeItem = screen
+        .getByText("Dark")
+        .closest("[data-testid='dropdown-item']");
       fireEvent.click(darkThemeItem!);
 
       expect(mockSetAttribute).toHaveBeenCalledWith("data-theme", "dark");
@@ -340,7 +364,9 @@ describe("Layout Component", () => {
       );
 
       // Click on Stage Mode theme
-      const stageModeItem = screen.getByText("Stage Mode").closest("[data-testid='dropdown-item']");
+      const stageModeItem = screen
+        .getByText("Stage Mode")
+        .closest("[data-testid='dropdown-item']");
       fireEvent.click(stageModeItem!);
 
       expect(mockSetAttribute).toHaveBeenCalledWith("data-theme", "stage");
@@ -355,10 +381,14 @@ describe("Layout Component", () => {
       );
 
       // First switch to dark, then back to light
-      const darkThemeItem = screen.getByText("Dark").closest("[data-testid='dropdown-item']");
+      const darkThemeItem = screen
+        .getByText("Dark")
+        .closest("[data-testid='dropdown-item']");
       fireEvent.click(darkThemeItem!);
 
-      const lightThemeItem = screen.getByText("Light").closest("[data-testid='dropdown-item']");
+      const lightThemeItem = screen
+        .getByText("Light")
+        .closest("[data-testid='dropdown-item']");
       fireEvent.click(lightThemeItem!);
 
       expect(mockSetAttribute).toHaveBeenLastCalledWith("data-theme", "light");
@@ -376,7 +406,9 @@ describe("Layout Component", () => {
       expect(screen.getAllByTestId("sun-icon")).toHaveLength(2);
 
       // Switch to dark theme
-      const darkThemeItem = screen.getByText("Dark").closest("[data-testid='dropdown-item']");
+      const darkThemeItem = screen
+        .getByText("Dark")
+        .closest("[data-testid='dropdown-item']");
       fireEvent.click(darkThemeItem!);
 
       // Should now show moon icon in the button, sun icon still in dropdown
@@ -437,7 +469,9 @@ describe("Layout Component", () => {
         </Layout>,
       );
 
-      const addButton = screen.getByTestId("plus-circle-icon").closest("button");
+      const addButton = screen
+        .getByTestId("plus-circle-icon")
+        .closest("button");
       expect(addButton).toHaveAttribute("data-variant", "ghost");
       expect(addButton).toHaveAttribute("data-size", "icon");
     });
@@ -468,8 +502,9 @@ describe("Layout Component", () => {
 
       // Check for responsive classes - find the desktop brand element specifically
       const brandElements = screen.getAllByText("HSA Songbook");
-      const desktopBrand = brandElements.find(el => 
-        el.className.includes("hidden") && el.className.includes("sm:block"),
+      const desktopBrand = brandElements.find(
+        (el) =>
+          el.className.includes("hidden") && el.className.includes("sm:block"),
       );
       expect(desktopBrand).toHaveClass("hidden", "sm:block");
 
@@ -486,12 +521,16 @@ describe("Layout Component", () => {
       );
 
       // Desktop nav should have hidden md:flex classes
-      const desktopNavLinks = screen.getAllByRole("link", { name: /dashboard|songs|setlists|arrangements/i });
-      
+      const desktopNavLinks = screen.getAllByRole("link", {
+        name: /dashboard|songs|setlists|arrangements/i,
+      });
+
       // Find navigation containers
-      const containers = desktopNavLinks.map(link => link.closest("nav"));
-      const desktopNav = containers.find(nav => nav?.className.includes("hidden md:flex"));
-      
+      const containers = desktopNavLinks.map((link) => link.closest("nav"));
+      const desktopNav = containers.find((nav) =>
+        nav?.className.includes("hidden md:flex"),
+      );
+
       expect(desktopNav).toBeInTheDocument();
     });
 
@@ -502,7 +541,9 @@ describe("Layout Component", () => {
         </Layout>,
       );
 
-      const searchContainer = screen.getByPlaceholderText("Search songs, artists, or themes...").closest("div.hidden");
+      const searchContainer = screen
+        .getByPlaceholderText("Search songs, artists, or themes...")
+        .closest("div.hidden");
       expect(searchContainer).toBeInTheDocument();
     });
   });
@@ -530,9 +571,9 @@ describe("Layout Component", () => {
 
       const buttons = screen.getAllByRole("button");
       expect(buttons.length).toBeGreaterThan(0);
-      
+
       // All buttons should be focusable
-      buttons.forEach(button => {
+      buttons.forEach((button) => {
         expect(button).toBeVisible();
       });
     });
@@ -546,7 +587,7 @@ describe("Layout Component", () => {
 
       const links = screen.getAllByRole("link");
       expect(links.length).toBeGreaterThan(0);
-      
+
       // Brand link should go to home
       const brandLinks = screen.getAllByRole("link", { name: /hsa songbook/i });
       expect(brandLinks[0]).toHaveAttribute("href", "/");

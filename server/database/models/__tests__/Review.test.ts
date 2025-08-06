@@ -5,7 +5,7 @@ describe("Review Model Schema", () => {
   describe("Schema Structure", () => {
     it("should have all required fields defined", () => {
       const paths = reviewSchema.paths;
-      
+
       expect(paths).toHaveProperty("arrangementId");
       expect(paths).toHaveProperty("userId");
       expect(paths).toHaveProperty("rating");
@@ -17,7 +17,7 @@ describe("Review Model Schema", () => {
 
     it("should have correct field types", () => {
       const paths = reviewSchema.paths;
-      
+
       expect(paths.arrangementId.instance).toBe("ObjectId");
       expect(paths.userId.instance).toBe("ObjectId");
       expect(paths.rating.instance).toBe("Number");
@@ -28,7 +28,7 @@ describe("Review Model Schema", () => {
 
     it("should have required validators on necessary fields", () => {
       const paths = reviewSchema.paths;
-      
+
       expect(paths.arrangementId.isRequired).toBe(true);
       expect(paths.userId.isRequired).toBe(true);
       expect(paths.rating.isRequired).toBe(true);
@@ -38,26 +38,26 @@ describe("Review Model Schema", () => {
     it("should have correct validators for rating", () => {
       const ratingPath = reviewSchema.paths.rating;
       const validators = ratingPath.validators;
-      
+
       // Check for min validator
-      const minValidator = validators.find(v => v.type === "min");
+      const minValidator = validators.find((v) => v.type === "min");
       expect((minValidator as any)?.min).toBe(1);
-      
+
       // Check for max validator
-      const maxValidator = validators.find(v => v.type === "max");
+      const maxValidator = validators.find((v) => v.type === "max");
       expect((maxValidator as any)?.max).toBe(5);
     });
 
     it("should have correct validators for comment", () => {
       const commentPath = reviewSchema.paths.comment;
       const validators = commentPath.validators;
-      
+
       // Check for minlength validator
-      const minLengthValidator = validators.find(v => v.type === "minlength");
+      const minLengthValidator = validators.find((v) => v.type === "minlength");
       expect((minLengthValidator as any)?.minlength).toBe(10);
-      
+
       // Check for maxlength validator
-      const maxLengthValidator = validators.find(v => v.type === "maxlength");
+      const maxLengthValidator = validators.find((v) => v.type === "maxlength");
       expect((maxLengthValidator as any)?.maxlength).toBe(2000);
     });
 
@@ -69,7 +69,7 @@ describe("Review Model Schema", () => {
     it("should have correct default values", () => {
       const helpfulPath = reviewSchema.paths.helpful;
       const reportedPath = reviewSchema.paths.reported;
-      
+
       expect((helpfulPath as any).defaultValue).toBeInstanceOf(Function);
       expect((helpfulPath as any).defaultValue()).toEqual([]);
       expect((reportedPath as any).defaultValue).toBe(false);
@@ -80,38 +80,37 @@ describe("Review Model Schema", () => {
     it("should have unique compound index on arrangementId and userId", () => {
       const indexes = reviewSchema.indexes();
       const uniqueIndex = indexes.find(
-        idx => idx[0].arrangementId === 1 && 
-               idx[0].userId === 1 && 
-               idx[1]?.unique === true,
+        (idx) =>
+          idx[0].arrangementId === 1 &&
+          idx[0].userId === 1 &&
+          idx[1]?.unique === true,
       );
-      
+
       expect(uniqueIndex).toBeDefined();
     });
 
     it("should have index on reported field", () => {
       const indexes = reviewSchema.indexes();
-      const reportedIndex = indexes.find(
-        idx => idx[0].reported === 1,
-      );
-      
+      const reportedIndex = indexes.find((idx) => idx[0].reported === 1);
+
       expect(reportedIndex).toBeDefined();
     });
 
     it("should have index on arrangementId", () => {
       const indexes = reviewSchema.indexes();
       const arrangementIndex = indexes.find(
-        idx => idx[0].arrangementId === 1 && !idx[0].userId,
+        (idx) => idx[0].arrangementId === 1 && !idx[0].userId,
       );
-      
+
       expect(arrangementIndex).toBeDefined();
     });
 
     it("should have index on userId", () => {
       const indexes = reviewSchema.indexes();
       const userIndex = indexes.find(
-        idx => idx[0].userId === 1 && !idx[0].arrangementId,
+        (idx) => idx[0].userId === 1 && !idx[0].arrangementId,
       );
-      
+
       expect(userIndex).toBeDefined();
     });
   });

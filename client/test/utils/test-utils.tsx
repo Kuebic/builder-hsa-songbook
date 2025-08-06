@@ -21,7 +21,7 @@ export function renderWithProviders(
     routerProps = {},
     queryClient = new QueryClient({
       defaultOptions: {
-        queries: { 
+        queries: {
           retry: false,
           staleTime: Infinity, // Prevent automatic refetches in tests
         },
@@ -33,10 +33,7 @@ export function renderWithProviders(
 
   function Wrapper({ children }: { children: React.ReactNode }) {
     return (
-      <MemoryRouter 
-        initialEntries={[initialRoute]} 
-        {...routerProps}
-      >
+      <MemoryRouter initialEntries={[initialRoute]} {...routerProps}>
         <QueryClientProvider client={queryClient}>
           {children}
         </QueryClientProvider>

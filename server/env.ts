@@ -20,7 +20,7 @@ let loadedPath = "";
 // Try each possible path until we find a .env file
 for (const envPath of possibleEnvPaths) {
   const result = dotenv.config({ path: envPath });
-  
+
   if (!result.error) {
     envLoaded = true;
     loadedPath = envPath;
@@ -30,8 +30,10 @@ for (const envPath of possibleEnvPaths) {
 }
 
 if (!envLoaded) {
-  console.warn("⚠️  Could not find .env file in any of the following locations:");
-  possibleEnvPaths.forEach(p => console.warn(`   - ${p}`));
+  console.warn(
+    "⚠️  Could not find .env file in any of the following locations:",
+  );
+  possibleEnvPaths.forEach((p) => console.warn(`   - ${p}`));
   console.log("💡 Using system environment variables as fallback");
 }
 
@@ -59,14 +61,18 @@ if (process.env.MONGODB_URI) {
 
 if (missingEnvVars.length > 0) {
   console.error("❌ Missing required environment variables:");
-  missingEnvVars.forEach(v => console.error(`   - ${v}`));
-  console.log("\n💡 Please ensure all required variables are set in your .env file:");
+  missingEnvVars.forEach((v) => console.error(`   - ${v}`));
+  console.log(
+    "\n💡 Please ensure all required variables are set in your .env file:",
+  );
   console.log("   MONGODB_URI=mongodb://...");
   console.log("   VITE_CLERK_PUBLISHABLE_KEY=pk_test_...");
-  
+
   // In development, show more helpful error
   if (process.env.NODE_ENV === "development") {
-    console.log("\n📝 Create a .env file in your project root with the above variables");
+    console.log(
+      "\n📝 Create a .env file in your project root with the above variables",
+    );
     console.log("   You can copy .env.example as a starting point");
   }
 }

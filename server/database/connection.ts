@@ -21,7 +21,7 @@ export class DatabaseConnection {
 
     try {
       const mongoUri = process.env.MONGODB_URI;
-      
+
       if (!mongoUri) {
         throw new Error("MONGODB_URI environment variable is not defined");
       }
@@ -36,7 +36,7 @@ export class DatabaseConnection {
         socketTimeoutMS: 5000, // Shorter socket timeout
         connectTimeoutMS: 3000, // Faster connection timeout
         bufferCommands: false, // Disable mongoose buffering
-        
+
         // Compression settings - let MongoDB handle this
         compressors: ["zstd", "zlib", "snappy"],
         zlibCompressionLevel: 6,
@@ -44,10 +44,9 @@ export class DatabaseConnection {
 
       this.isConnected = true;
       console.log("✅ Connected to MongoDB Atlas");
-      
+
       // Monitor database size and connection
       this.setupMonitoring();
-      
     } catch (error) {
       console.error("❌ MongoDB connection error:", error);
       this.isConnected = false;
@@ -92,19 +91,24 @@ export class DatabaseConnection {
     });
 
     // Set up periodic storage monitoring (every 30 minutes)
-    setInterval(async () => {
-      try {
-        await this.checkStorageUsage();
-      } catch (error) {
-        console.error("❌ Error checking storage usage:", error);
-      }
-    }, 30 * 60 * 1000); // 30 minutes
+    setInterval(
+      async () => {
+        try {
+          await this.checkStorageUsage();
+        } catch (error) {
+          console.error("❌ Error checking storage usage:", error);
+        }
+      },
+      30 * 60 * 1000,
+    ); // 30 minutes
   }
 
   private async checkStorageUsage(): Promise<void> {
     try {
       const db = mongoose.connection.db;
-      if (!db) {return;}
+      if (!db) {
+        return;
+      }
 
       const stats = await db.stats();
       const usageBytes = stats.dataSize + stats.indexSize;
@@ -115,13 +119,16 @@ export class DatabaseConnection {
 
       // Alert when approaching limit
       if (usagePercent >= 80) {
-        console.warn(`⚠️  Database usage at ${usagePercent}% - consider cleanup`);
+        console.warn(
+          `⚠️  Database usage at ${usagePercent}% - consider cleanup`,
+        );
       }
 
       if (usagePercent >= 95) {
-        console.error(`🚨 Database usage critical at ${usagePercent}% - immediate cleanup required`);
+        console.error(
+          `🚨 Database usage critical at ${usagePercent}% - immediate cleanup required`,
+        );
       }
-
     } catch (error) {
       console.error("❌ Error checking database stats:", error);
     }
@@ -158,7 +165,10 @@ export class DatabaseConnection {
    * Completely reset the database - DROP all data and recreate clean
    * WARNING: This will permanently delete ALL data in the database
    */
-  public async resetDatabase(): Promise<{ dropped: boolean; recreated: boolean }> {
+  public async resetDatabase(): Promise<{
+    dropped: boolean;
+    recreated: boolean;
+  }> {
     if (!this.isConnectedToDatabase()) {
       throw new Error("Database must be connected before reset");
     }
@@ -174,7 +184,9 @@ export class DatabaseConnection {
     try {
       // Get initial stats for logging
       const initialStats = await this.getStorageStats();
-      console.log(`📊 Initial database size: ${initialStats.usage}MB (${initialStats.percentage}%)`);
+      console.log(
+        `📊 Initial database size: ${initialStats.usage}MB (${initialStats.percentage}%)`,
+      );
 
       // Drop the entire database
       console.log("🗑️  Dropping entire database...");
@@ -189,17 +201,20 @@ export class DatabaseConnection {
       if (isClean) {
         console.log("✅ Database reset complete - clean state verified");
       } else {
-        console.warn(`⚠️  Database may not be completely clean - found ${collections.length} collections`);
+        console.warn(
+          `⚠️  Database may not be completely clean - found ${collections.length} collections`,
+        );
       }
 
       return {
         dropped: true,
         recreated: true,
       };
-
     } catch (error) {
       console.error("❌ Database reset failed:", error);
-      throw new Error(`Database reset failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Database reset failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 

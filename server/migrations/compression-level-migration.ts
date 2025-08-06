@@ -1,13 +1,13 @@
 #!/usr/bin/env tsx
 /**
  * Migration script to handle compression level changes
- * 
+ *
  * This script:
  * 1. Identifies songs compressed with the old compression level (6)
  * 2. Decompresses them using the old level
  * 3. Recompresses them using the new level (3)
  * 4. Updates the documents in the database
- * 
+ *
  * Usage: npx tsx server/migrations/compression-level-migration.ts
  */
 
@@ -29,9 +29,15 @@ async function migrateCompressionLevel() {
     // Connect to MongoDB - check both possible environment variable names
     const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
     if (!mongoUri) {
-      console.warn("Neither MONGODB_URI nor MONGO_URI environment variable is set");
-      console.log("This is normal in development environments without a database.");
-      console.log("Migration will be skipped. When you have a production database,");
+      console.warn(
+        "Neither MONGODB_URI nor MONGO_URI environment variable is set",
+      );
+      console.log(
+        "This is normal in development environments without a database.",
+      );
+      console.log(
+        "Migration will be skipped. When you have a production database,",
+      );
       console.log("set MONGODB_URI and run this migration again.");
       return;
     }
@@ -50,12 +56,11 @@ async function migrateCompressionLevel() {
 
     while (skip < totalCount) {
       // Fetch batch of songs without triggering decompression middleware
-      const songs = await Song.find({})
-        .skip(skip)
-        .limit(batchSize)
-        .lean(); // Use lean() to get plain objects
+      const songs = await Song.find({}).skip(skip).limit(batchSize).lean(); // Use lean() to get plain objects
 
-      console.log(`Processing batch ${Math.floor(skip / batchSize) + 1} (${skip + 1}-${Math.min(skip + batchSize, totalCount)} of ${totalCount})`);
+      console.log(
+        `Processing batch ${Math.floor(skip / batchSize) + 1} (${skip + 1}-${Math.min(skip + batchSize, totalCount)} of ${totalCount})`,
+      );
 
       // Process each song in the batch
       for (const song of songs) {
@@ -64,7 +69,9 @@ async function migrateCompressionLevel() {
         try {
           // @ts-ignore - Migration for old schema where chordData was on Song
           if (!song.chordData || !Buffer.isBuffer(song.chordData)) {
-            console.log(`Song ${song._id} (${song.title}) has no chord data or invalid format, skipping`);
+            console.log(
+              `Song ${song._id} (${song.title}) has no chord data or invalid format, skipping`,
+            );
             continue;
           }
 
@@ -77,14 +84,19 @@ async function migrateCompressionLevel() {
             decompressed = await decompress(song.chordData);
           } catch (error) {
             // If that fails, the data might be compressed with the old level
-            console.log(`Song ${song._id} (${song.title}) failed to decompress with level 3, trying manual decompression...`);
-            
+            console.log(
+              `Song ${song._id} (${song.title}) failed to decompress with level 3, trying manual decompression...`,
+            );
+
             // Since we can't specify compression level in decompress,
             // we'll mark this as needing migration but skip for now
             // In production, you might want to use a different approach
             // or store the compression level metadata with each document
             failed++;
-            console.error(`Failed to decompress song ${song._id} (${song.title}):`, error);
+            console.error(
+              `Failed to decompress song ${song._id} (${song.title}):`,
+              error,
+            );
             continue;
           }
 
@@ -103,12 +115,17 @@ async function migrateCompressionLevel() {
               migrated++;
               console.log(`✓ Migrated song ${song._id} (${song.title})`);
             } else {
-              console.log(`Song ${song._id} (${song.title}) already using compression level 3`);
+              console.log(
+                `Song ${song._id} (${song.title}) already using compression level 3`,
+              );
             }
           }
         } catch (error) {
           failed++;
-          console.error(`Failed to process song ${song._id} (${song.title}):`, error);
+          console.error(
+            `Failed to process song ${song._id} (${song.title}):`,
+            error,
+          );
         }
       }
 
@@ -123,10 +140,13 @@ async function migrateCompressionLevel() {
     console.log(`Already up to date: ${processed - migrated - failed}`);
 
     if (failed > 0) {
-      console.log("\n⚠️  Warning: Some songs failed to migrate. These may need manual intervention.");
-      console.log("The application will handle them gracefully with fallback logic.");
+      console.log(
+        "\n⚠️  Warning: Some songs failed to migrate. These may need manual intervention.",
+      );
+      console.log(
+        "The application will handle them gracefully with fallback logic.",
+      );
     }
-
   } catch (error) {
     console.error("Migration failed:", error);
     process.exit(1);

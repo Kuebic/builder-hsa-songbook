@@ -1,10 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Request, Response } from "express";
-import {
-  batchSync,
-  getSyncStatus,
-  resolveConflicts,
-} from "../sync";
+import { batchSync, getSyncStatus, resolveConflicts } from "../sync";
 import { Song, Setlist, Arrangement, User } from "../../database/models";
 
 // Mock the models
@@ -131,25 +127,38 @@ describe("Sync API Routes", () => {
   describe("batchSync", () => {
     it("processes valid sync operations successfully", async () => {
       const operations = [validSyncOperation];
-      const { req, res } = createMockReqRes({}, {}, {
-        operations,
-        clientLastSync: Date.now() - 60000, // 1 minute ago
-      });
+      const { req, res } = createMockReqRes(
+        {},
+        {},
+        {
+          operations,
+          clientLastSync: Date.now() - 60000, // 1 minute ago
+        },
+      );
 
       // Mock successful song creation
-      const mockSongInstance = { ...mockSong, save: vi.fn().mockResolvedValue(mockSong) };
+      const mockSongInstance = {
+        ...mockSong,
+        save: vi.fn().mockResolvedValue(mockSong),
+      };
       (Song as any).mockImplementation(() => mockSongInstance);
 
       // Mock server changes query
-      (Song.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Setlist.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Arrangement.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
+      (Song.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Setlist.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Arrangement.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
 
       await batchSync(req as Request, res as Response);
 
       expect(Song).toHaveBeenCalledWith(validSyncOperation.data);
       expect(mockSongInstance.save).toHaveBeenCalled();
-      
+
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         data: {
@@ -177,9 +186,13 @@ describe("Sync API Routes", () => {
         },
       };
 
-      const { req, res } = createMockReqRes({}, {}, {
-        operations: [updateOperation],
-      });
+      const { req, res } = createMockReqRes(
+        {},
+        {},
+        {
+          operations: [updateOperation],
+        },
+      );
 
       // Mock existing song with later update time
       const existingSong = {
@@ -189,14 +202,20 @@ describe("Sync API Routes", () => {
       (Song.findById as any).mockResolvedValue(existingSong);
 
       // Mock server changes query
-      (Song.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Setlist.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Arrangement.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
+      (Song.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Setlist.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Arrangement.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
 
       await batchSync(req as Request, res as Response);
 
       expect(Song.findById).toHaveBeenCalledWith("song123");
-      
+
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         data: {
@@ -222,21 +241,31 @@ describe("Sync API Routes", () => {
         operation: "delete" as const,
       };
 
-      const { req, res } = createMockReqRes({}, {}, {
-        operations: [deleteOperation],
-      });
+      const { req, res } = createMockReqRes(
+        {},
+        {},
+        {
+          operations: [deleteOperation],
+        },
+      );
 
       (Song.findByIdAndDelete as any).mockResolvedValue(mockSong);
 
       // Mock server changes query
-      (Song.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Setlist.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Arrangement.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
+      (Song.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Setlist.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Arrangement.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
 
       await batchSync(req as Request, res as Response);
 
       expect(Song.findByIdAndDelete).toHaveBeenCalledWith("song123");
-      
+
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         data: {
@@ -265,17 +294,30 @@ describe("Sync API Routes", () => {
         },
       };
 
-      const { req, res } = createMockReqRes({}, {}, {
-        operations: [setlistOperation],
-      });
+      const { req, res } = createMockReqRes(
+        {},
+        {},
+        {
+          operations: [setlistOperation],
+        },
+      );
 
-      const mockSetlistInstance = { ...mockSetlist, save: vi.fn().mockResolvedValue(mockSetlist) };
+      const mockSetlistInstance = {
+        ...mockSetlist,
+        save: vi.fn().mockResolvedValue(mockSetlist),
+      };
       (Setlist as any).mockImplementation(() => mockSetlistInstance);
 
       // Mock server changes query
-      (Song.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Setlist.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Arrangement.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
+      (Song.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Setlist.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Arrangement.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
 
       await batchSync(req as Request, res as Response);
 
@@ -294,17 +336,30 @@ describe("Sync API Routes", () => {
         },
       };
 
-      const { req, res } = createMockReqRes({}, {}, {
-        operations: [arrangementOperation],
-      });
+      const { req, res } = createMockReqRes(
+        {},
+        {},
+        {
+          operations: [arrangementOperation],
+        },
+      );
 
-      const mockArrangementInstance = { ...mockArrangement, save: vi.fn().mockResolvedValue(mockArrangement) };
+      const mockArrangementInstance = {
+        ...mockArrangement,
+        save: vi.fn().mockResolvedValue(mockArrangement),
+      };
       (Arrangement as any).mockImplementation(() => mockArrangementInstance);
 
       // Mock server changes query
-      (Song.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Setlist.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Arrangement.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
+      (Song.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Setlist.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Arrangement.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
 
       await batchSync(req as Request, res as Response);
 
@@ -324,40 +379,66 @@ describe("Sync API Routes", () => {
         },
       };
 
-      const { req, res } = createMockReqRes({}, {}, {
-        operations: [userOperation],
-      });
+      const { req, res } = createMockReqRes(
+        {},
+        {},
+        {
+          operations: [userOperation],
+        },
+      );
 
       // Mock user not found (should create new user)
       (User.findById as any).mockResolvedValue(null);
-      const mockUserInstance = { ...mockUser, save: vi.fn().mockResolvedValue(mockUser) };
+      const mockUserInstance = {
+        ...mockUser,
+        save: vi.fn().mockResolvedValue(mockUser),
+      };
       (User as any).mockImplementation(() => mockUserInstance);
 
       // Mock server changes query
-      (Song.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Setlist.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Arrangement.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
+      (Song.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Setlist.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Arrangement.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
 
       await batchSync(req as Request, res as Response);
 
       expect(User.findById).toHaveBeenCalledWith("user123");
-      expect(User).toHaveBeenCalledWith({ _id: "user123", ...userOperation.data });
+      expect(User).toHaveBeenCalledWith({
+        _id: "user123",
+        ...userOperation.data,
+      });
       expect(mockUserInstance.save).toHaveBeenCalled();
     });
 
     it("returns server changes since client last sync", async () => {
-      const { req, res } = createMockReqRes({}, {}, {
-        operations: [],
-        clientLastSync: Date.now() - 60000, // 1 minute ago
-      });
+      const { req, res } = createMockReqRes(
+        {},
+        {},
+        {
+          operations: [],
+          clientLastSync: Date.now() - 60000, // 1 minute ago
+        },
+      );
 
       // Mock server changes
       const recentSongs = [{ _id: "song1", title: "Recent Song" }];
       const recentSetlists = [{ _id: "setlist1", name: "Recent Setlist" }];
 
-      (Song.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue(recentSongs) });
-      (Setlist.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue(recentSetlists) });
-      (Arrangement.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
+      (Song.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue(recentSongs),
+      });
+      (Setlist.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue(recentSetlists),
+      });
+      (Arrangement.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
 
       await batchSync(req as Request, res as Response);
 
@@ -368,7 +449,10 @@ describe("Sync API Routes", () => {
           conflicts: [],
           serverChanges: [
             { entity: "song", data: { _id: "song1", title: "Recent Song" } },
-            { entity: "setlist", data: { _id: "setlist1", name: "Recent Setlist" } },
+            {
+              entity: "setlist",
+              data: { _id: "setlist1", name: "Recent Setlist" },
+            },
           ],
           serverTimestamp: expect.any(Number),
         },
@@ -387,9 +471,13 @@ describe("Sync API Routes", () => {
         },
       ];
 
-      const { req, res } = createMockReqRes({}, {}, {
-        operations: invalidOperations,
-      });
+      const { req, res } = createMockReqRes(
+        {},
+        {},
+        {
+          operations: invalidOperations,
+        },
+      );
 
       await batchSync(req as Request, res as Response);
 
@@ -410,9 +498,13 @@ describe("Sync API Routes", () => {
         id: `op${i}`,
       }));
 
-      const { req, res } = createMockReqRes({}, {}, {
-        operations: manyOperations,
-      });
+      const { req, res } = createMockReqRes(
+        {},
+        {},
+        {
+          operations: manyOperations,
+        },
+      );
 
       await batchSync(req as Request, res as Response);
 
@@ -428,25 +520,33 @@ describe("Sync API Routes", () => {
     });
 
     it("handles individual operation failures gracefully", async () => {
-      const operations = [
-        validSyncOperation,
-      ];
+      const operations = [validSyncOperation];
 
-      const { req, res } = createMockReqRes({}, {}, {
-        operations,
-      });
+      const { req, res } = createMockReqRes(
+        {},
+        {},
+        {
+          operations,
+        },
+      );
 
       // Mock operation that throws an error during processing
-      const mockSongInstance = { 
-        ...mockSong, 
+      const mockSongInstance = {
+        ...mockSong,
         save: vi.fn().mockRejectedValue(new Error("Save failed")),
       };
       (Song as any).mockImplementation(() => mockSongInstance);
 
       // Mock server changes query
-      (Song.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Setlist.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Arrangement.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
+      (Song.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Setlist.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Arrangement.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
 
       await batchSync(req as Request, res as Response);
 
@@ -469,7 +569,6 @@ describe("Sync API Routes", () => {
         },
       });
     });
-
   });
 
   describe("getSyncStatus", () => {
@@ -641,7 +740,11 @@ describe("Sync API Routes", () => {
     });
 
     it("handles invalid resolutions array", async () => {
-      const { req, res } = createMockReqRes({}, {}, { resolutions: "not-an-array" });
+      const { req, res } = createMockReqRes(
+        {},
+        {},
+        { resolutions: "not-an-array" },
+      );
 
       await resolveConflicts(req as Request, res as Response);
 
@@ -719,16 +822,26 @@ describe("Sync API Routes", () => {
         operation: "update" as const,
       };
 
-      const { req, res } = createMockReqRes({}, {}, {
-        operations: [updateOperation],
-      });
+      const { req, res } = createMockReqRes(
+        {},
+        {},
+        {
+          operations: [updateOperation],
+        },
+      );
 
       (Song.findById as any).mockResolvedValue(null);
 
       // Mock server changes query
-      (Song.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Setlist.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Arrangement.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
+      (Song.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Setlist.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Arrangement.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
 
       await batchSync(req as Request, res as Response);
 
@@ -762,9 +875,13 @@ describe("Sync API Routes", () => {
         },
       };
 
-      const { req, res } = createMockReqRes({}, {}, {
-        operations: [updateOperation],
-      });
+      const { req, res } = createMockReqRes(
+        {},
+        {},
+        {
+          operations: [updateOperation],
+        },
+      );
 
       const existingSong = {
         ...mockSong,
@@ -773,9 +890,15 @@ describe("Sync API Routes", () => {
       (Song.findById as any).mockResolvedValue(existingSong);
 
       // Mock server changes query
-      (Song.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Setlist.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Arrangement.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
+      (Song.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Setlist.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Arrangement.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
 
       await batchSync(req as Request, res as Response);
 
@@ -798,14 +921,24 @@ describe("Sync API Routes", () => {
     });
 
     it("handles empty operations array", async () => {
-      const { req, res } = createMockReqRes({}, {}, {
-        operations: [],
-      });
+      const { req, res } = createMockReqRes(
+        {},
+        {},
+        {
+          operations: [],
+        },
+      );
 
       // Mock server changes query
-      (Song.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Setlist.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
-      (Arrangement.find as any).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
+      (Song.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Setlist.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
+      (Arrangement.find as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue([]),
+      });
 
       await batchSync(req as Request, res as Response);
 

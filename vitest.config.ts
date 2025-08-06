@@ -19,7 +19,7 @@ export default defineConfig({
       include: [
         "client/**/*.{ts,tsx}",
         "server/**/*.{ts,tsx}",
-        "shared/**/*.{ts,tsx}"
+        "shared/**/*.{ts,tsx}",
       ],
       exclude: [
         "node_modules/",
@@ -27,9 +27,9 @@ export default defineConfig({
         "dist/",
         "**/*.d.ts",
         "**/*.config.{ts,js}",
-        "**/index.{ts,tsx}"
-      ]
-    }
+        "**/index.{ts,tsx}",
+      ],
+    },
   },
   resolve: {
     alias: {

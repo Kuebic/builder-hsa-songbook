@@ -23,7 +23,7 @@ vi.mock("../../database/models", () => {
     countDocuments: vi.fn(),
     findByShareToken: vi.fn(),
   });
-  
+
   return {
     Setlist: MockSetlist,
   };
@@ -162,7 +162,9 @@ describe("Setlists API Routes", () => {
       expect((Setlist as any).find).toHaveBeenCalledWith({
         $text: { $search: "Sunday" },
       });
-      expect(mockQuery.sort).toHaveBeenCalledWith({ score: { $meta: "textScore" } });
+      expect(mockQuery.sort).toHaveBeenCalledWith({
+        score: { $meta: "textScore" },
+      });
     });
 
     it("applies createdBy filter correctly", async () => {
@@ -266,7 +268,10 @@ describe("Setlists API Routes", () => {
 
   describe("getSetlist", () => {
     it("returns a public setlist successfully", async () => {
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a654321" });
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a654321" },
+      );
 
       const mockSetlistWithPopulate = {
         ...mockSetlist,
@@ -277,7 +282,9 @@ describe("Setlists API Routes", () => {
 
       await getSetlist(req as Request, res as Response);
 
-      expect((Setlist as any).findById).toHaveBeenCalledWith("60f7b1c3e4b0c72a1a654321");
+      expect((Setlist as any).findById).toHaveBeenCalledWith(
+        "60f7b1c3e4b0c72a1a654321",
+      );
       expect(mockSetlistWithPopulate.populate).toHaveBeenCalledWith({
         path: "songs.arrangementId",
         populate: {
@@ -315,7 +322,10 @@ describe("Setlists API Routes", () => {
         ...mockSetlist,
         metadata: { ...mockSetlist.metadata, isPublic: false },
       };
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a654321" });
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a654321" },
+      );
 
       (Setlist as any).findById.mockReturnValue({
         populate: vi.fn().mockResolvedValue(privateSetlist),
@@ -334,7 +344,10 @@ describe("Setlists API Routes", () => {
     });
 
     it("handles database errors", async () => {
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a654321" });
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a654321" },
+      );
 
       (Setlist as any).findById.mockRejectedValue(new Error("Database error"));
 
@@ -359,7 +372,9 @@ describe("Setlists API Routes", () => {
 
       await getSetlistByToken(req as Request, res as Response);
 
-      expect((Setlist as any).findByShareToken).toHaveBeenCalledWith("valid-token");
+      expect((Setlist as any).findByShareToken).toHaveBeenCalledWith(
+        "valid-token",
+      );
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         data: mockSetlist,
@@ -386,7 +401,9 @@ describe("Setlists API Routes", () => {
     it("handles database errors", async () => {
       const { req, res } = createMockReqRes({}, { token: "valid-token" });
 
-      (Setlist as any).findByShareToken.mockRejectedValue(new Error("Database error"));
+      (Setlist as any).findByShareToken.mockRejectedValue(
+        new Error("Database error"),
+      );
 
       await getSetlistByToken(req as Request, res as Response);
 
@@ -497,14 +514,20 @@ describe("Setlists API Routes", () => {
     };
 
     it("updates a setlist successfully", async () => {
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a654321" }, updateData);
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a654321" },
+        updateData,
+      );
 
       const mockSetlistInstance = { ...mockSetlist };
       (Setlist as any).findById.mockResolvedValue(mockSetlistInstance);
 
       await updateSetlist(req as Request, res as Response);
 
-      expect((Setlist as any).findById).toHaveBeenCalledWith("60f7b1c3e4b0c72a1a654321");
+      expect((Setlist as any).findById).toHaveBeenCalledWith(
+        "60f7b1c3e4b0c72a1a654321",
+      );
       // Object.assign is used to update the setlist instance - verify the setlist was updated
       expect(mockSetlistInstance.name).toBe(updateData.name);
       expect(mockSetlistInstance.description).toBe(updateData.description);
@@ -517,7 +540,11 @@ describe("Setlists API Routes", () => {
     });
 
     it("returns 404 for non-existent setlist", async () => {
-      const { req, res } = createMockReqRes({}, { id: "nonexistent" }, updateData);
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "nonexistent" },
+        updateData,
+      );
 
       (Setlist as any).findById.mockResolvedValue(null);
 
@@ -535,7 +562,11 @@ describe("Setlists API Routes", () => {
 
     it("handles validation errors", async () => {
       const invalidData = { songs: [{ order: "invalid" }] }; // Invalid order type
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a654321" }, invalidData);
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a654321" },
+        invalidData,
+      );
 
       await updateSetlist(req as Request, res as Response);
 
@@ -551,7 +582,11 @@ describe("Setlists API Routes", () => {
     });
 
     it("handles database errors", async () => {
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a654321" }, updateData);
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a654321" },
+        updateData,
+      );
 
       (Setlist as any).findById.mockRejectedValue(new Error("Database error"));
 
@@ -570,15 +605,22 @@ describe("Setlists API Routes", () => {
 
   describe("deleteSetlist", () => {
     it("deletes a setlist successfully", async () => {
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a654321" });
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a654321" },
+      );
 
       (Setlist as any).findById.mockResolvedValue(mockSetlist);
       (Setlist as any).findByIdAndDelete.mockResolvedValue(mockSetlist);
 
       await deleteSetlist(req as Request, res as Response);
 
-      expect((Setlist as any).findById).toHaveBeenCalledWith("60f7b1c3e4b0c72a1a654321");
-      expect((Setlist as any).findByIdAndDelete).toHaveBeenCalledWith("60f7b1c3e4b0c72a1a654321");
+      expect((Setlist as any).findById).toHaveBeenCalledWith(
+        "60f7b1c3e4b0c72a1a654321",
+      );
+      expect((Setlist as any).findByIdAndDelete).toHaveBeenCalledWith(
+        "60f7b1c3e4b0c72a1a654321",
+      );
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         data: { id: "60f7b1c3e4b0c72a1a654321" },
@@ -603,7 +645,10 @@ describe("Setlists API Routes", () => {
     });
 
     it("handles database errors", async () => {
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a654321" });
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a654321" },
+      );
 
       (Setlist as any).findById.mockRejectedValue(new Error("Database error"));
 
@@ -633,8 +678,14 @@ describe("Setlists API Routes", () => {
 
       await addSongToSetlist(req as Request, res as Response);
 
-      expect((Setlist as any).findById).toHaveBeenCalledWith("60f7b1c3e4b0c72a1a654321");
-      expect(mockSetlistInstance.addSong).toHaveBeenCalledWith("arr123", 2, "Test notes");
+      expect((Setlist as any).findById).toHaveBeenCalledWith(
+        "60f7b1c3e4b0c72a1a654321",
+      );
+      expect(mockSetlistInstance.addSong).toHaveBeenCalledWith(
+        "arr123",
+        2,
+        "Test notes",
+      );
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         data: mockSetlist,
@@ -715,7 +766,9 @@ describe("Setlists API Routes", () => {
 
       await removeSongFromSetlist(req as Request, res as Response);
 
-      expect((Setlist as any).findById).toHaveBeenCalledWith("60f7b1c3e4b0c72a1a654321");
+      expect((Setlist as any).findById).toHaveBeenCalledWith(
+        "60f7b1c3e4b0c72a1a654321",
+      );
       expect(mockSetlistInstance.removeSong).toHaveBeenCalledWith("arr123");
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -777,8 +830,14 @@ describe("Setlists API Routes", () => {
 
       await reorderSetlistSongs(req as Request, res as Response);
 
-      expect((Setlist as any).findById).toHaveBeenCalledWith("60f7b1c3e4b0c72a1a654321");
-      expect(mockSetlistInstance.reorderSongs).toHaveBeenCalledWith(["arr2", "arr1", "arr3"]);
+      expect((Setlist as any).findById).toHaveBeenCalledWith(
+        "60f7b1c3e4b0c72a1a654321",
+      );
+      expect(mockSetlistInstance.reorderSongs).toHaveBeenCalledWith([
+        "arr2",
+        "arr1",
+        "arr3",
+      ]);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         data: mockSetlist,
@@ -851,12 +910,17 @@ describe("Setlists API Routes", () => {
     it("handles malformed ObjectId in getSetlist", async () => {
       const { req, res } = createMockReqRes({}, { id: "invalid-id" });
 
-      (Setlist as any).findById.mockRejectedValue(new Error("Cast to ObjectId failed"));
+      (Setlist as any).findById.mockRejectedValue(
+        new Error("Cast to ObjectId failed"),
+      );
 
       await getSetlist(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(mockConsole.error).toHaveBeenCalledWith("Error fetching setlist:", expect.any(Error));
+      expect(mockConsole.error).toHaveBeenCalledWith(
+        "Error fetching setlist:",
+        expect.any(Error),
+      );
     });
 
     it("handles complex filter combinations", async () => {
@@ -897,7 +961,11 @@ describe("Setlists API Routes", () => {
         name: "Updated Setlist Name",
         isPublic: false,
       };
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a654321" }, updateData);
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a654321" },
+        updateData,
+      );
 
       // Create a mutable mock setlist instance
       const mockSetlistInstance = {

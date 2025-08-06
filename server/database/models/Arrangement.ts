@@ -7,6 +7,7 @@ export type Difficulty = "beginner" | "intermediate" | "advanced";
 // Interface for Arrangement document - Updated per PRD specifications
 export interface IArrangement extends Document {
   _id: Types.ObjectId;
+  slug: string; // URL-friendly identifier: {song-name}-{random-id}
   name: string; // Required, max 200 chars
   songIds: Types.ObjectId[]; // Array supports mashups
   createdBy: Types.ObjectId; // Reference to User, indexed
@@ -45,7 +46,7 @@ export interface IArrangement extends Document {
   documentSize: number;
   createdAt: Date;
   updatedAt: Date;
-  
+
   // Instance methods
   updateViews(): Promise<IArrangement>;
   addRating(rating: number): Promise<IArrangement>;
@@ -65,194 +66,232 @@ export interface IArrangementModel extends Model<IArrangement> {
 }
 
 // Mashup section sub-schema
-const mashupSectionSchema = new Schema({
-  songId: {
-    type: Schema.Types.ObjectId,
-    ref: "Song",
-    required: true,
+const mashupSectionSchema = new Schema(
+  {
+    songId: {
+      type: Schema.Types.ObjectId,
+      ref: "Song",
+      required: true,
+    },
+    title: {
+      type: String,
+      required: true,
+      maxlength: 200,
+    },
+    startBar: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+    endBar: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
   },
-  title: {
-    type: String,
-    required: true,
-    maxlength: 200,
-  },
-  startBar: {
-    type: Number,
-    required: true,
-    min: 1,
-  },
-  endBar: {
-    type: Number,
-    required: true,
-    min: 1,
-  },
-}, { _id: false });
+  { _id: false },
+);
 
 // Create the schema
-const arrangementSchema = new Schema<IArrangement>({
-  name: {
-    type: String,
-    required: true,
-    maxlength: 200,
-    trim: true,
-    index: "text",
-  },
-  songIds: [{
-    type: Schema.Types.ObjectId,
-    ref: "Song",
-    required: true,
-    index: true,
-  }],
-  createdBy: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-    index: true,
-  },
-  chordData: {
-    type: String, // ChordPro data (plain text)
-    required: true,
-    validate: {
-      validator: function (v: string) {
-        return v.length <= 500 * 1024; // 500KB limit for arrangements (uncompressed)
-      },
-      message: "Chord data exceeds 500KB limit",
-    },
-  },
-  key: {
-    type: String,
-    enum: ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"],
-    required: true,
-    index: true,
-  },
-  tempo: {
-    type: Number,
-    min: 40,
-    max: 200,
-  },
-  timeSignature: {
-    type: String,
-    default: "4/4",
-  },
-  difficulty: {
-    type: String,
-    enum: ["beginner", "intermediate", "advanced"],
-    default: "intermediate",
-    index: true,
-  },
-  description: {
-    type: String,
-    maxlength: 1000,
-    trim: true,
-  },
-  tags: [{
-    type: String,
-    maxlength: 50,
-    trim: true,
-  }],
-  vocalRange: {
-    low: {
+const arrangementSchema = new Schema<IArrangement>(
+  {
+    slug: {
       type: String,
-      validate: {
-        validator: function(v: string) {
-          return !v || /^[A-G][#b]?\d$/.test(v); // e.g., C3, F#4, Bb2
-        },
-        message: "Vocal range must be in format like 'C3', 'F#4', 'Bb2'",
-      },
+      required: true,
+      unique: true,
+      trim: true,
+      index: true,
+      maxlength: 100,
     },
-    high: {
+    name: {
       type: String,
-      validate: {
-        validator: function(v: string) {
-          return !v || /^[A-G][#b]?\d$/.test(v);
-        },
-        message: "Vocal range must be in format like 'C3', 'F#4', 'Bb2'",
-      },
+      required: true,
+      maxlength: 200,
+      trim: true,
+      index: "text",
     },
-  },
-  structure: [{
-    type: String,
-    trim: true,
-    maxlength: 10, // e.g., "Verse 1", "Chorus", "Bridge"
-  }],
-  genreStyle: {
-    type: String,
-    trim: true,
-    maxlength: 50,
-    index: true,
-  },
-  demoUrl: {
-    type: String,
-    trim: true,
-    maxlength: 500,
-    validate: {
-      validator: function(v: string) {
-        return !v || /^https?:\/\/.+/.test(v);
+    songIds: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Song",
+        required: true,
+        index: true,
       },
-      message: "Demo URL must be a valid HTTP(S) URL",
-    },
-  },
-  sheetMusicUrl: {
-    type: String,
-    trim: true,
-    maxlength: 500,
-    validate: {
-      validator: function(v: string) {
-        return !v || /^https?:\/\/.+/.test(v);
-      },
-      message: "Sheet music URL must be a valid HTTP(S) URL",
-    },
-  },
-  metadata: {
-    isMashup: {
-      type: Boolean,
-      default: false,
+    ],
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
       index: true,
     },
-    mashupSections: [mashupSectionSchema],
-    isPublic: {
-      type: Boolean,
-      default: true,
+    chordData: {
+      type: String, // ChordPro data (plain text)
+      required: true,
+      validate: {
+        validator: function (v: string) {
+          return v.length <= 500 * 1024; // 500KB limit for arrangements (uncompressed)
+        },
+        message: "Chord data exceeds 500KB limit",
+      },
+    },
+    key: {
+      type: String,
+      enum: [
+        "C",
+        "C#",
+        "Db",
+        "D",
+        "D#",
+        "Eb",
+        "E",
+        "F",
+        "F#",
+        "Gb",
+        "G",
+        "G#",
+        "Ab",
+        "A",
+        "A#",
+        "Bb",
+        "B",
+      ],
+      required: true,
       index: true,
     },
-    ratings: {
-      average: {
+    tempo: {
+      type: Number,
+      min: 40,
+      max: 200,
+    },
+    timeSignature: {
+      type: String,
+      default: "4/4",
+    },
+    difficulty: {
+      type: String,
+      enum: ["beginner", "intermediate", "advanced"],
+      default: "intermediate",
+      index: true,
+    },
+    description: {
+      type: String,
+      maxlength: 1000,
+      trim: true,
+    },
+    tags: [
+      {
+        type: String,
+        maxlength: 50,
+        trim: true,
+      },
+    ],
+    vocalRange: {
+      low: {
+        type: String,
+        validate: {
+          validator: function (v: string) {
+            return !v || /^[A-G][#b]?\d$/.test(v); // e.g., C3, F#4, Bb2
+          },
+          message: "Vocal range must be in format like 'C3', 'F#4', 'Bb2'",
+        },
+      },
+      high: {
+        type: String,
+        validate: {
+          validator: function (v: string) {
+            return !v || /^[A-G][#b]?\d$/.test(v);
+          },
+          message: "Vocal range must be in format like 'C3', 'F#4', 'Bb2'",
+        },
+      },
+    },
+    structure: [
+      {
+        type: String,
+        trim: true,
+        maxlength: 10, // e.g., "Verse 1", "Chorus", "Bridge"
+      },
+    ],
+    genreStyle: {
+      type: String,
+      trim: true,
+      maxlength: 50,
+      index: true,
+    },
+    demoUrl: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      validate: {
+        validator: function (v: string) {
+          return !v || /^https?:\/\/.+/.test(v);
+        },
+        message: "Demo URL must be a valid HTTP(S) URL",
+      },
+    },
+    sheetMusicUrl: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      validate: {
+        validator: function (v: string) {
+          return !v || /^https?:\/\/.+/.test(v);
+        },
+        message: "Sheet music URL must be a valid HTTP(S) URL",
+      },
+    },
+    metadata: {
+      isMashup: {
+        type: Boolean,
+        default: false,
+        index: true,
+      },
+      mashupSections: [mashupSectionSchema],
+      isPublic: {
+        type: Boolean,
+        default: true,
+        index: true,
+      },
+      ratings: {
+        average: {
+          type: Number,
+          default: 0,
+          min: 0,
+          max: 5,
+        },
+        count: {
+          type: Number,
+          default: 0,
+          min: 0,
+        },
+      },
+      views: {
         type: Number,
         default: 0,
         min: 0,
-        max: 5,
       },
-      count: {
+      setlistCount: {
+        type: Number,
+        default: 0,
+        min: 0,
+        index: true,
+      },
+      reviewCount: {
         type: Number,
         default: 0,
         min: 0,
       },
     },
-    views: {
+    documentSize: {
       type: Number,
       default: 0,
-      min: 0,
-    },
-    setlistCount: {
-      type: Number,
-      default: 0,
-      min: 0,
-      index: true,
-    },
-    reviewCount: {
-      type: Number,
-      default: 0,
-      min: 0,
     },
   },
-  documentSize: {
-    type: Number,
-    default: 0,
+  {
+    timestamps: true,
+    collection: "arrangements",
   },
-}, {
-  timestamps: true,
-  collection: "arrangements",
-});
+);
 
 // Strategic indexes per PRD specifications
 arrangementSchema.index(
@@ -269,7 +308,6 @@ arrangementSchema.index({ tags: 1, "metadata.isPublic": 1 }); // Tag searches
 
 // Pre-save middleware for validation
 arrangementSchema.pre("save", async function (this: IArrangement, next) {
-
   // Auto-set isMashup based on songIds length
   this.metadata.isMashup = this.songIds.length > 1;
 
@@ -278,20 +316,27 @@ arrangementSchema.pre("save", async function (this: IArrangement, next) {
     if (this.songIds.length < 2) {
       throw new Error("Mashup arrangements must reference at least 2 songs");
     }
-    
-    if (this.metadata.mashupSections && this.metadata.mashupSections.length > 0) {
+
+    if (
+      this.metadata.mashupSections &&
+      this.metadata.mashupSections.length > 0
+    ) {
       // Verify all mashup sections reference songs in songIds
-      const songIdStrings = this.songIds.map(id => id.toString());
+      const songIdStrings = this.songIds.map((id) => id.toString());
       for (const section of this.metadata.mashupSections) {
         if (!songIdStrings.includes(section.songId.toString())) {
-          throw new Error("All mashup sections must reference songs in songIds array");
+          throw new Error(
+            "All mashup sections must reference songs in songIds array",
+          );
         }
       }
     }
   } else {
     // Single song arrangement
     if (this.songIds.length !== 1) {
-      throw new Error("Non-mashup arrangements must reference exactly one song");
+      throw new Error(
+        "Non-mashup arrangements must reference exactly one song",
+      );
     }
     // Clear mashup sections for single songs
     this.metadata.mashupSections = undefined;
@@ -302,7 +347,7 @@ arrangementSchema.pre("save", async function (this: IArrangement, next) {
 });
 
 // Post-save middleware to calculate document size
-arrangementSchema.post("save", async function(doc: IArrangement) {
+arrangementSchema.post("save", async function (doc: IArrangement) {
   if (doc.documentSize === 0) {
     // Calculate and update document size after save
     const docObject = doc.toObject();
@@ -322,22 +367,25 @@ arrangementSchema.methods.updateViews = function () {
 };
 
 arrangementSchema.methods.addRating = function (rating: number) {
-  const currentTotal = this.metadata.ratings.average * this.metadata.ratings.count;
+  const currentTotal =
+    this.metadata.ratings.average * this.metadata.ratings.count;
   this.metadata.ratings.count += 1;
-  this.metadata.ratings.average = (currentTotal + rating) / this.metadata.ratings.count;
+  this.metadata.ratings.average =
+    (currentTotal + rating) / this.metadata.ratings.count;
   return this.save();
 };
 
-arrangementSchema.methods.getDecompressedChordData = async function (): Promise<string> {
-  // Since chordData is now stored as plain text, just return it directly
-  return this.chordData || "";
-};
+arrangementSchema.methods.getDecompressedChordData =
+  async function (): Promise<string> {
+    // Since chordData is now stored as plain text, just return it directly
+    return this.chordData || "";
+  };
 
 arrangementSchema.methods.getMashupDuration = function () {
   if (!this.metadata.isMashup || !this.metadata.mashupSections) {
     return 0;
   }
-  
+
   return this.metadata.mashupSections.reduce((total: number, section: any) => {
     if (section.startBar && section.endBar) {
       return total + (section.endBar - section.startBar + 1);
@@ -346,12 +394,12 @@ arrangementSchema.methods.getMashupDuration = function () {
   }, 0);
 };
 
-arrangementSchema.methods.incrementSetlistCount = function() {
+arrangementSchema.methods.incrementSetlistCount = function () {
   this.metadata.setlistCount += 1;
   return this.save();
 };
 
-arrangementSchema.methods.decrementSetlistCount = function() {
+arrangementSchema.methods.decrementSetlistCount = function () {
   if (this.metadata.setlistCount > 0) {
     this.metadata.setlistCount -= 1;
   }
@@ -380,15 +428,18 @@ arrangementSchema.statics.findByDifficulty = function (difficulty: string) {
     .populate("createdBy", "name email");
 };
 
-arrangementSchema.statics.searchArrangements = function (query: string, limit = 20) {
+arrangementSchema.statics.searchArrangements = function (
+  query: string,
+  limit = 20,
+) {
   return this.find(
     { $text: { $search: query }, "metadata.isPublic": true },
     { score: { $meta: "textScore" } },
   )
-  .populate("songIds", "title artist")
-  .populate("createdBy", "name email")
-  .sort({ score: { $meta: "textScore" } })
-  .limit(limit);
+    .populate("songIds", "title artist")
+    .populate("createdBy", "name email")
+    .sort({ score: { $meta: "textScore" } })
+    .limit(limit);
 };
 
 arrangementSchema.statics.findByTags = function (tags: string[], limit = 20) {
@@ -399,4 +450,7 @@ arrangementSchema.statics.findByTags = function (tags: string[], limit = 20) {
     .limit(limit);
 };
 
-export const Arrangement = model<IArrangement, IArrangementModel>("Arrangement", arrangementSchema);
+export const Arrangement = model<IArrangement, IArrangementModel>(
+  "Arrangement",
+  arrangementSchema,
+);

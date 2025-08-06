@@ -9,13 +9,12 @@ const createReviewSchema = z.object({
   comment: z.string().trim().min(10).max(2000),
 });
 
-
 const reportReviewSchema = z.object({
   reason: z.string().trim().max(500).optional(),
 });
 
 // Helper to check if user is admin/moderator
-const canModerateReviews = (user: any): boolean => {
+const canModerateReviews = (user: { role: string }): boolean => {
   return user && (user.role === "ADMIN" || user.role === "MODERATOR");
 };
 
@@ -38,9 +37,11 @@ export const getReviews = async (req: Request, res: Response) => {
     }
 
     // Check if arrangement exists
-    const arrangement = await Arrangement.findById(arrangementId)
-      .populate("songIds", "title artist");
-    
+    const arrangement = await Arrangement.findById(arrangementId).populate(
+      "songIds",
+      "title artist",
+    );
+
     if (!arrangement) {
       return res.status(404).json({
         success: false,
@@ -65,7 +66,7 @@ export const getReviews = async (req: Request, res: Response) => {
     const { average, count } = await Review.getAverageRating(arrangementId);
 
     // Transform reviews for response
-    const transformedReviews = reviews.map(review => ({
+    const transformedReviews = reviews.map((review) => ({
       id: review._id.toString(),
       arrangementId: review.arrangementId.toString(),
       user: {
@@ -76,7 +77,9 @@ export const getReviews = async (req: Request, res: Response) => {
       rating: review.rating,
       comment: review.comment,
       helpfulCount: review.helpful.length,
-      hasMarkedHelpful: userId ? review.helpful.some(id => id.toString() === userId) : false,
+      hasMarkedHelpful: userId
+        ? review.helpful.some((id) => id.toString() === userId)
+        : false,
       reported: review.reported,
       reportReason: review.reportReason,
       createdAt: review.createdAt,
@@ -86,7 +89,10 @@ export const getReviews = async (req: Request, res: Response) => {
     // Find current user's review if logged in
     let currentUserReview = null;
     if (userId && Types.ObjectId.isValid(userId as string)) {
-      const userReview = await Review.findUserReview(arrangementId, userId as string);
+      const userReview = await Review.findUserReview(
+        arrangementId,
+        userId as string,
+      );
       if (userReview) {
         currentUserReview = {
           id: userReview._id.toString(),
@@ -108,7 +114,7 @@ export const getReviews = async (req: Request, res: Response) => {
           averageRating: average,
           totalReviews: count,
           arrangementName: arrangement.name,
-          songs: (arrangement.songIds as any[]).map(song => ({
+          songs: (arrangement.songIds as any[]).map((song) => ({
             id: song._id.toString(),
             title: song.title,
             artist: song.artist,
@@ -314,7 +320,9 @@ export const markHelpful = async (req: Request, res: Response) => {
 
     // Toggle helpful status
     const userObjectId = new Types.ObjectId(userId as string);
-    const hasMarkedHelpful = review.helpful.some(id => id.equals(userObjectId));
+    const hasMarkedHelpful = review.helpful.some((id) =>
+      id.equals(userObjectId),
+    );
 
     if (hasMarkedHelpful) {
       await review.unmarkAsHelpful(userObjectId);
@@ -465,7 +473,7 @@ export const getReportedReviews = async (req: Request, res: Response) => {
     const reviews = await Review.findReported(parseInt(limit as string));
 
     // Transform for response
-    const transformedReviews = reviews.map(review => ({
+    const transformedReviews = reviews.map((review) => ({
       id: review._id.toString(),
       arrangementId: review.arrangementId._id.toString(),
       arrangementName: (review.arrangementId as any).name,
@@ -629,7 +637,7 @@ export const deleteReview = async (req: Request, res: Response) => {
     const reviewer = await User.findById(review.userId);
     if (reviewer) {
       reviewer.reviews = reviewer.reviews.filter(
-        reviewId => !reviewId.equals(review._id),
+        (reviewId) => !reviewId.equals(review._id),
       );
       await reviewer.save();
     }
@@ -637,10 +645,15 @@ export const deleteReview = async (req: Request, res: Response) => {
     // Update arrangement review count and average
     const arrangement = await Arrangement.findById(review.arrangementId);
     if (arrangement) {
-      arrangement.metadata.reviewCount = Math.max(0, arrangement.metadata.reviewCount - 1);
-      
+      arrangement.metadata.reviewCount = Math.max(
+        0,
+        arrangement.metadata.reviewCount - 1,
+      );
+
       // Recalculate average rating
-      const { average, count } = await Review.getAverageRating(review.arrangementId.toString());
+      const { average, count } = await Review.getAverageRating(
+        review.arrangementId.toString(),
+      );
       arrangement.metadata.ratings.average = average;
       arrangement.metadata.ratings.count = count;
       await arrangement.save();

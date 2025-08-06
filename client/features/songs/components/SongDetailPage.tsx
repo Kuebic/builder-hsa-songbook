@@ -4,17 +4,30 @@ import { Layout } from "@/shared/components/Layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Music, FileText, Star, Book } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { AlertCircle, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useSongBySlug } from "../hooks/useSongsAPI";
-import { useArrangementsBySong, useUpdateArrangement } from "../hooks/useArrangements";
-import SongHeader from "./SongHeader";
-import SongMetadata from "./SongMetadata";
-import ArrangementsList from "./ArrangementsList";
-import SongRating from "./SongRating";
+import { useSongBySlug } from "@features/songs/hooks/useSongsAPI";
+import {
+  useArrangementsBySong,
+  useUpdateArrangement,
+} from "@features/songs/hooks/useArrangements";
+import {
+  useVerses,
+  useToggleSongFavorite,
+  useSongComments,
+} from "@features/songs/hooks/useVerses";
+import SongDetailHeader from "./SongDetailHeader";
+import VersesSection from "./VersesSection";
+import CommunitySection from "./CommunitySection";
+import ArrangementsSection from "./ArrangementsSection";
 import ChordProEditor from "./ChordProEditor";
 import SongNotesTab from "./SongNotesTab";
-import { ArrangementDetail } from "../types/song.types";
+import {
+  ArrangementDetail,
+  ArrangementWithMetrics,
+  SongWithRelations,
+} from "@features/songs/types/song.types";
 
 type SongParams = {
   slug: string;
@@ -22,7 +35,10 @@ type SongParams = {
 
 function SongDetailSkeleton(): ReactElement {
   return (
-    <div className="max-w-6xl mx-auto space-y-6" data-testid="song-detail-skeleton">
+    <div
+      className="max-w-6xl mx-auto space-y-6"
+      data-testid="song-detail-skeleton"
+    >
       {/* Header skeleton */}
       <div className="space-y-4">
         <Skeleton className="h-10 w-3/4" />
@@ -33,7 +49,7 @@ function SongDetailSkeleton(): ReactElement {
           <Skeleton className="h-8 w-24" />
         </div>
       </div>
-      
+
       {/* Tabs skeleton */}
       <div className="space-y-4">
         <Skeleton className="h-10 w-full" />
@@ -54,11 +70,10 @@ function SongNotFound({ slug }: SongNotFoundProps): ReactElement {
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Song not found</AlertTitle>
         <AlertDescription>
-          {slug 
+          {slug
             ? `We couldn't find a song with the slug "${slug}".`
-            : "The requested song could not be found."
-          }
-          {" "}Please check the URL and try again, or return to the songs page.
+            : "The requested song could not be found."}{" "}
+          Please check the URL and try again, or return to the songs page.
         </AlertDescription>
       </Alert>
     </div>
@@ -69,60 +84,50 @@ export default function SongDetailPage(): ReactElement {
   const { slug } = useParams<SongParams>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [editingArrangement, setEditingArrangement] = useState<ArrangementDetail | null>(null);
+  const [editingArrangement, setEditingArrangement] =
+    useState<ArrangementDetail | null>(null);
   const [showChordProEditor, setShowChordProEditor] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("info");
+  const [activeTab, setActiveTab] = useState<string>("notes");
   const [isViewMode, setIsViewMode] = useState(false);
-  
-  const { data: song, isLoading: songLoading, error: songError } = useSongBySlug(slug || "");
-  const { data: arrangements, isLoading: arrangementsLoading, refetch: refetchArrangements } = useArrangementsBySong(song?.id || "");
+  const [isFavorited, setIsFavorited] = useState(false);
+
+  const {
+    data: song,
+    isLoading: songLoading,
+    error: songError,
+  } = useSongBySlug(slug || "");
+  const { data: arrangements, refetch: refetchArrangements } =
+    useArrangementsBySong(song?.id || "");
+  const { data: verses } = useVerses(song?.id || "");
+  const { data: comments } = useSongComments(song?.id || "");
   const updateArrangementMutation = useUpdateArrangement();
+  const toggleFavoriteMutation = useToggleSongFavorite();
 
-  const handleToggleFavorite = () => {
-    // TODO: Implement favorite toggle
+  const handleToggleFavorite = async () => {
+    if (!song) {
+      return;
+    }
+
+    try {
+      await toggleFavoriteMutation.mutateAsync({
+        songId: song.id,
+        isFavorited,
+      });
+      setIsFavorited(!isFavorited);
+    } catch (error) {
+      console.error("Failed to toggle favorite:", error);
+    }
   };
 
-  const handleEditSong = () => {
-    // TODO: Navigate to edit page
-    navigate(`/songs/${slug}/edit`);
-  };
-
-  const handleDeleteSong = () => {
-    // TODO: Implement delete
-  };
-
-  const handleShareSong = () => {
-    // TODO: Implement share
-  };
-
-  const handleExportSong = () => {
-    // TODO: Implement export
-  };
-
-  const handleRateSong = async (_rating: number) => {
-    // TODO: Implement rating
-  };
-
-  const handleArrangementView = (arrangement: ArrangementDetail) => {
-    setEditingArrangement(arrangement);
-    setShowChordProEditor(true);
-    setActiveTab("arrangements"); // Remember we're in arrangements tab
-    setIsViewMode(true); // Set read-only mode
-  };
-
-  const handleArrangementEdit = (arrangement: ArrangementDetail) => {
-    setEditingArrangement(arrangement);
-    setShowChordProEditor(true);
-    setActiveTab("arrangements"); // Remember we're in arrangements tab
-    setIsViewMode(false); // Set edit mode
+  const handleAddArrangement = () => {
+    navigate(`/songs/${slug}/arrangements/new`);
   };
 
   const handleSaveArrangement = async (content: string) => {
     if (!editingArrangement) {
       return;
     }
-    
-    
+
     try {
       await updateArrangementMutation.mutateAsync({
         id: editingArrangement._id,
@@ -131,20 +136,18 @@ export default function SongDetailPage(): ReactElement {
       setShowChordProEditor(false);
       setEditingArrangement(null);
       setIsViewMode(false);
-      
-      // Show success toast
+
       toast({
         title: "Arrangement saved",
         description: "Your changes have been saved successfully.",
       });
-      
-      // Refresh arrangements list
+
       refetchArrangements();
     } catch (error) {
-      // Keep the editor open on error so user doesn't lose their work
       toast({
         title: "Failed to save arrangement",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
+        description:
+          error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
     }
@@ -187,64 +190,80 @@ export default function SongDetailPage(): ReactElement {
     );
   }
 
+  // Transform song data to match new structure
+  const songWithRelations: SongWithRelations | undefined = song
+    ? {
+        ...song,
+        source: (song as any).source || "Unknown",
+        totalArrangements: arrangements?.length || 0,
+        compositionYear: (song as any).year,
+        ccli: (song as any).ccli,
+        favoriteCount: 0, // TODO: Get from API
+        isFavorited,
+        verses: verses || [],
+        arrangements: (arrangements || []).map(
+          (arr) =>
+            ({
+              ...(arr as any),
+              slug: (arr as any).slug, // Use slug from server
+              favoriteCount: 0, // TODO: Get from API
+              setlistCount: (arr as any).usageInSetlists || 0,
+              rating: {
+                average: (arr.metadata as any)?.ratings?.average || 0,
+                count: (arr.metadata as any)?.ratings?.count || 0,
+              },
+              reviews: [],
+              capo: arr.metadata?.capo,
+              songs: [], // For mashups
+              isDefault: false,
+              usageInSetlists: (arr as any).usageInSetlists || 0,
+            }) as ArrangementWithMetrics,
+        ),
+        comments: comments || [],
+      }
+    : undefined;
+
   return (
     <Layout>
       <div className="space-y-6">
-        {/* Song Header */}
-        <SongHeader
-          song={song}
-          onToggleFavorite={handleToggleFavorite}
-          onEdit={handleEditSong}
-          onDelete={handleDeleteSong}
-          onShare={handleShareSong}
-          onExport={handleExportSong}
-        />
+        {/* Song Header with core info */}
+        {songWithRelations && (
+          <SongDetailHeader
+            song={songWithRelations}
+            onToggleFavorite={handleToggleFavorite}
+            onAddArrangement={handleAddArrangement}
+          />
+        )}
 
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            {/* Tabs for content organization */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="info" className="gap-2">
-                  <Music className="h-4 w-4" />
-                  Song Info
+            {/* Tabs for Notes, Verses, Community */}
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="notes">Notes</TabsTrigger>
+                <TabsTrigger value="verses" className="gap-2">
+                  Verses & Quotes
+                  {verses && verses.length > 0 && (
+                    <Badge variant="secondary" className="ml-2">
+                      {verses.length}
+                    </Badge>
+                  )}
                 </TabsTrigger>
-                <TabsTrigger value="arrangements" className="gap-2">
-                  <FileText className="h-4 w-4" />
-                  Arrangements {arrangements && `(${arrangements.length})`}
-                </TabsTrigger>
-                <TabsTrigger value="notes" className="gap-2">
-                  <Book className="h-4 w-4" />
-                  Notes & Verses
-                </TabsTrigger>
-                <TabsTrigger value="rating" className="gap-2">
-                  <Star className="h-4 w-4" />
-                  Rating & Reviews
+                <TabsTrigger value="community" className="gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  Community
+                  {comments && comments.length > 0 && (
+                    <Badge variant="secondary" className="ml-2">
+                      {comments.length}
+                    </Badge>
+                  )}
                 </TabsTrigger>
               </TabsList>
-              
-              <TabsContent value="info" className="mt-6">
-                <SongMetadata song={song} />
-              </TabsContent>
-              
-              <TabsContent value="arrangements" className="mt-6">
-                {arrangementsLoading ? (
-                  <div className="space-y-3">
-                    <Skeleton className="h-32 w-full" />
-                    <Skeleton className="h-32 w-full" />
-                  </div>
-                ) : (
-                  <ArrangementsList
-                    songId={song.id}
-                    songChordData={song.chordData || ""}
-                    arrangements={(arrangements || []) as ArrangementDetail[]}
-                    defaultArrangementId={song.defaultArrangementId}
-                    onArrangementView={handleArrangementView}
-                    onArrangementEdit={handleArrangementEdit}
-                  />
-                )}
-              </TabsContent>
-              
+
               <TabsContent value="notes" className="mt-6">
                 <SongNotesTab
                   songId={song.id}
@@ -252,17 +271,22 @@ export default function SongDetailPage(): ReactElement {
                   songNotes={song.notes}
                 />
               </TabsContent>
-              
-              <TabsContent value="rating" className="mt-6">
-                <div className="max-w-md mx-auto">
-                  <SongRating
-                    currentRating={song.avgRating}
-                    totalRatings={100} // TODO: Get actual count from API
-                    onRate={handleRateSong}
-                  />
-                </div>
+
+              <TabsContent value="verses" className="mt-6">
+                <VersesSection songId={song.id} />
+              </TabsContent>
+
+              <TabsContent value="community" className="mt-6">
+                <CommunitySection songId={song.id} />
               </TabsContent>
             </Tabs>
+
+            {/* Arrangements Section - Always visible below tabs */}
+            {songWithRelations && (
+              <ArrangementsSection
+                arrangements={songWithRelations.arrangements}
+              />
+            )}
           </div>
         </div>
       </div>

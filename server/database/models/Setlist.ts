@@ -29,7 +29,12 @@ export interface ISetlist extends Document {
 
   // Instance methods
   generateShareToken(): string;
-  addSong(songId: string, arrangementId?: string, transpose?: number, notes?: string): Promise<ISetlist>;
+  addSong(
+    songId: string,
+    arrangementId?: string,
+    transpose?: number,
+    notes?: string,
+  ): Promise<ISetlist>;
   removeSong(songId: string): Promise<ISetlist>;
   reorderSongs(newOrder: string[]): Promise<ISetlist>;
   updateSongTranspose(songId: string, transpose: number): Promise<ISetlist>;
@@ -47,86 +52,94 @@ export interface ISetlistModel extends Model<ISetlist> {
 }
 
 // Setlist item sub-schema - Updated per PRD specifications
-const setlistItemSchema = new Schema({
-  songId: {
-    type: Schema.Types.ObjectId,
-    ref: "Song",
-    required: true,
+const setlistItemSchema = new Schema(
+  {
+    songId: {
+      type: Schema.Types.ObjectId,
+      ref: "Song",
+      required: true,
+    },
+    arrangementId: {
+      type: Schema.Types.ObjectId,
+      ref: "Arrangement",
+      // Optional - arrangement override
+    },
+    transpose: {
+      type: Number,
+      default: 0,
+      min: -11,
+      max: 11,
+    },
+    notes: {
+      type: String,
+      maxlength: 500,
+      trim: true,
+    },
+    order: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
   },
-  arrangementId: {
-    type: Schema.Types.ObjectId,
-    ref: "Arrangement",
-    // Optional - arrangement override
-  },
-  transpose: {
-    type: Number,
-    default: 0,
-    min: -11,
-    max: 11,
-  },
-  notes: {
-    type: String,
-    maxlength: 500,
-    trim: true,
-  },
-  order: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-}, { _id: false });
+  { _id: false },
+);
 
 // Create the schema
-const setlistSchema = new Schema<ISetlist>({
-  name: {
-    type: String,
-    required: true,
-    maxlength: 200,
-    trim: true,
-  },
-  description: {
-    type: String,
-    maxlength: 1000,
-    trim: true,
-  },
-  createdBy: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-  songs: [setlistItemSchema],
-  tags: [{
-    type: String,
-    maxlength: 50,
-    trim: true,
-  }],
-  metadata: {
-    isPublic: {
-      type: Boolean,
-      default: false,
-    },
-    shareToken: {
+const setlistSchema = new Schema<ISetlist>(
+  {
+    name: {
       type: String,
+      required: true,
+      maxlength: 200,
+      trim: true,
     },
-    estimatedDuration: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 500, // 8+ hours max for large events
+    description: {
+      type: String,
+      maxlength: 1000,
+      trim: true,
     },
-    lastUsedAt: {
-      type: Date,
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
-    usageCount: {
-      type: Number,
-      default: 0,
-      min: 0,
+    songs: [setlistItemSchema],
+    tags: [
+      {
+        type: String,
+        maxlength: 50,
+        trim: true,
+      },
+    ],
+    metadata: {
+      isPublic: {
+        type: Boolean,
+        default: false,
+      },
+      shareToken: {
+        type: String,
+      },
+      estimatedDuration: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 500, // 8+ hours max for large events
+      },
+      lastUsedAt: {
+        type: Date,
+      },
+      usageCount: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
     },
   },
-}, {
-  timestamps: true,
-  collection: "setlists",
-});
+  {
+    timestamps: true,
+    collection: "setlists",
+  },
+);
 
 // Strategic indexes per PRD specifications
 setlistSchema.index(
@@ -138,7 +151,10 @@ setlistSchema.index(
 setlistSchema.index({ createdBy: 1, createdAt: -1 }); // User's setlists
 setlistSchema.index({ "metadata.isPublic": 1, createdAt: -1 }); // Public setlists
 setlistSchema.index({ tags: 1, "metadata.isPublic": 1 }); // Tag searches
-setlistSchema.index({ "metadata.shareToken": 1 }, { sparse: true, unique: true }); // Public sharing
+setlistSchema.index(
+  { "metadata.shareToken": 1 },
+  { sparse: true, unique: true },
+); // Public sharing
 
 // Pre-save middleware
 setlistSchema.pre("save", function (this: ISetlist) {
@@ -166,30 +182,37 @@ setlistSchema.pre("save", function (this: ISetlist) {
 
 // Instance methods
 setlistSchema.methods.generateShareToken = function (): string {
-  return Math.random().toString(36).substring(2, 15) + 
-         Math.random().toString(36).substring(2, 15);
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
 };
 
-setlistSchema.methods.addSong = function (songId: string, arrangementId?: string, transpose = 0, notes?: string) {
+setlistSchema.methods.addSong = function (
+  songId: string,
+  arrangementId?: string,
+  transpose = 0,
+  notes?: string,
+) {
   const newOrder = this.songs.length;
-  const newSong: any = {
+  const newSong: ISetlistSong = {
     songId: new Types.ObjectId(songId),
     transpose,
     notes,
     order: newOrder,
   };
-  
+
   if (arrangementId) {
     newSong.arrangementId = new Types.ObjectId(arrangementId);
   }
-  
+
   this.songs.push(newSong);
   return this.save();
 };
 
 setlistSchema.methods.removeSong = function (songId: string) {
   this.songs = this.songs.filter(
-    (song: any) => song.songId.toString() !== songId,
+    (song: ISetlistSong) => song.songId.toString() !== songId,
   );
   // Reorder remaining songs - will be handled in pre-save middleware
   return this.save();
@@ -197,21 +220,26 @@ setlistSchema.methods.removeSong = function (songId: string) {
 
 setlistSchema.methods.reorderSongs = function (newOrder: string[]) {
   const reorderedSongs = [];
-  
+
   for (let i = 0; i < newOrder.length; i++) {
     const songId = newOrder[i];
-    const song = this.songs.find((s: any) => s.songId.toString() === songId);
+    const song = this.songs.find(
+      (s: ISetlistSong) => s.songId.toString() === songId,
+    );
     if (song) {
       song.order = i;
       reorderedSongs.push(song);
     }
   }
-  
+
   this.songs = reorderedSongs;
   return this.save();
 };
 
-setlistSchema.methods.updateSongTranspose = function (songId: string, transpose: number) {
+setlistSchema.methods.updateSongTranspose = function (
+  songId: string,
+  transpose: number,
+) {
   const song = this.songs.find((s: any) => s.songId.toString() === songId);
   if (song) {
     song.transpose = transpose;
@@ -241,7 +269,10 @@ setlistSchema.statics.findPublic = function (limit = 20) {
     .limit(limit);
 };
 
-setlistSchema.statics.findByUser = function (userId: string, includePrivate = false) {
+setlistSchema.statics.findByUser = function (
+  userId: string,
+  includePrivate = false,
+) {
   const query: any = { createdBy: userId };
   if (!includePrivate) {
     query["metadata.isPublic"] = true;
@@ -275,11 +306,11 @@ setlistSchema.statics.searchSetlists = function (query: string, limit = 20) {
     { $text: { $search: query }, "metadata.isPublic": true },
     { score: { $meta: "textScore" } },
   )
-  .populate("songs.songId", "title artist key difficulty")
-  .populate("songs.arrangementId", "name key difficulty")
-  .populate("createdBy", "name email")
-  .sort({ score: { $meta: "textScore" } })
-  .limit(limit);
+    .populate("songs.songId", "title artist key difficulty")
+    .populate("songs.arrangementId", "name key difficulty")
+    .populate("createdBy", "name email")
+    .sort({ score: { $meta: "textScore" } })
+    .limit(limit);
 };
 
 export const Setlist = model<ISetlist, ISetlistModel>("Setlist", setlistSchema);

@@ -298,7 +298,7 @@ export async function migrateMockData() {
       });
 
       await song.save();
-      
+
       // Create a default arrangement for the song
       const arrangement = new Arrangement({
         name: "Default",
@@ -324,21 +324,23 @@ export async function migrateMockData() {
         },
         documentSize: 0,
       });
-      
+
       await arrangement.save();
-      
+
       // Update the song with the default arrangement
       song.defaultArrangement = arrangement._id;
       await song.save();
-      
-      console.log(`✅ Migrated: ${song.title} (${song.slug}) with default arrangement`);
+
+      console.log(
+        `✅ Migrated: ${song.title} (${song.slug}) with default arrangement`,
+      );
     }
 
     // Create sample arrangements for the first few songs
     console.log("🎵 Creating sample arrangements...");
     const createdSongs = await Song.find({}).limit(3); // Get first 3 songs
     let arrangementsCreated = 0;
-    
+
     for (const song of createdSongs) {
       // Create 2 arrangements per song (different keys/styles)
       const arrangements = [
@@ -346,7 +348,9 @@ export async function migrateMockData() {
           name: `${song.title} - Original Key`,
           songIds: [song._id],
           createdBy: adminUserId,
-          chordData: (mockChordProData as Record<string, string>)[song.title] || `{title: ${song.title}}
+          chordData:
+            (mockChordProData as Record<string, string>)[song.title] ||
+            `{title: ${song.title}}
 {key: G}
 
 [G]Sample chord data for ${song.title}
@@ -410,7 +414,9 @@ export async function migrateMockData() {
     await adminUser.save();
 
     console.log("✅ Migration completed successfully!");
-    console.log(`📊 Migrated ${mockSongs.length} songs and ${arrangementsCreated} arrangements`);
+    console.log(
+      `📊 Migrated ${mockSongs.length} songs and ${arrangementsCreated} arrangements`,
+    );
 
     // Get storage stats
     const stats = await database.getStorageStats();

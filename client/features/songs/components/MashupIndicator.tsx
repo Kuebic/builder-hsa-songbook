@@ -37,7 +37,7 @@ export default function MashupIndicator({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div 
+            <div
               className={cn("inline-flex", className)}
               role="img"
               aria-label={`Mashup arrangement${titles ? `: ${titles}` : ""}`}
@@ -62,8 +62,8 @@ export default function MashupIndicator({
   if (variant === "detailed") {
     return (
       <div className={cn("space-y-2", className)}>
-        <Badge 
-          variant="secondary" 
+        <Badge
+          variant="secondary"
           className="gap-1"
           role="status"
           aria-label={`Mashup arrangement containing ${count} songs`}
@@ -74,7 +74,10 @@ export default function MashupIndicator({
         {songTitles && songTitles.length > 0 && (
           <div className="space-y-1">
             {songTitles.map((title, index) => (
-              <div key={index} className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div
+                key={index}
+                className="flex items-center gap-2 text-sm text-muted-foreground"
+              >
                 <Music2 className="h-3 w-3" aria-hidden="true" />
                 <span>{title}</span>
               </div>
@@ -90,8 +93,8 @@ export default function MashupIndicator({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Badge 
-            variant="secondary" 
+          <Badge
+            variant="secondary"
             className={cn("gap-1", className)}
             role="status"
             aria-label={`Mashup arrangement${titles ? `: ${titles}` : ""}`}

@@ -1,26 +1,27 @@
 import { Request, Response } from "express";
 import { Song } from "../database/models";
 import { z } from "zod";
-import type { ISong } from '../database/models/Song';
+import type { ISong } from "../database/models/Song";
+import type { FilterQuery } from "mongoose";
 
 // Helper function to extract basic chords from ChordPro data
 function extractBasicChords(chordData: string): string[] {
   if (!chordData) {
     return [];
   }
-  
+
   const chordRegex = /\[([A-G][#b]?[^/\]]*)\]/g;
   const matches = chordData.match(chordRegex);
-  
+
   if (!matches) {
     return [];
   }
-  
+
   const chords = matches
-    .map(match => match.slice(1, -1)) // Remove brackets
+    .map((match) => match.slice(1, -1)) // Remove brackets
     .filter((chord, index, array) => array.indexOf(chord) === index) // Remove duplicates
     .slice(0, 5); // Take first 5 unique chords
-    
+
   return chords;
 }
 
@@ -30,40 +31,44 @@ function transformSongToClientFormat(song: ISong | any) {
     // For now, we don't have arrangement data populated
     // This would need to be populated via .populate('defaultArrangement') in the query
     let basicChords: string[] = [];
-    
+
     // If defaultArrangement is populated and has chordData
-    if (song.defaultArrangement && typeof song.defaultArrangement === 'object' && 'chordData' in song.defaultArrangement) {
+    if (
+      song.defaultArrangement &&
+      typeof song.defaultArrangement === "object" &&
+      "chordData" in song.defaultArrangement
+    ) {
       basicChords = extractBasicChords(song.defaultArrangement.chordData);
     }
-  
-  return {
-    id: song._id.toString(),
-    title: song.title,
-    artist: song.artist || "",
-    slug: song.slug,
-    compositionYear: song.compositionYear,
-    ccli: song.ccli,
-    themes: song.themes || [],
-    source: song.source,
-    lyrics: song.lyrics,
-    notes: song.notes,
-    viewCount: song.metadata?.views || 0,
-    avgRating: song.metadata?.ratings?.average || 0,
-    ratingCount: song.metadata?.ratings?.count || 0,
-    defaultArrangementId: song.defaultArrangement?.toString(),
-    createdBy: song.metadata?.createdBy?.toString(),
-    lastModifiedBy: song.metadata?.lastModifiedBy?.toString(),
-    isPublic: song.metadata?.isPublic ?? true,
-    createdAt: song.createdAt,
-    updatedAt: song.updatedAt,
-    // Add missing ClientSong fields - these come from arrangement if populated
-    key: song.defaultArrangement?.key,
-    tempo: song.defaultArrangement?.tempo,
-    difficulty: song.defaultArrangement?.difficulty || "intermediate",
-    basicChords,
-    lastUsed: undefined, // Client-side only field
-    isFavorite: false, // Client-side only field
-  };
+
+    return {
+      id: song._id.toString(),
+      title: song.title,
+      artist: song.artist || "",
+      slug: song.slug,
+      compositionYear: song.compositionYear,
+      ccli: song.ccli,
+      themes: song.themes || [],
+      source: song.source,
+      lyrics: song.lyrics,
+      notes: song.notes,
+      viewCount: song.metadata?.views || 0,
+      avgRating: song.metadata?.ratings?.average || 0,
+      ratingCount: song.metadata?.ratings?.count || 0,
+      defaultArrangementId: song.defaultArrangement?.toString(),
+      createdBy: song.metadata?.createdBy?.toString(),
+      lastModifiedBy: song.metadata?.lastModifiedBy?.toString(),
+      isPublic: song.metadata?.isPublic ?? true,
+      createdAt: song.createdAt,
+      updatedAt: song.updatedAt,
+      // Add missing ClientSong fields - these come from arrangement if populated
+      key: song.defaultArrangement?.key,
+      tempo: song.defaultArrangement?.tempo,
+      difficulty: song.defaultArrangement?.difficulty || "intermediate",
+      basicChords,
+      lastUsed: undefined, // Client-side only field
+      isFavorite: false, // Client-side only field
+    };
   } catch (error) {
     console.error("Error in transformSongToClientFormat:", error);
     console.error("Song data:", JSON.stringify(song, null, 2));
@@ -75,7 +80,11 @@ function transformSongToClientFormat(song: ISong | any) {
 const createSongSchema = z.object({
   title: z.string().min(1).max(200),
   artist: z.string().max(100).optional(),
-  compositionYear: z.number().min(1000).max(new Date().getFullYear() + 1).optional(),
+  compositionYear: z
+    .number()
+    .min(1000)
+    .max(new Date().getFullYear() + 1)
+    .optional(),
   ccli: z.string().regex(/^\d+$/, "CCLI must be numeric").optional(),
   themes: z.array(z.string().max(50)).default([]),
   source: z.string().max(100).optional(),
@@ -109,7 +118,7 @@ export async function getSongs(req: Request, res: Response) {
     const query = querySchema.parse(req.query);
 
     // Build MongoDB query
-    const filter: any = { "metadata.isPublic": query.isPublic };
+    const filter: FilterQuery<ISong> = { "metadata.isPublic": query.isPublic };
 
     if (query.search) {
       filter.$text = { $search: query.search };
@@ -180,11 +189,10 @@ export async function getSong(req: Request, res: Response) {
   try {
     const { id } = req.params;
 
-    const song = await Song.findById(id)
-      .populate({
-        path: "defaultArrangement",
-        select: "key tempo difficulty chordData",
-      });
+    const song = await Song.findById(id).populate({
+      path: "defaultArrangement",
+      select: "key tempo difficulty chordData",
+    });
 
     if (!song) {
       return res.status(404).json({
@@ -242,7 +250,8 @@ export async function getSongBySlug(req: Request, res: Response) {
         error: {
           code: "DATABASE_UNAVAILABLE",
           message: "Database connection is not available",
-          details: "The server is currently unable to connect to the database. Please try again later.",
+          details:
+            "The server is currently unable to connect to the database. Please try again later.",
         },
       });
     }
@@ -295,8 +304,11 @@ export async function getSongBySlug(req: Request, res: Response) {
     });
   } catch (error) {
     console.error("Error fetching song by slug:", error);
-    console.error("Stack trace:", error instanceof Error ? error.stack : "No stack trace available");
-    
+    console.error(
+      "Stack trace:",
+      error instanceof Error ? error.stack : "No stack trace available",
+    );
+
     // Provide more specific error messages
     if (error instanceof z.ZodError) {
       return res.status(400).json({
@@ -308,18 +320,21 @@ export async function getSongBySlug(req: Request, res: Response) {
         },
       });
     }
-    
+
     // Check for MongoDB connection errors
     if (error instanceof Error) {
-      if (error.message.includes("buffering timed out") || 
-          error.message.includes("ECONNREFUSED") ||
-          error.message.includes("connect ETIMEDOUT")) {
+      if (
+        error.message.includes("buffering timed out") ||
+        error.message.includes("ECONNREFUSED") ||
+        error.message.includes("connect ETIMEDOUT")
+      ) {
         return res.status(503).json({
           success: false,
           error: {
             code: "DATABASE_ERROR",
             message: "Database connection error",
-            details: "Unable to connect to the database. Please check server logs.",
+            details:
+              "Unable to connect to the database. Please check server logs.",
           },
         });
       }
@@ -427,14 +442,30 @@ export async function updateSong(req: Request, res: Response) {
     // TODO: Add authorization check - only owner or admin can update
 
     // Update fields
-    if (updateData.title !== undefined) {song.title = updateData.title;}
-    if (updateData.artist !== undefined) {song.artist = updateData.artist;}
-    if (updateData.compositionYear !== undefined) {song.compositionYear = updateData.compositionYear;}
-    if (updateData.ccli !== undefined) {song.ccli = updateData.ccli;}
-    if (updateData.themes !== undefined) {song.themes = updateData.themes;}
-    if (updateData.source !== undefined) {song.source = updateData.source;}
-    if (updateData.lyrics !== undefined) {song.lyrics = updateData.lyrics;}
-    if (updateData.notes !== undefined) {song.notes = updateData.notes;}
+    if (updateData.title !== undefined) {
+      song.title = updateData.title;
+    }
+    if (updateData.artist !== undefined) {
+      song.artist = updateData.artist;
+    }
+    if (updateData.compositionYear !== undefined) {
+      song.compositionYear = updateData.compositionYear;
+    }
+    if (updateData.ccli !== undefined) {
+      song.ccli = updateData.ccli;
+    }
+    if (updateData.themes !== undefined) {
+      song.themes = updateData.themes;
+    }
+    if (updateData.source !== undefined) {
+      song.source = updateData.source;
+    }
+    if (updateData.lyrics !== undefined) {
+      song.lyrics = updateData.lyrics;
+    }
+    if (updateData.notes !== undefined) {
+      song.notes = updateData.notes;
+    }
 
     if (updateData.isPublic !== undefined) {
       song.metadata.isPublic = updateData.isPublic;

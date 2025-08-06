@@ -34,9 +34,9 @@ interface ErrorBoundaryState {
 
 /**
  * Generic error boundary component that catches JavaScript errors anywhere in the child component tree.
- * 
+ *
  * Provides a fallback UI when errors occur and allows for error recovery.
- * 
+ *
  * @component
  * @example
  * ```tsx
@@ -49,7 +49,10 @@ interface ErrorBoundaryState {
  * </ErrorBoundary>
  * ```
  */
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -57,7 +60,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   /**
    * Updates state when an error is caught
-   * 
+   *
    * @param error - The error that was thrown
    * @returns Updated state with error information
    */
@@ -67,7 +70,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   /**
    * Logs error information and calls optional error callback
-   * 
+   *
    * @param error - The error that was thrown
    * @param errorInfo - Additional error information from React
    */
@@ -107,8 +110,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             </AlertTitle>
             <AlertDescription className="mt-2 space-y-2">
               <p>
-                {this.props.errorDescription || 
-                 "Something went wrong while rendering this content."}
+                {this.props.errorDescription ||
+                  "Something went wrong while rendering this content."}
               </p>
               {process.env.NODE_ENV === "development" && (
                 <details className="mt-2 text-xs text-muted-foreground">
@@ -139,11 +142,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
 /**
  * Hook to create a wrapped component with error boundary
- * 
+ *
  * @param Component - Component to wrap
  * @param errorBoundaryProps - Props to pass to ErrorBoundary
  * @returns Wrapped component
- * 
+ *
  * @example
  * ```tsx
  * const SafeComponent = withErrorBoundary(MyComponent, {

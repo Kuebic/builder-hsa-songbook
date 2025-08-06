@@ -3,15 +3,20 @@ import React from "react";
 
 // Create a generic icon component factory
 const createIcon = (name: string) => {
-  const Icon = React.forwardRef<HTMLDivElement, any>(({ className, fill, ...props }, ref) => (
-    <div 
-      ref={ref}
-      data-testid={`${name.toLowerCase().replace(/([A-Z])/g, "-$1").replace(/^-/, "")}-icon`} 
-      className={className}
-      data-fill={fill}
-      {...props}
-    />
-  ));
+  const Icon = React.forwardRef<HTMLDivElement, any>(
+    ({ className, fill, ...props }, ref) => (
+      <div
+        ref={ref}
+        data-testid={`${name
+          .toLowerCase()
+          .replace(/([A-Z])/g, "-$1")
+          .replace(/^-/, "")}-icon`}
+        className={className}
+        data-fill={fill}
+        {...props}
+      />
+    ),
+  );
   Icon.displayName = name;
   return Icon;
 };
@@ -34,7 +39,7 @@ vi.mock("lucide-react", () => ({
   GripVertical: createIcon("GripVertical"),
   PanelLeft: createIcon("PanelLeft"),
   Dot: createIcon("Dot"),
-  
+
   // Actions
   Plus: createIcon("Plus"),
   PlusCircle: createIcon("PlusCircle"),
@@ -50,9 +55,7 @@ vi.mock("lucide-react", () => ({
   Upload: createIcon("Upload"),
   Copy: createIcon("Copy"),
   Clipboard: createIcon("Clipboard"),
-  RotateCcw: createIcon("RotateCcw"),
-  ThumbsUp: createIcon("ThumbsUp"),
-  
+
   // Status & Feedback
   Check: createIcon("Check"),
   CheckCircle: createIcon("CheckCircle"),
@@ -66,7 +69,7 @@ vi.mock("lucide-react", () => ({
   Loader2: createIcon("Loader2"),
   RefreshCw: createIcon("RefreshCw"),
   FileWarning: createIcon("FileWarning"),
-  
+
   // User & Social
   User: createIcon("User"),
   Users: createIcon("Users"),
@@ -76,7 +79,7 @@ vi.mock("lucide-react", () => ({
   UserX: createIcon("UserX"),
   LogIn: createIcon("LogIn"),
   LogOut: createIcon("LogOut"),
-  
+
   // Content & Media
   FileText: createIcon("FileText"),
   File: createIcon("File"),
@@ -91,7 +94,7 @@ vi.mock("lucide-react", () => ({
   Camera: createIcon("Camera"),
   Mic: createIcon("Mic"),
   Mic2: createIcon("Mic2"),
-  
+
   // Common Icons
   Settings: createIcon("Settings"),
   Search: createIcon("Search"),
@@ -108,7 +111,7 @@ vi.mock("lucide-react", () => ({
   MessageCircle: createIcon("MessageCircle"),
   Clock: createIcon("Clock"),
   Calendar: createIcon("Calendar"),
-  
+
   // Theme & Display
   Sun: createIcon("Sun"),
   Moon: createIcon("Moon"),
@@ -116,7 +119,7 @@ vi.mock("lucide-react", () => ({
   Smartphone: createIcon("Smartphone"),
   Tablet: createIcon("Tablet"),
   Laptop: createIcon("Laptop"),
-  
+
   // Shapes & Misc
   Circle: createIcon("Circle"),
   Square: createIcon("Square"),
@@ -133,34 +136,34 @@ vi.mock("lucide-react", () => ({
   SortDesc: createIcon("SortDesc"),
   Cross: createIcon("Cross"),
   Crown: createIcon("Crown"),
-  
+
   // Communication
   Mail: createIcon("Mail"),
   Send: createIcon("Send"),
   Phone: createIcon("Phone"),
   Bell: createIcon("Bell"),
   BellOff: createIcon("BellOff"),
-  
+
   // Business & Commerce
   ShoppingCart: createIcon("ShoppingCart"),
   CreditCard: createIcon("CreditCard"),
   DollarSign: createIcon("DollarSign"),
   TrendingUp: createIcon("TrendingUp"),
   TrendingDown: createIcon("TrendingDown"),
-  
+
   // Development
   Code: createIcon("Code"),
   Terminal: createIcon("Terminal"),
   GitBranch: createIcon("GitBranch"),
   GitCommit: createIcon("GitCommit"),
   GitPullRequest: createIcon("GitPullRequest"),
-  
+
   // Alignment & Layout
   AlignLeft: createIcon("AlignLeft"),
   AlignCenter: createIcon("AlignCenter"),
   AlignRight: createIcon("AlignRight"),
   AlignJustify: createIcon("AlignJustify"),
-  
+
   // Other Common Icons
   Hash: createIcon("Hash"),
   Zap: createIcon("Zap"),
@@ -223,7 +226,7 @@ vi.mock("lucide-react", () => ({
   Wind: createIcon("Wind"),
   ZoomIn: createIcon("ZoomIn"),
   ZoomOut: createIcon("ZoomOut"),
-  
+
   // ChordDisplay specific icons
   Keyboard: createIcon("Keyboard"),
 }));

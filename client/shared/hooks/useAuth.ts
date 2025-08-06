@@ -35,7 +35,7 @@ export function useUserId(): string | null {
 // User preferences hook
 export function useUserPreferences() {
   const { currentUser, updateUser } = useAuth();
-  
+
   const updatePreferences = (preferences: Partial<User["preferences"]>) => {
     if (currentUser) {
       updateUser({
@@ -53,7 +53,7 @@ export function useUserPreferences() {
 // User profile hook
 export function useUserProfile() {
   const { currentUser, updateUser } = useAuth();
-  
+
   const updateProfile = (profile: Partial<User["profile"]>) => {
     if (currentUser) {
       updateUser({

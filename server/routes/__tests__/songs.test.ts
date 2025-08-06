@@ -21,7 +21,7 @@ vi.mock("../../database/models", () => {
     countDocuments: vi.fn(),
     searchSongs: vi.fn(),
   });
-  
+
   return {
     Song: MockSong,
   };
@@ -123,7 +123,9 @@ describe("Songs API Routes", () => {
 
       await getSongs(req as Request, res as Response);
 
-      expect((Song as any).find).toHaveBeenCalledWith({ "metadata.isPublic": true });
+      expect((Song as any).find).toHaveBeenCalledWith({
+        "metadata.isPublic": true,
+      });
       expect(mockQuery.limit).toHaveBeenCalledWith(20);
       expect(mockQuery.skip).toHaveBeenCalledWith(0);
       expect(res.json).toHaveBeenCalledWith({
@@ -158,7 +160,9 @@ describe("Songs API Routes", () => {
         "metadata.isPublic": true,
         $text: { $search: "Amazing Grace" },
       });
-      expect(mockQuery.sort).toHaveBeenCalledWith({ score: { $meta: "textScore" } });
+      expect(mockQuery.sort).toHaveBeenCalledWith({
+        score: { $meta: "textScore" },
+      });
     });
 
     it("applies key filter correctly", async () => {
@@ -289,13 +293,18 @@ describe("Songs API Routes", () => {
 
   describe("getSong", () => {
     it("returns a public song successfully", async () => {
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a123456" });
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a123456" },
+      );
 
       (Song as any).findById.mockResolvedValue(mockSong);
 
       await getSong(req as Request, res as Response);
 
-      expect((Song as any).findById).toHaveBeenCalledWith("60f7b1c3e4b0c72a1a123456");
+      expect((Song as any).findById).toHaveBeenCalledWith(
+        "60f7b1c3e4b0c72a1a123456",
+      );
       expect(mockSong.updateViews).toHaveBeenCalled();
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -325,8 +334,14 @@ describe("Songs API Routes", () => {
     });
 
     it("returns 403 for private song", async () => {
-      const privateSong = { ...mockSong, metadata: { ...mockSong.metadata, isPublic: false } };
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a123456" });
+      const privateSong = {
+        ...mockSong,
+        metadata: { ...mockSong.metadata, isPublic: false },
+      };
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a123456" },
+      );
 
       (Song as any).findById.mockResolvedValue(privateSong);
 
@@ -343,7 +358,10 @@ describe("Songs API Routes", () => {
     });
 
     it("handles database errors", async () => {
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a123456" });
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a123456" },
+      );
 
       (Song as any).findById.mockRejectedValue(new Error("Database error"));
 
@@ -388,7 +406,7 @@ describe("Songs API Routes", () => {
       await createSong(req as Request, res as Response);
 
       // Verify the Song constructor was called (song instance was created)
-      expect((Song as any)).toHaveBeenCalled();
+      expect(Song as any).toHaveBeenCalled();
       expect(mockSongInstance.save).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
@@ -469,14 +487,20 @@ describe("Songs API Routes", () => {
     };
 
     it("updates a song successfully", async () => {
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a123456" }, updateData);
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a123456" },
+        updateData,
+      );
 
       const mockSongInstance = { ...mockSong };
       (Song as any).findById.mockResolvedValue(mockSongInstance);
 
       await updateSong(req as Request, res as Response);
 
-      expect((Song as any).findById).toHaveBeenCalledWith("60f7b1c3e4b0c72a1a123456");
+      expect((Song as any).findById).toHaveBeenCalledWith(
+        "60f7b1c3e4b0c72a1a123456",
+      );
       // Object.assign is used to update the song instance - verify the song was updated
       expect(mockSongInstance.title).toBe(updateData.title);
       expect(mockSongInstance.save).toHaveBeenCalled();
@@ -490,7 +514,11 @@ describe("Songs API Routes", () => {
     });
 
     it("returns 404 for non-existent song", async () => {
-      const { req, res } = createMockReqRes({}, { id: "nonexistent" }, updateData);
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "nonexistent" },
+        updateData,
+      );
 
       (Song as any).findById.mockResolvedValue(null);
 
@@ -508,7 +536,11 @@ describe("Songs API Routes", () => {
 
     it("handles validation errors", async () => {
       const invalidData = { tempo: 500 }; // Invalid tempo
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a123456" }, invalidData);
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a123456" },
+        invalidData,
+      );
 
       await updateSong(req as Request, res as Response);
 
@@ -524,7 +556,11 @@ describe("Songs API Routes", () => {
     });
 
     it("handles database errors", async () => {
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a123456" }, updateData);
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a123456" },
+        updateData,
+      );
 
       (Song as any).findById.mockRejectedValue(new Error("Database error"));
 
@@ -543,15 +579,22 @@ describe("Songs API Routes", () => {
 
   describe("deleteSong", () => {
     it("deletes a song successfully", async () => {
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a123456" });
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a123456" },
+      );
 
       (Song as any).findById.mockResolvedValue(mockSong);
       (Song as any).findByIdAndDelete.mockResolvedValue(mockSong);
 
       await deleteSong(req as Request, res as Response);
 
-      expect((Song as any).findById).toHaveBeenCalledWith("60f7b1c3e4b0c72a1a123456");
-      expect((Song as any).findByIdAndDelete).toHaveBeenCalledWith("60f7b1c3e4b0c72a1a123456");
+      expect((Song as any).findById).toHaveBeenCalledWith(
+        "60f7b1c3e4b0c72a1a123456",
+      );
+      expect((Song as any).findByIdAndDelete).toHaveBeenCalledWith(
+        "60f7b1c3e4b0c72a1a123456",
+      );
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         data: { id: "60f7b1c3e4b0c72a1a123456" },
@@ -576,7 +619,10 @@ describe("Songs API Routes", () => {
     });
 
     it("handles database errors", async () => {
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a123456" });
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a123456" },
+      );
 
       (Song as any).findById.mockRejectedValue(new Error("Database error"));
 
@@ -595,7 +641,11 @@ describe("Songs API Routes", () => {
 
   describe("rateSong", () => {
     it("rates a song successfully", async () => {
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a123456" }, { rating: 5 });
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a123456" },
+        { rating: 5 },
+      );
 
       const mockSongInstance = {
         ...mockSong,
@@ -605,7 +655,9 @@ describe("Songs API Routes", () => {
 
       await rateSong(req as Request, res as Response);
 
-      expect((Song as any).findById).toHaveBeenCalledWith("60f7b1c3e4b0c72a1a123456");
+      expect((Song as any).findById).toHaveBeenCalledWith(
+        "60f7b1c3e4b0c72a1a123456",
+      );
       expect(mockSongInstance.addRating).toHaveBeenCalledWith(5);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -617,7 +669,11 @@ describe("Songs API Routes", () => {
     });
 
     it("returns 400 for invalid rating", async () => {
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a123456" }, { rating: 6 });
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a123456" },
+        { rating: 6 },
+      );
 
       await rateSong(req as Request, res as Response);
 
@@ -632,7 +688,11 @@ describe("Songs API Routes", () => {
     });
 
     it("returns 404 for non-existent song", async () => {
-      const { req, res } = createMockReqRes({}, { id: "nonexistent" }, { rating: 5 });
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "nonexistent" },
+        { rating: 5 },
+      );
 
       (Song as any).findById.mockResolvedValue(null);
 
@@ -649,7 +709,11 @@ describe("Songs API Routes", () => {
     });
 
     it("handles database errors", async () => {
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a123456" }, { rating: 5 });
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a123456" },
+        { rating: 5 },
+      );
 
       (Song as any).findById.mockRejectedValue(new Error("Database error"));
 
@@ -735,12 +799,17 @@ describe("Songs API Routes", () => {
     it("handles malformed ObjectId in getSong", async () => {
       const { req, res } = createMockReqRes({}, { id: "invalid-id" });
 
-      (Song as any).findById.mockRejectedValue(new Error("Cast to ObjectId failed"));
+      (Song as any).findById.mockRejectedValue(
+        new Error("Cast to ObjectId failed"),
+      );
 
       await getSong(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(mockConsole.error).toHaveBeenCalledWith("Error fetching song:", expect.any(Error));
+      expect(mockConsole.error).toHaveBeenCalledWith(
+        "Error fetching song:",
+        expect.any(Error),
+      );
     });
 
     it("handles empty search query", async () => {
@@ -759,7 +828,11 @@ describe("Songs API Routes", () => {
     });
 
     it("handles missing rating in rateSong", async () => {
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a123456" }, {});
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a123456" },
+        {},
+      );
 
       await rateSong(req as Request, res as Response);
 
@@ -775,7 +848,11 @@ describe("Songs API Routes", () => {
 
     it("handles isPublic flag update in updateSong", async () => {
       const updateData = { isPublic: false };
-      const { req, res } = createMockReqRes({}, { id: "60f7b1c3e4b0c72a1a123456" }, updateData);
+      const { req, res } = createMockReqRes(
+        {},
+        { id: "60f7b1c3e4b0c72a1a123456" },
+        updateData,
+      );
 
       const mockSongInstance = { ...mockSong };
       (Song as any).findById.mockResolvedValue(mockSongInstance);

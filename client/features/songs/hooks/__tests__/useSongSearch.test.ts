@@ -124,8 +124,10 @@ const defaultFilters: SongFilters = {
 describe("useSongSearch Hook", () => {
   describe("Basic Functionality", () => {
     it("returns all songs when no filters are applied", () => {
-      const { result } = renderHook(() => useSongSearch(mockSongs, defaultFilters));
-      
+      const { result } = renderHook(() =>
+        useSongSearch(mockSongs, defaultFilters),
+      );
+
       expect(result.current).toHaveLength(4);
       expect(result.current).toEqual(mockSongs);
     });
@@ -145,17 +147,23 @@ describe("useSongSearch Hook", () => {
 
   describe("Search Query Filtering", () => {
     it("filters songs by title", () => {
-      const filters: SongFilters = { ...defaultFilters, searchQuery: "Amazing" };
+      const filters: SongFilters = {
+        ...defaultFilters,
+        searchQuery: "Amazing",
+      };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(1);
       expect(result.current[0].title).toBe("Amazing Grace");
     });
 
     it("filters songs by artist", () => {
-      const filters: SongFilters = { ...defaultFilters, searchQuery: "Hillsong" };
+      const filters: SongFilters = {
+        ...defaultFilters,
+        searchQuery: "Hillsong",
+      };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(1);
       expect(result.current[0].artist).toBe("Hillsong United");
     });
@@ -163,15 +171,18 @@ describe("useSongSearch Hook", () => {
     it("filters songs by themes", () => {
       const filters: SongFilters = { ...defaultFilters, searchQuery: "faith" };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(1);
       expect(result.current[0].themes).toContain("faith");
     });
 
     it("is case insensitive", () => {
-      const filters: SongFilters = { ...defaultFilters, searchQuery: "AMAZING" };
+      const filters: SongFilters = {
+        ...defaultFilters,
+        searchQuery: "AMAZING",
+      };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(1);
       expect(result.current[0].title).toBe("Amazing Grace");
     });
@@ -179,29 +190,32 @@ describe("useSongSearch Hook", () => {
     it("handles partial matches", () => {
       const filters: SongFilters = { ...defaultFilters, searchQuery: "Great" };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(1);
       expect(result.current[0].title).toBe("How Great Thou Art");
     });
 
     it("returns empty array when no matches found", () => {
-      const filters: SongFilters = { ...defaultFilters, searchQuery: "NonExistentSong" };
+      const filters: SongFilters = {
+        ...defaultFilters,
+        searchQuery: "NonExistentSong",
+      };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(0);
     });
 
     it("handles empty search query", () => {
       const filters: SongFilters = { ...defaultFilters, searchQuery: "" };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toEqual(mockSongs);
     });
 
     it("handles whitespace-only search query", () => {
       const filters: SongFilters = { ...defaultFilters, searchQuery: "   " };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toEqual(mockSongs);
     });
   });
@@ -210,7 +224,7 @@ describe("useSongSearch Hook", () => {
     it("filters songs by key", () => {
       const filters: SongFilters = { ...defaultFilters, key: "G" };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(1);
       expect(result.current[0].key).toBe("G");
     });
@@ -218,61 +232,77 @@ describe("useSongSearch Hook", () => {
     it("shows all songs when key is 'all'", () => {
       const filters: SongFilters = { ...defaultFilters, key: "all" };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(4);
     });
 
     it("returns empty array when no songs match key", () => {
       const filters: SongFilters = { ...defaultFilters, key: "E" };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(0);
     });
 
     it("filters multiple songs with same key", () => {
       // Add another song in key C
-      const songsWithMultipleC = [...mockSongs, {
-        ...mockSongs[1],
-        id: "5",
-        title: "Another C Song",
-      }];
-      
+      const songsWithMultipleC = [
+        ...mockSongs,
+        {
+          ...mockSongs[1],
+          id: "5",
+          title: "Another C Song",
+        },
+      ];
+
       const filters: SongFilters = { ...defaultFilters, key: "C" };
-      const { result } = renderHook(() => useSongSearch(songsWithMultipleC, filters));
-      
+      const { result } = renderHook(() =>
+        useSongSearch(songsWithMultipleC, filters),
+      );
+
       expect(result.current).toHaveLength(2);
-      expect(result.current.every(song => song.key === "C")).toBe(true);
+      expect(result.current.every((song) => song.key === "C")).toBe(true);
     });
   });
 
   describe("Difficulty Filtering", () => {
     it("filters songs by difficulty", () => {
-      const filters: SongFilters = { ...defaultFilters, difficulty: "beginner" };
+      const filters: SongFilters = {
+        ...defaultFilters,
+        difficulty: "beginner",
+      };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(2);
-      expect(result.current.every(song => song.difficulty === "beginner")).toBe(true);
+      expect(
+        result.current.every((song) => song.difficulty === "beginner"),
+      ).toBe(true);
     });
 
     it("shows all songs when difficulty is 'all'", () => {
       const filters: SongFilters = { ...defaultFilters, difficulty: "all" };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(4);
     });
 
     it("filters intermediate difficulty", () => {
-      const filters: SongFilters = { ...defaultFilters, difficulty: "intermediate" };
+      const filters: SongFilters = {
+        ...defaultFilters,
+        difficulty: "intermediate",
+      };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(1);
       expect(result.current[0].difficulty).toBe("intermediate");
     });
 
     it("filters advanced difficulty", () => {
-      const filters: SongFilters = { ...defaultFilters, difficulty: "advanced" };
+      const filters: SongFilters = {
+        ...defaultFilters,
+        difficulty: "advanced",
+      };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(1);
       expect(result.current[0].difficulty).toBe("advanced");
     });
@@ -282,45 +312,57 @@ describe("useSongSearch Hook", () => {
     it("filters songs by single theme", () => {
       const filters: SongFilters = { ...defaultFilters, themes: ["worship"] };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(2);
-      expect(result.current.every(song => song.themes.includes("worship"))).toBe(true);
+      expect(
+        result.current.every((song) => song.themes.includes("worship")),
+      ).toBe(true);
     });
 
     it("filters songs by multiple themes (OR logic)", () => {
-      const filters: SongFilters = { ...defaultFilters, themes: ["faith", "comfort"] };
+      const filters: SongFilters = {
+        ...defaultFilters,
+        themes: ["faith", "comfort"],
+      };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(2);
       // Should include songs with either "faith" OR "comfort"
-      expect(result.current.some(song => song.themes.includes("faith"))).toBe(true);
-      expect(result.current.some(song => song.themes.includes("comfort"))).toBe(true);
+      expect(result.current.some((song) => song.themes.includes("faith"))).toBe(
+        true,
+      );
+      expect(
+        result.current.some((song) => song.themes.includes("comfort")),
+      ).toBe(true);
     });
 
     it("shows all songs when themes array is empty", () => {
       const filters: SongFilters = { ...defaultFilters, themes: [] };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(4);
     });
 
     it("returns empty array when no songs match theme", () => {
-      const filters: SongFilters = { ...defaultFilters, themes: ["nonexistent"] };
+      const filters: SongFilters = {
+        ...defaultFilters,
+        themes: ["nonexistent"],
+      };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(0);
     });
   });
 
   describe("Combined Filtering", () => {
     it("applies search query and key filter together", () => {
-      const filters: SongFilters = { 
-        ...defaultFilters, 
-        searchQuery: "worship", 
-        key: "G", 
+      const filters: SongFilters = {
+        ...defaultFilters,
+        searchQuery: "worship",
+        key: "G",
       };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(1);
       expect(result.current[0].title).toBe("Amazing Grace");
       expect(result.current[0].key).toBe("G");
@@ -328,52 +370,52 @@ describe("useSongSearch Hook", () => {
     });
 
     it("applies search query and difficulty filter together", () => {
-      const filters: SongFilters = { 
-        ...defaultFilters, 
-        searchQuery: "worship", 
-        difficulty: "beginner", 
+      const filters: SongFilters = {
+        ...defaultFilters,
+        searchQuery: "worship",
+        difficulty: "beginner",
       };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(1);
       expect(result.current[0].title).toBe("How Great Thou Art");
       expect(result.current[0].difficulty).toBe("beginner");
     });
 
     it("applies key and difficulty filter together", () => {
-      const filters: SongFilters = { 
-        ...defaultFilters, 
-        key: "F", 
-        difficulty: "beginner", 
+      const filters: SongFilters = {
+        ...defaultFilters,
+        key: "F",
+        difficulty: "beginner",
       };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(1);
       expect(result.current[0].title).toBe("What a Friend We Have in Jesus");
     });
 
     it("applies all filters together", () => {
-      const filters: SongFilters = { 
-        searchQuery: "worship", 
-        key: "C", 
+      const filters: SongFilters = {
+        searchQuery: "worship",
+        key: "C",
         difficulty: "beginner",
         themes: ["praise"],
       };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(1);
       expect(result.current[0].title).toBe("How Great Thou Art");
     });
 
     it("returns empty array when combined filters exclude all songs", () => {
-      const filters: SongFilters = { 
-        searchQuery: "worship", 
+      const filters: SongFilters = {
+        searchQuery: "worship",
         key: "F", // No worship songs in key F
         difficulty: "all",
         themes: [],
       };
       const { result } = renderHook(() => useSongSearch(mockSongs, filters));
-      
+
       expect(result.current).toHaveLength(0);
     });
   });
@@ -391,7 +433,7 @@ describe("useSongSearch Hook", () => {
       // Update to filter by key
       const newFilters: SongFilters = { ...defaultFilters, key: "G" };
       rerender({ filters: newFilters });
-      
+
       expect(result.current).toHaveLength(1);
       expect(result.current[0].key).toBe("G");
     });
@@ -420,31 +462,39 @@ describe("useSongSearch Hook", () => {
   describe("Edge Cases", () => {
     it("handles empty songs array", () => {
       const { result } = renderHook(() => useSongSearch([], defaultFilters));
-      
+
       expect(result.current).toHaveLength(0);
     });
 
     it("handles songs with undefined artist", () => {
-      const songsWithUndefinedArtist = [{
-        ...mockSongs[0],
-        artist: undefined,
-      }];
-      
+      const songsWithUndefinedArtist = [
+        {
+          ...mockSongs[0],
+          artist: undefined,
+        },
+      ];
+
       const filters: SongFilters = { ...defaultFilters, searchQuery: "John" };
-      const { result } = renderHook(() => useSongSearch(songsWithUndefinedArtist, filters));
-      
+      const { result } = renderHook(() =>
+        useSongSearch(songsWithUndefinedArtist, filters),
+      );
+
       expect(result.current).toHaveLength(0);
     });
 
     it("handles songs with empty themes array", () => {
-      const songsWithEmptyThemes = [{
-        ...mockSongs[0],
-        themes: [],
-      }];
-      
+      const songsWithEmptyThemes = [
+        {
+          ...mockSongs[0],
+          themes: [],
+        },
+      ];
+
       const filters: SongFilters = { ...defaultFilters, themes: ["worship"] };
-      const { result } = renderHook(() => useSongSearch(songsWithEmptyThemes, filters));
-      
+      const { result } = renderHook(() =>
+        useSongSearch(songsWithEmptyThemes, filters),
+      );
+
       expect(result.current).toHaveLength(0);
     });
   });

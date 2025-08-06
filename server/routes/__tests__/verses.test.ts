@@ -18,17 +18,17 @@ vi.mock("../../database/models", () => {
     findByIdAndDelete: vi.fn(),
     findPending: vi.fn(),
   });
-  
+
   const MockSong = vi.fn();
   Object.assign(MockSong, {
     findById: vi.fn(),
   });
-  
+
   const MockUser = vi.fn();
   Object.assign(MockUser, {
     findById: vi.fn(),
   });
-  
+
   return {
     Verse: MockVerse,
     Song: MockSong,
@@ -72,7 +72,10 @@ describe("Verses API Routes", () => {
 
   describe("GET /api/songs/:songId/verses", () => {
     it("should return verses for a valid song", async () => {
-      const { req, res } = createMockReqRes({}, { songId: "507f1f77bcf86cd799439011" });
+      const { req, res } = createMockReqRes(
+        {},
+        { songId: "507f1f77bcf86cd799439011" },
+      );
       const mockSong = {
         _id: "507f1f77bcf86cd799439011",
         title: "Amazing Grace",
@@ -83,7 +86,11 @@ describe("Verses API Routes", () => {
           _id: "verse1",
           reference: "John 3:16",
           text: "For God so loved the world...",
-          submittedBy: { _id: "user1", name: "Test User", email: "test@test.com" },
+          submittedBy: {
+            _id: "user1",
+            name: "Test User",
+            email: "test@test.com",
+          },
           upvotes: ["user2", "user3"],
           status: "approved",
           getUpvoteCount: vi.fn().mockReturnValue(2),
@@ -116,7 +123,10 @@ describe("Verses API Routes", () => {
     });
 
     it("should return 404 if song not found", async () => {
-      const { req, res } = createMockReqRes({}, { songId: "507f1f77bcf86cd799439011" });
+      const { req, res } = createMockReqRes(
+        {},
+        { songId: "507f1f77bcf86cd799439011" },
+      );
 
       (Song.findById as any).mockResolvedValue(null);
 
@@ -143,7 +153,11 @@ describe("Verses API Routes", () => {
           _id: "verse1",
           reference: "John 3:16",
           text: "Test verse",
-          submittedBy: { _id: "user2", name: "Other User", email: "other@test.com" },
+          submittedBy: {
+            _id: "user2",
+            name: "Other User",
+            email: "other@test.com",
+          },
           upvotes: ["user1"],
           status: "approved",
           getUpvoteCount: vi.fn().mockReturnValue(1),
@@ -187,7 +201,11 @@ describe("Verses API Routes", () => {
           _id: "newVerse",
           reference: "Psalm 23:1",
           text: "The Lord is my shepherd",
-          submittedBy: { _id: "user1", name: "Test User", email: "test@test.com" },
+          submittedBy: {
+            _id: "user1",
+            name: "Test User",
+            email: "test@test.com",
+          },
           upvotes: [],
           status: "pending",
           getUpvoteCount: vi.fn().mockReturnValue(0),
@@ -204,7 +222,9 @@ describe("Verses API Routes", () => {
       expect(Song.findById).toHaveBeenCalledWith("507f1f77bcf86cd799439011");
       expect(User.findById).toHaveBeenCalledWith("user1");
       expect(mockVerse.save).toHaveBeenCalled();
-      expect((mockUser as any).addSubmittedVerse).toHaveBeenCalledWith("newVerse");
+      expect((mockUser as any).addSubmittedVerse).toHaveBeenCalledWith(
+        "newVerse",
+      );
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -336,10 +356,10 @@ describe("Verses API Routes", () => {
       const { req, res } = createMockReqRes(
         {},
         { id: "verse1" },
-        { 
-          status: "rejected", 
+        {
+          status: "rejected",
           rejectionReason: "Inappropriate content",
-          userId: "mod1", 
+          userId: "mod1",
         },
       );
 
@@ -474,5 +494,4 @@ describe("Verses API Routes", () => {
       });
     });
   });
-
 });

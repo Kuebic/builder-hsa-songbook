@@ -1,12 +1,18 @@
 import { Request, Response } from "express";
-import { Setlist } from "../database/models";
+import { Setlist, type ISetlist } from "../database/models";
 import { z } from "zod";
-import { Types } from "mongoose";
+import { Types, type FilterQuery } from "mongoose";
 
 // Validation schemas
 const setlistItemSchema = z.object({
-  songId: z.string().min(1).transform(id => new Types.ObjectId(id)),
-  arrangementId: z.string().optional().transform(id => id ? new Types.ObjectId(id) : undefined),
+  songId: z
+    .string()
+    .min(1)
+    .transform((id) => new Types.ObjectId(id)),
+  arrangementId: z
+    .string()
+    .optional()
+    .transform((id) => (id ? new Types.ObjectId(id) : undefined)),
   transpose: z.number().min(-11).max(11).default(0),
   notes: z.string().max(500).optional(),
   order: z.number().min(0),
@@ -27,8 +33,15 @@ const querySchema = z.object({
   search: z.string().optional(),
   createdBy: z.string().optional(),
   tags: z.string().optional(), // Comma-separated
-  isPublic: z.string().transform(v => v === "true").optional(),
-  limit: z.string().transform(Number).pipe(z.number().min(1).max(50)).default("20"),
+  isPublic: z
+    .string()
+    .transform((v) => v === "true")
+    .optional(),
+  limit: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().min(1).max(50))
+    .default("20"),
   offset: z.string().transform(Number).pipe(z.number().min(0)).default("0"),
 });
 
@@ -36,24 +49,24 @@ const querySchema = z.object({
 export async function getSetlists(req: Request, res: Response) {
   try {
     const query = querySchema.parse(req.query);
-    
+
     // Build MongoDB query
-    const filter: any = {};
-    
+    const filter: FilterQuery<ISetlist> = {};
+
     if (query.isPublic !== undefined) {
       filter["metadata.isPublic"] = query.isPublic;
     }
-    
+
     if (query.createdBy) {
       filter.createdBy = query.createdBy;
     }
-    
+
     if (query.search) {
       filter.$text = { $search: query.search };
     }
-    
+
     if (query.tags) {
-      const tagArray = query.tags.split(",").map(t => t.trim());
+      const tagArray = query.tags.split(",").map((t) => t.trim());
       filter.tags = { $in: tagArray };
     }
 
@@ -67,7 +80,9 @@ export async function getSetlists(req: Request, res: Response) {
             select: "title artist key tempo difficulty",
           },
         })
-        .sort(query.search ? { score: { $meta: "textScore" } } : { createdAt: -1 })
+        .sort(
+          query.search ? { score: { $meta: "textScore" } } : { createdAt: -1 },
+        )
         .limit(query.limit)
         .skip(query.offset)
         .lean(),
@@ -83,10 +98,9 @@ export async function getSetlists(req: Request, res: Response) {
         limit: query.limit,
       },
     });
-
   } catch (error) {
     console.error("Error fetching setlists:", error);
-    
+
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -112,16 +126,15 @@ export async function getSetlists(req: Request, res: Response) {
 export async function getSetlist(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    
-    const setlist = await Setlist.findById(id)
-      .populate({
-        path: "songs.arrangementId",
-        populate: {
-          path: "songIds",
-          select: "title artist key tempo difficulty chordData",
-        },
-      });
-    
+
+    const setlist = await Setlist.findById(id).populate({
+      path: "songs.arrangementId",
+      populate: {
+        path: "songIds",
+        select: "title artist key tempo difficulty chordData",
+      },
+    });
+
     if (!setlist) {
       return res.status(404).json({
         success: false,
@@ -148,10 +161,9 @@ export async function getSetlist(req: Request, res: Response) {
       success: true,
       data: setlist,
     });
-
   } catch (error) {
     console.error("Error fetching setlist:", error);
-    
+
     res.status(500).json({
       success: false,
       error: {
@@ -166,9 +178,9 @@ export async function getSetlist(req: Request, res: Response) {
 export async function getSetlistByToken(req: Request, res: Response) {
   try {
     const { token } = req.params;
-    
+
     const setlist = await Setlist.findByShareToken(token);
-    
+
     if (!setlist) {
       return res.status(404).json({
         success: false,
@@ -183,10 +195,9 @@ export async function getSetlistByToken(req: Request, res: Response) {
       success: true,
       data: setlist,
     });
-
   } catch (error) {
     console.error("Error fetching setlist by token:", error);
-    
+
     res.status(500).json({
       success: false,
       error: {
@@ -201,7 +212,7 @@ export async function getSetlistByToken(req: Request, res: Response) {
 export async function createSetlist(req: Request, res: Response) {
   try {
     const setlistData = createSetlistSchema.parse(req.body);
-    
+
     const setlist = new Setlist({
       name: setlistData.name,
       description: setlistData.description,
@@ -228,10 +239,9 @@ export async function createSetlist(req: Request, res: Response) {
       success: true,
       data: setlist,
     });
-
   } catch (error) {
     console.error("Error creating setlist:", error);
-    
+
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -258,9 +268,9 @@ export async function updateSetlist(req: Request, res: Response) {
   try {
     const { id } = req.params;
     const updateData = updateSetlistSchema.parse(req.body);
-    
+
     const setlist = await Setlist.findById(id);
-    
+
     if (!setlist) {
       return res.status(404).json({
         success: false,
@@ -272,13 +282,19 @@ export async function updateSetlist(req: Request, res: Response) {
     }
 
     // TODO: Add authorization check - only owner can update
-    
+
     // Update basic fields
-    if (updateData.name) {setlist.name = updateData.name;}
-    if (updateData.description !== undefined) {setlist.description = updateData.description;}
-    if (updateData.tags) {setlist.tags = updateData.tags;}
+    if (updateData.name) {
+      setlist.name = updateData.name;
+    }
+    if (updateData.description !== undefined) {
+      setlist.description = updateData.description;
+    }
+    if (updateData.tags) {
+      setlist.tags = updateData.tags;
+    }
     if (updateData.songs) {
-      setlist.songs = updateData.songs.map(song => ({
+      setlist.songs = updateData.songs.map((song) => ({
         songId: song.songId!,
         arrangementId: song.arrangementId,
         transpose: song.transpose ?? 0,
@@ -286,9 +302,11 @@ export async function updateSetlist(req: Request, res: Response) {
         order: song.order!,
       }));
     }
-    
+
     // Update metadata (removed date and venue as they're not in the schema)
-    if (updateData.isPublic !== undefined) {setlist.metadata.isPublic = updateData.isPublic;}
+    if (updateData.isPublic !== undefined) {
+      setlist.metadata.isPublic = updateData.isPublic;
+    }
 
     await setlist.save();
 
@@ -305,10 +323,9 @@ export async function updateSetlist(req: Request, res: Response) {
       success: true,
       data: setlist,
     });
-
   } catch (error) {
     console.error("Error updating setlist:", error);
-    
+
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -334,9 +351,9 @@ export async function updateSetlist(req: Request, res: Response) {
 export async function deleteSetlist(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    
+
     const setlist = await Setlist.findById(id);
-    
+
     if (!setlist) {
       return res.status(404).json({
         success: false,
@@ -348,17 +365,16 @@ export async function deleteSetlist(req: Request, res: Response) {
     }
 
     // TODO: Add authorization check - only owner can delete
-    
+
     await Setlist.findByIdAndDelete(id);
 
     res.json({
       success: true,
       data: { id },
     });
-
   } catch (error) {
     console.error("Error deleting setlist:", error);
-    
+
     res.status(500).json({
       success: false,
       error: {
@@ -374,7 +390,7 @@ export async function addSongToSetlist(req: Request, res: Response) {
   try {
     const { id } = req.params;
     const { arrangementId, transposeBy = 0, notes } = req.body;
-    
+
     if (!arrangementId) {
       return res.status(400).json({
         success: false,
@@ -386,7 +402,7 @@ export async function addSongToSetlist(req: Request, res: Response) {
     }
 
     const setlist = await Setlist.findById(id);
-    
+
     if (!setlist) {
       return res.status(404).json({
         success: false,
@@ -398,17 +414,16 @@ export async function addSongToSetlist(req: Request, res: Response) {
     }
 
     // TODO: Add authorization check
-    
+
     await setlist.addSong(arrangementId, transposeBy, notes);
 
     res.json({
       success: true,
       data: setlist,
     });
-
   } catch (error) {
     console.error("Error adding song to setlist:", error);
-    
+
     res.status(500).json({
       success: false,
       error: {
@@ -423,9 +438,9 @@ export async function addSongToSetlist(req: Request, res: Response) {
 export async function removeSongFromSetlist(req: Request, res: Response) {
   try {
     const { id, arrangementId } = req.params;
-    
+
     const setlist = await Setlist.findById(id);
-    
+
     if (!setlist) {
       return res.status(404).json({
         success: false,
@@ -437,17 +452,16 @@ export async function removeSongFromSetlist(req: Request, res: Response) {
     }
 
     // TODO: Add authorization check
-    
+
     await setlist.removeSong(arrangementId);
 
     res.json({
       success: true,
       data: setlist,
     });
-
   } catch (error) {
     console.error("Error removing song from setlist:", error);
-    
+
     res.status(500).json({
       success: false,
       error: {
@@ -463,7 +477,7 @@ export async function reorderSetlistSongs(req: Request, res: Response) {
   try {
     const { id } = req.params;
     const { songOrder } = req.body;
-    
+
     if (!Array.isArray(songOrder)) {
       return res.status(400).json({
         success: false,
@@ -475,7 +489,7 @@ export async function reorderSetlistSongs(req: Request, res: Response) {
     }
 
     const setlist = await Setlist.findById(id);
-    
+
     if (!setlist) {
       return res.status(404).json({
         success: false,
@@ -487,17 +501,16 @@ export async function reorderSetlistSongs(req: Request, res: Response) {
     }
 
     // TODO: Add authorization check
-    
+
     await setlist.reorderSongs(songOrder);
 
     res.json({
       success: true,
       data: setlist,
     });
-
   } catch (error) {
     console.error("Error reordering setlist songs:", error);
-    
+
     res.status(500).json({
       success: false,
       error: {

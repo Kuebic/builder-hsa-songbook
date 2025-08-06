@@ -1,16 +1,23 @@
 import { vi } from "vitest";
 import React from "react";
-import type { ClerkSignInButtonProps, ClerkSignOutButtonProps, ClerkUserButtonProps, MockClerkUser } from '../../../shared/types/test.types';
+import type {
+  ClerkSignInButtonProps,
+  ClerkSignOutButtonProps,
+  ClerkUserButtonProps,
+  MockClerkUser,
+} from "../../../shared/types/test.types";
 
 // Mock all Clerk components and hooks
 vi.mock("@clerk/clerk-react", () => ({
   // Provider component
-  ClerkProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  
+  ClerkProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+
   // Control components for conditional rendering
   SignedIn: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   SignedOut: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  
+
   // Authentication components
   SignInButton: ({ children, mode, ...props }: ClerkSignInButtonProps) => (
     <button data-testid="sign-in-button" data-mode={mode} {...props}>
@@ -23,11 +30,15 @@ vi.mock("@clerk/clerk-react", () => ({
     </button>
   ),
   UserButton: ({ afterSignOutUrl, ...props }: ClerkUserButtonProps) => (
-    <div data-testid="user-button" data-after-sign-out-url={afterSignOutUrl} {...props}>
+    <div
+      data-testid="user-button"
+      data-after-sign-out-url={afterSignOutUrl}
+      {...props}
+    >
       User
     </div>
   ),
-  
+
   // Hooks
   useUser: vi.fn(() => ({
     isSignedIn: false,
@@ -56,7 +67,9 @@ vi.mock("@clerk/clerk-react", () => ({
 }));
 
 // Get the mocked hooks for manipulation in tests
-const { useUser, useAuth, useClerk, useSession } = await import("@clerk/clerk-react");
+const { useUser, useAuth, useClerk, useSession } = await import(
+  "@clerk/clerk-react"
+);
 
 // Helper function to mock an authenticated user
 export const mockAuthenticatedUser = (userData: MockClerkUser = {}) => {
@@ -70,14 +83,14 @@ export const mockAuthenticatedUser = (userData: MockClerkUser = {}) => {
     },
     emailAddresses: [{ emailAddress: "test@example.com" }],
     ...userData,
-  };
-  
+  } as any; // Mock doesn't need all UserResource properties
+
   vi.mocked(useUser).mockReturnValue({
     isSignedIn: true,
     isLoaded: true,
     user,
   });
-  
+
   vi.mocked(useAuth).mockReturnValue({
     isSignedIn: true,
     isLoaded: true,
@@ -92,7 +105,7 @@ export const mockAuthenticatedUser = (userData: MockClerkUser = {}) => {
     has: vi.fn().mockReturnValue(false),
     signOut: vi.fn().mockResolvedValue(undefined),
   } as any);
-  
+
   vi.mocked(useSession).mockReturnValue({
     isSignedIn: true,
     isLoaded: true,
@@ -104,7 +117,7 @@ export const mockAuthenticatedUser = (userData: MockClerkUser = {}) => {
       expireAt: new Date(Date.now() + 3600000), // 1 hour from now
     } as any,
   });
-  
+
   return user;
 };
 
@@ -115,7 +128,7 @@ export const mockUnauthenticatedUser = () => {
     isLoaded: true,
     user: null,
   });
-  
+
   vi.mocked(useAuth).mockReturnValue({
     isSignedIn: false,
     isLoaded: true,
@@ -130,7 +143,7 @@ export const mockUnauthenticatedUser = () => {
     has: vi.fn().mockReturnValue(false),
     signOut: vi.fn().mockResolvedValue(undefined),
   } as any);
-  
+
   vi.mocked(useSession).mockReturnValue({
     isSignedIn: false,
     isLoaded: true,
@@ -145,7 +158,7 @@ export const mockLoadingState = () => {
     isLoaded: false,
     user: undefined,
   } as any);
-  
+
   vi.mocked(useAuth).mockReturnValue({
     isSignedIn: false,
     isLoaded: false,
@@ -160,7 +173,7 @@ export const mockLoadingState = () => {
     has: undefined,
     signOut: undefined,
   } as any);
-  
+
   vi.mocked(useSession).mockReturnValue({
     isSignedIn: false,
     isLoaded: false,

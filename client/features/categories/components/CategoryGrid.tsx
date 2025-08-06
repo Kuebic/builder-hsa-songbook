@@ -5,8 +5,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { CategoryCard } from "./CategoryCard";
-import { useCategoryStats } from "../hooks/useCategoryStats";
-import type { CategoryGridProps } from "../types/category.types";
+import { useCategoryStats } from "@features/categories/hooks/useCategoryStats";
+import type { CategoryGridProps } from "@features/categories/types/category.types";
 
 function CategoryGridSkeleton({ count = 6 }: { count: number }) {
   return (
@@ -33,36 +33,44 @@ function CategoryGridError({ onRetry }: { onRetry: () => void }) {
   );
 }
 
-export function CategoryGrid({ 
-  onCategorySelect, 
-  maxCategories = 6, 
-  className 
+export function CategoryGrid({
+  onCategorySelect,
+  maxCategories = 6,
+  className,
 }: CategoryGridProps) {
   const navigate = useNavigate();
-  const { data: categoryStats, isLoading, error, refetch } = useCategoryStats({
+  const {
+    data: categoryStats,
+    isLoading,
+    error,
+    refetch,
+  } = useCategoryStats({
     limit: maxCategories,
-    sortBy: 'popularity',
+    sortBy: "popularity",
     includeEmpty: false,
   });
-  
+
   const deferredStats = useDeferredValue(categoryStats);
   const [isPending, startTransition] = useTransition();
-  
-  const handleCategoryClick = useCallback((categoryId: string) => {
-    startTransition(() => {
-      // Call the callback if provided (for backward compatibility)
-      if (onCategorySelect) {
-        onCategorySelect(categoryId);
-      }
-      // Navigate to the category browser page
-      navigate(`/categories/${categoryId}`);
-    });
-  }, [onCategorySelect, navigate]);
-  
+
+  const handleCategoryClick = useCallback(
+    (categoryId: string) => {
+      startTransition(() => {
+        // Call the callback if provided (for backward compatibility)
+        if (onCategorySelect) {
+          onCategorySelect(categoryId);
+        }
+        // Navigate to the category browser page
+        navigate(`/categories/${categoryId}`);
+      });
+    },
+    [onCategorySelect, navigate],
+  );
+
   const handleRetry = useCallback(() => {
     refetch();
   }, [refetch]);
-  
+
   if (isLoading) {
     return (
       <div className={cn("space-y-4", className)}>
@@ -74,7 +82,7 @@ export function CategoryGrid({
       </div>
     );
   }
-  
+
   if (error || !deferredStats) {
     return (
       <div className={cn("space-y-4", className)}>
@@ -88,7 +96,7 @@ export function CategoryGrid({
       </div>
     );
   }
-  
+
   if (deferredStats.length === 0) {
     return (
       <div className={cn("space-y-4", className)}>
@@ -100,15 +108,16 @@ export function CategoryGrid({
         </div>
         <Alert>
           <AlertDescription>
-            No categories available yet. Categories will appear as songs are added to the collection.
+            No categories available yet. Categories will appear as songs are
+            added to the collection.
           </AlertDescription>
         </Alert>
       </div>
     );
   }
-  
+
   const displayedStats = deferredStats.slice(0, maxCategories);
-  
+
   return (
     <div className={cn("space-y-4", className)}>
       <div className="flex items-center justify-between">
@@ -118,15 +127,11 @@ export function CategoryGrid({
             Discover songs organized by spiritual themes and traditions
           </p>
         </div>
-        <Button 
-          variant="outline" 
-          asChild
-          disabled={isPending}
-        >
+        <Button variant="outline" asChild disabled={isPending}>
           <Link to="/songs">View All Songs</Link>
         </Button>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {displayedStats.map((category) => (
           <CategoryCard
@@ -137,7 +142,7 @@ export function CategoryGrid({
           />
         ))}
       </div>
-      
+
       {isPending && (
         <div className="flex items-center justify-center py-4">
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
@@ -146,13 +151,11 @@ export function CategoryGrid({
           </div>
         </div>
       )}
-      
+
       {deferredStats.length > maxCategories && (
         <div className="flex justify-center pt-4">
           <Button variant="ghost" asChild>
-            <Link to="/songs">
-              View All {deferredStats.length} Categories
-            </Link>
+            <Link to="/songs">View All {deferredStats.length} Categories</Link>
           </Button>
         </div>
       )}
@@ -161,31 +164,38 @@ export function CategoryGrid({
 }
 
 // Compact version for smaller spaces
-export function CategoryGridCompact({ 
-  onCategorySelect, 
+export function CategoryGridCompact({
+  onCategorySelect,
   maxCategories = 4,
-  className 
+  className,
 }: CategoryGridProps) {
   const navigate = useNavigate();
-  const { data: categoryStats, isLoading, error } = useCategoryStats({
+  const {
+    data: categoryStats,
+    isLoading,
+    error,
+  } = useCategoryStats({
     limit: maxCategories,
-    sortBy: 'popularity',
+    sortBy: "popularity",
     includeEmpty: false,
   });
-  
+
   const [isPending, startTransition] = useTransition();
-  
-  const handleCategoryClick = useCallback((categoryId: string) => {
-    startTransition(() => {
-      // Call the callback if provided (for backward compatibility)
-      if (onCategorySelect) {
-        onCategorySelect(categoryId);
-      }
-      // Navigate to the category browser page
-      navigate(`/categories/${categoryId}`);
-    });
-  }, [onCategorySelect, navigate]);
-  
+
+  const handleCategoryClick = useCallback(
+    (categoryId: string) => {
+      startTransition(() => {
+        // Call the callback if provided (for backward compatibility)
+        if (onCategorySelect) {
+          onCategorySelect(categoryId);
+        }
+        // Navigate to the category browser page
+        navigate(`/categories/${categoryId}`);
+      });
+    },
+    [onCategorySelect, navigate],
+  );
+
   if (isLoading) {
     return (
       <div className={cn("space-y-3", className)}>
@@ -198,11 +208,11 @@ export function CategoryGridCompact({
       </div>
     );
   }
-  
+
   if (error || !categoryStats || categoryStats.length === 0) {
     return null; // Fail silently in compact mode
   }
-  
+
   return (
     <div className={cn("space-y-3", className)}>
       <div className="flex items-center justify-between">
@@ -211,7 +221,7 @@ export function CategoryGridCompact({
           <Link to="/songs">View All</Link>
         </Button>
       </div>
-      
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {categoryStats.slice(0, maxCategories).map((category) => (
           <div
@@ -219,7 +229,7 @@ export function CategoryGridCompact({
             className={cn(
               "p-3 rounded-lg border cursor-pointer transition-all duration-200",
               "hover:shadow-md hover:border-primary/50",
-              isPending && "opacity-50 pointer-events-none"
+              isPending && "opacity-50 pointer-events-none",
             )}
             onClick={() => handleCategoryClick(category.id)}
           >

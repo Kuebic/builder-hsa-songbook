@@ -1,6 +1,6 @@
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import type { ClientSong } from "@features/songs/types/song.types";
-import type { CategoryBrowsingState } from "../types/category.types";
+import type { CategoryBrowsingState } from "@features/categories/types/category.types";
 
 interface CategorySongsResponse {
   success: boolean;
@@ -33,40 +33,51 @@ interface CategoryBrowsingParams {
   categoryId: string;
   page?: number;
   limit?: number;
-  sortBy?: 'popular' | 'recent' | 'rating' | 'title';
+  sortBy?: "popular" | "recent" | "rating" | "title";
   searchQuery?: string;
 }
 
 // Hook for browsing songs within a specific category with pagination
 export function useCategoryBrowsing(params: CategoryBrowsingParams) {
-  const { categoryId, page = 1, limit = 20, sortBy = 'popular', searchQuery } = params;
-  
+  const {
+    categoryId,
+    page = 1,
+    limit = 20,
+    sortBy = "popular",
+    searchQuery,
+  } = params;
+
   return useQuery({
-    queryKey: ['categories', categoryId, 'songs', { page, limit, sortBy, searchQuery }],
+    queryKey: [
+      "categories",
+      categoryId,
+      "songs",
+      { page, limit, sortBy, searchQuery },
+    ],
     queryFn: async (): Promise<CategorySongsResponse> => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
-      
+
       try {
         const searchParams = new URLSearchParams();
-        searchParams.append('page', String(page));
-        searchParams.append('limit', String(limit));
-        searchParams.append('sortBy', sortBy);
-        
+        searchParams.append("page", String(page));
+        searchParams.append("limit", String(limit));
+        searchParams.append("sortBy", sortBy);
+
         if (searchQuery && searchQuery.trim()) {
-          searchParams.append('searchQuery', searchQuery.trim());
+          searchParams.append("searchQuery", searchQuery.trim());
         }
-        
+
         const response = await fetch(
           `/api/categories/${categoryId}/songs?${searchParams.toString()}`,
-          { signal: controller.signal }
+          { signal: controller.signal },
         );
-        
+
         clearTimeout(timeoutId);
-        
+
         if (!response.ok) {
           if (response.status === 404) {
-            throw new Error('Category not found');
+            throw new Error("Category not found");
           }
           if (response.status >= 500) {
             console.warn("Category songs API not available, using fallback");
@@ -84,7 +95,7 @@ export function useCategoryBrowsing(params: CategoryBrowsingParams) {
                 },
                 category: {
                   id: categoryId,
-                  name: 'Unknown Category',
+                  name: "Unknown Category",
                 },
                 appliedFilters: {
                   sortBy,
@@ -93,23 +104,27 @@ export function useCategoryBrowsing(params: CategoryBrowsingParams) {
               },
             };
           }
-          throw new Error(`Failed to fetch category songs: ${response.statusText}`);
+          throw new Error(
+            `Failed to fetch category songs: ${response.statusText}`,
+          );
         }
-        
+
         const result: CategorySongsResponse = await response.json();
-        
+
         if (!result.success) {
-          throw new Error(result.error?.message || 'Failed to fetch category songs');
+          throw new Error(
+            result.error?.message || "Failed to fetch category songs",
+          );
         }
-        
+
         return result;
       } catch (error) {
         clearTimeout(timeoutId);
-        
-        if (error instanceof Error && error.name === 'AbortError') {
-          console.warn('Category songs request timed out');
+
+        if (error instanceof Error && error.name === "AbortError") {
+          console.warn("Category songs request timed out");
         }
-        
+
         // Re-throw error to let React Query handle it
         throw error;
       }
@@ -122,42 +137,54 @@ export function useCategoryBrowsing(params: CategoryBrowsingParams) {
 }
 
 // Hook for infinite scrolling within a category
-export function useCategoryBrowsingInfinite(params: Omit<CategoryBrowsingParams, 'page'>) {
-  const { categoryId, limit = 20, sortBy = 'popular', searchQuery } = params;
-  
+export function useCategoryBrowsingInfinite(
+  params: Omit<CategoryBrowsingParams, "page">,
+) {
+  const { categoryId, limit = 20, sortBy = "popular", searchQuery } = params;
+
   return useInfiniteQuery({
-    queryKey: ['categories', categoryId, 'songs', 'infinite', { limit, sortBy, searchQuery }],
+    queryKey: [
+      "categories",
+      categoryId,
+      "songs",
+      "infinite",
+      { limit, sortBy, searchQuery },
+    ],
     queryFn: async ({ pageParam = 1 }): Promise<CategorySongsResponse> => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
-      
+
       try {
         const searchParams = new URLSearchParams();
-        searchParams.append('page', String(pageParam));
-        searchParams.append('limit', String(limit));
-        searchParams.append('sortBy', sortBy);
-        
+        searchParams.append("page", String(pageParam));
+        searchParams.append("limit", String(limit));
+        searchParams.append("sortBy", sortBy);
+
         if (searchQuery && searchQuery.trim()) {
-          searchParams.append('searchQuery', searchQuery.trim());
+          searchParams.append("searchQuery", searchQuery.trim());
         }
-        
+
         const response = await fetch(
           `/api/categories/${categoryId}/songs?${searchParams.toString()}`,
-          { signal: controller.signal }
+          { signal: controller.signal },
         );
-        
+
         clearTimeout(timeoutId);
-        
+
         if (!response.ok) {
-          throw new Error(`Failed to fetch category songs: ${response.statusText}`);
+          throw new Error(
+            `Failed to fetch category songs: ${response.statusText}`,
+          );
         }
-        
+
         const result: CategorySongsResponse = await response.json();
-        
+
         if (!result.success) {
-          throw new Error(result.error?.message || 'Failed to fetch category songs');
+          throw new Error(
+            result.error?.message || "Failed to fetch category songs",
+          );
         }
-        
+
         return result;
       } catch (error) {
         clearTimeout(timeoutId);
@@ -176,19 +203,22 @@ export function useCategoryBrowsingInfinite(params: Omit<CategoryBrowsingParams,
 }
 
 // Hook to get songs from multiple categories (for recommendations)
-export function useMultiCategorySongs(categoryIds: string[], limit: number = 10) {
+export function useMultiCategorySongs(
+  categoryIds: string[],
+  limit: number = 10,
+) {
   return useQuery({
-    queryKey: ['categories', 'multi', categoryIds.sort(), { limit }],
+    queryKey: ["categories", "multi", categoryIds.sort(), { limit }],
     queryFn: async (): Promise<Record<string, ClientSong[]>> => {
       const results: Record<string, ClientSong[]> = {};
-      
+
       // Fetch songs from each category in parallel
       const promises = categoryIds.map(async (categoryId) => {
         try {
           const response = await fetch(
-            `/api/categories/${categoryId}/songs?limit=${limit}&sortBy=popular`
+            `/api/categories/${categoryId}/songs?limit=${limit}&sortBy=popular`,
           );
-          
+
           if (response.ok) {
             const result: CategorySongsResponse = await response.json();
             if (result.success) {
@@ -196,11 +226,14 @@ export function useMultiCategorySongs(categoryIds: string[], limit: number = 10)
             }
           }
         } catch (error) {
-          console.warn(`Failed to fetch songs for category ${categoryId}:`, error);
+          console.warn(
+            `Failed to fetch songs for category ${categoryId}:`,
+            error,
+          );
           results[categoryId] = [];
         }
       });
-      
+
       await Promise.all(promises);
       return results;
     },
@@ -214,26 +247,26 @@ export function useMultiCategorySongs(categoryIds: string[], limit: number = 10)
 export function useCategoryBrowsingState() {
   // This would typically use a state management solution like Zustand or context
   // For now, implementing basic state that can be extended
-  
+
   const defaultState: CategoryBrowsingState = {
     filters: {
       themes: [],
     },
-    sortBy: 'popular',
-    viewMode: 'grid',
-    searchQuery: '',
+    sortBy: "popular",
+    viewMode: "grid",
+    searchQuery: "",
   };
-  
+
   // In a real implementation, this would connect to state management
   return {
     state: defaultState,
     updateState: (updates: Partial<CategoryBrowsingState>) => {
       // State update logic would go here
-      console.log('Category browsing state update:', updates);
+      console.log("Category browsing state update:", updates);
     },
     resetState: () => {
       // Reset to default state logic would go here
-      console.log('Resetting category browsing state');
+      console.log("Resetting category browsing state");
     },
   };
 }

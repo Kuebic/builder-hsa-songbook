@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { Verse, Song, User } from "../database/models";
+import { Verse, Song, User, type IVerse } from "../database/models";
 import { z } from "zod";
-import { Types } from "mongoose";
+import { Types, type FilterQuery } from "mongoose";
 
 // Validation schemas
 const createVerseSchema = z.object({
@@ -15,7 +15,7 @@ const updateVerseSchema = z.object({
 });
 
 // Helper to check if user is admin/moderator
-const canModerateVerses = (user: any): boolean => {
+const canModerateVerses = (user: { role: string }): boolean => {
   return user && (user.role === "ADMIN" || user.role === "MODERATOR");
 };
 
@@ -49,15 +49,18 @@ export const getVersesBySong = async (req: Request, res: Response) => {
     }
 
     // Build query
-    const query: any = { songId };
-    
+    const query: FilterQuery<IVerse> = { songId };
+
     // Non-moderators can only see approved verses
     const userId = req.query.userId || req.headers["x-user-id"];
     if (userId) {
       const user = await User.findById(userId);
       if (!canModerateVerses(user) && status !== "approved") {
         query.status = "approved";
-      } else if (status && ["pending", "approved", "rejected"].includes(status as string)) {
+      } else if (
+        status &&
+        ["pending", "approved", "rejected"].includes(status as string)
+      ) {
         query.status = status;
       }
     } else {
@@ -70,7 +73,7 @@ export const getVersesBySong = async (req: Request, res: Response) => {
       .sort({ "upvotes.length": -1, createdAt: -1 });
 
     // Transform verses for response
-    const transformedVerses = verses.map(verse => ({
+    const transformedVerses = verses.map((verse) => ({
       id: verse._id.toString(),
       songId: verse.songId.toString(),
       reference: verse.reference,
@@ -81,7 +84,9 @@ export const getVersesBySong = async (req: Request, res: Response) => {
         email: (verse.submittedBy as any).email,
       },
       upvoteCount: verse.upvotes.length,
-      hasUpvoted: userId ? verse.upvotes.some(id => id.toString() === userId) : false,
+      hasUpvoted: userId
+        ? verse.upvotes.some((id) => id.toString() === userId)
+        : false,
       status: verse.status,
       rejectionReason: verse.rejectionReason,
       createdAt: verse.createdAt,
@@ -187,7 +192,8 @@ export const submitVerse = async (req: Request, res: Response) => {
         success: false,
         error: {
           code: "VERSE_ALREADY_EXISTS",
-          message: "You have already submitted a verse with this reference for this song",
+          message:
+            "You have already submitted a verse with this reference for this song",
         },
       });
     }
@@ -293,7 +299,7 @@ export const upvoteVerse = async (req: Request, res: Response) => {
 
     // Toggle upvote
     const userObjectId = new Types.ObjectId(userId as string);
-    const hasUpvoted = verse.upvotes.some(id => id.equals(userObjectId));
+    const hasUpvoted = verse.upvotes.some((id) => id.equals(userObjectId));
 
     if (hasUpvoted) {
       await verse.removeUpvote(userObjectId);
@@ -485,7 +491,7 @@ export const deleteVerse = async (req: Request, res: Response) => {
     const submitter = await User.findById(verse.submittedBy);
     if (submitter) {
       submitter.submittedVerses = submitter.submittedVerses.filter(
-        verseId => !verseId.equals(verse._id),
+        (verseId) => !verseId.equals(verse._id),
       );
       await submitter.save();
     }

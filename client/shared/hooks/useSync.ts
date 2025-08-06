@@ -9,7 +9,9 @@ interface UseSyncReturn {
     isProcessing: boolean;
     lastSync?: number;
   };
-  addToSyncQueue: (operation: Omit<SyncOperation, "id" | "timestamp" | "retries" | "status">) => Promise<void>;
+  addToSyncQueue: (
+    operation: Omit<SyncOperation, "id" | "timestamp" | "retries" | "status">,
+  ) => Promise<void>;
   forcSync: () => Promise<void>;
   retryFailed: () => Promise<void>;
   clearQueue: () => Promise<void>;
@@ -40,10 +42,15 @@ export function useSync(): UseSyncReturn {
   }, []);
 
   // Add operation to sync queue
-  const addToSyncQueue = useCallback(async (operation: Omit<SyncOperation, "id" | "timestamp" | "retries" | "status">) => {
-    await syncManager.addOperation(operation);
-    await updateSyncStatus();
-  }, [updateSyncStatus]);
+  const addToSyncQueue = useCallback(
+    async (
+      operation: Omit<SyncOperation, "id" | "timestamp" | "retries" | "status">,
+    ) => {
+      await syncManager.addOperation(operation);
+      await updateSyncStatus();
+    },
+    [updateSyncStatus],
+  );
 
   // Force sync
   const forcSync = useCallback(async () => {
@@ -111,59 +118,77 @@ export function useSync(): UseSyncReturn {
 export function useSyncOperations() {
   const { addToSyncQueue } = useSync();
 
-  const syncCreateSong = useCallback(async (songData: any) => {
-    await addToSyncQueue({
-      operation: "create",
-      entity: "song",
-      entityId: songData._id || `temp_${Date.now()}`,
-      data: songData,
-    });
-  }, [addToSyncQueue]);
+  const syncCreateSong = useCallback(
+    async (songData: any) => {
+      await addToSyncQueue({
+        operation: "create",
+        entity: "song",
+        entityId: songData._id || `temp_${Date.now()}`,
+        data: songData,
+      });
+    },
+    [addToSyncQueue],
+  );
 
-  const syncUpdateSong = useCallback(async (songId: string, songData: any) => {
-    await addToSyncQueue({
-      operation: "update",
-      entity: "song",
-      entityId: songId,
-      data: songData,
-    });
-  }, [addToSyncQueue]);
+  const syncUpdateSong = useCallback(
+    async (songId: string, songData: any) => {
+      await addToSyncQueue({
+        operation: "update",
+        entity: "song",
+        entityId: songId,
+        data: songData,
+      });
+    },
+    [addToSyncQueue],
+  );
 
-  const syncDeleteSong = useCallback(async (songId: string) => {
-    await addToSyncQueue({
-      operation: "delete",
-      entity: "song",
-      entityId: songId,
-      data: { id: songId },
-    });
-  }, [addToSyncQueue]);
+  const syncDeleteSong = useCallback(
+    async (songId: string) => {
+      await addToSyncQueue({
+        operation: "delete",
+        entity: "song",
+        entityId: songId,
+        data: { id: songId },
+      });
+    },
+    [addToSyncQueue],
+  );
 
-  const syncCreateSetlist = useCallback(async (setlistData: any) => {
-    await addToSyncQueue({
-      operation: "create",
-      entity: "setlist",
-      entityId: setlistData._id || `temp_${Date.now()}`,
-      data: setlistData,
-    });
-  }, [addToSyncQueue]);
+  const syncCreateSetlist = useCallback(
+    async (setlistData: any) => {
+      await addToSyncQueue({
+        operation: "create",
+        entity: "setlist",
+        entityId: setlistData._id || `temp_${Date.now()}`,
+        data: setlistData,
+      });
+    },
+    [addToSyncQueue],
+  );
 
-  const syncUpdateSetlist = useCallback(async (setlistId: string, setlistData: any) => {
-    await addToSyncQueue({
-      operation: "update",
-      entity: "setlist",
-      entityId: setlistId,
-      data: setlistData,
-    });
-  }, [addToSyncQueue]);
+  const syncUpdateSetlist = useCallback(
+    async (setlistId: string, setlistData: any) => {
+      await addToSyncQueue({
+        operation: "update",
+        entity: "setlist",
+        entityId: setlistId,
+        data: setlistData,
+      });
+    },
+    [addToSyncQueue],
+  );
 
-  const syncDeleteSetlist = useCallback(async (setlistId: string) => {
-    await addToSyncQueue({
-      operation: "delete",
-      entity: "setlist",
-      entityId: setlistId,
-      data: { id: setlistId },
-    });
-  }, [addToSyncQueue]);
+  const syncDeleteSetlist = useCallback(
+    async (setlistId: string) => {
+      await addToSyncQueue({
+        operation: "delete",
+        entity: "setlist",
+        entityId: setlistId,
+        data: { id: setlistId },
+      });
+    },
+    [addToSyncQueue],
+  );
 
   return {
     syncCreateSong,

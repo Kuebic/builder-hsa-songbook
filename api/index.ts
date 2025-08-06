@@ -9,21 +9,21 @@ let app: Application | undefined;
 async function getApp() {
   if (!app) {
     console.log("🚀 Initializing Vercel serverless function...");
-    
+
     try {
       // Initialize database connection
       await initializeServer();
-      
+
       // Create Express app
       app = await createServer();
-      
+
       console.log("✅ Vercel function initialized successfully");
     } catch (error) {
       console.error("❌ Failed to initialize Vercel function:", error);
       throw error;
     }
   }
-  
+
   return app;
 }
 
@@ -32,12 +32,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     // Get or create the Express app
     const expressApp = await getApp();
-    
+
     // Handle the request with Express
     expressApp(req, res);
   } catch (error) {
     console.error("❌ Vercel function error:", error);
-    
+
     // Return error response
     res.status(503).json({
       success: false,

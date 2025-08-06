@@ -23,17 +23,17 @@ vi.mock("../../database/models", () => {
     findByIdAndDelete: vi.fn(),
     findReported: vi.fn(),
   });
-  
+
   const MockArrangement = vi.fn();
   Object.assign(MockArrangement, {
     findById: vi.fn(),
   });
-  
+
   const MockUser = vi.fn();
   Object.assign(MockUser, {
     findById: vi.fn(),
   });
-  
+
   return {
     Review: MockReview,
     Arrangement: MockArrangement,
@@ -119,13 +119,24 @@ describe("Reviews API Routes", () => {
       });
       (Review.findByArrangement as any).mockResolvedValue(mockReviews);
       (Review.findUserReview as any).mockResolvedValue(mockUserReview);
-      (Review.getAverageRating as any).mockResolvedValue({ average: 4.5, count: 10 });
+      (Review.getAverageRating as any).mockResolvedValue({
+        average: 4.5,
+        count: 10,
+      });
 
       await getReviews(req as Request, res as Response);
 
-      expect(Arrangement.findById).toHaveBeenCalledWith("507f1f77bcf86cd799439011");
-      expect(Review.findByArrangement).toHaveBeenCalledWith("507f1f77bcf86cd799439011", false);
-      expect(Review.findUserReview).toHaveBeenCalledWith("507f1f77bcf86cd799439011", "user1");
+      expect(Arrangement.findById).toHaveBeenCalledWith(
+        "507f1f77bcf86cd799439011",
+      );
+      expect(Review.findByArrangement).toHaveBeenCalledWith(
+        "507f1f77bcf86cd799439011",
+        false,
+      );
+      expect(Review.findUserReview).toHaveBeenCalledWith(
+        "507f1f77bcf86cd799439011",
+        "user1",
+      );
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         data: {
@@ -195,11 +206,17 @@ describe("Reviews API Routes", () => {
       });
       (User.findById as any).mockResolvedValue(mockUser);
       (Review.findByArrangement as any).mockResolvedValue([]);
-      (Review.getAverageRating as any).mockResolvedValue({ average: 0, count: 0 });
+      (Review.getAverageRating as any).mockResolvedValue({
+        average: 0,
+        count: 0,
+      });
 
       await getReviews(req as Request, res as Response);
 
-      expect(Review.findByArrangement).toHaveBeenCalledWith("507f1f77bcf86cd799439011", true);
+      expect(Review.findByArrangement).toHaveBeenCalledWith(
+        "507f1f77bcf86cd799439011",
+        true,
+      );
     });
   });
 
@@ -249,13 +266,21 @@ describe("Reviews API Routes", () => {
       (User.findById as any).mockResolvedValue(mockUser);
       (Review.findUserReview as any).mockResolvedValue(null);
       (Review as any).mockImplementation(() => mockReview);
-      (Review.getAverageRating as any).mockResolvedValue({ average: 4.2, count: 6 });
+      (Review.getAverageRating as any).mockResolvedValue({
+        average: 4.2,
+        count: 6,
+      });
 
       await createOrUpdateReview(req as Request, res as Response);
 
-      expect(Arrangement.findById).toHaveBeenCalledWith("507f1f77bcf86cd799439011");
+      expect(Arrangement.findById).toHaveBeenCalledWith(
+        "507f1f77bcf86cd799439011",
+      );
       expect(User.findById).toHaveBeenCalledWith("user1");
-      expect(Review.findUserReview).toHaveBeenCalledWith("507f1f77bcf86cd799439011", "user1");
+      expect(Review.findUserReview).toHaveBeenCalledWith(
+        "507f1f77bcf86cd799439011",
+        "user1",
+      );
       expect(mockReview.save).toHaveBeenCalled();
       expect(mockUser.addReview).toHaveBeenCalledWith("newReview");
       expect(mockArrangement.metadata.reviewCount).toBe(6);
@@ -300,12 +325,17 @@ describe("Reviews API Routes", () => {
       (Arrangement.findById as any).mockResolvedValue(mockArrangement);
       (User.findById as any).mockResolvedValue(mockUser);
       (Review.findUserReview as any).mockResolvedValue(mockReview);
-      (Review.getAverageRating as any).mockResolvedValue({ average: 3.8, count: 5 });
+      (Review.getAverageRating as any).mockResolvedValue({
+        average: 3.8,
+        count: 5,
+      });
 
       await createOrUpdateReview(req as Request, res as Response);
 
       expect(mockReview.rating).toBe(4);
-      expect(mockReview.comment).toBe("Updated review - still good but found some issues");
+      expect(mockReview.comment).toBe(
+        "Updated review - still good but found some issues",
+      );
       expect(mockReview.save).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
     });
@@ -601,7 +631,10 @@ describe("Reviews API Routes", () => {
         .mockResolvedValueOnce(mockReviewer);
       (Review.findByIdAndDelete as any).mockResolvedValue(mockReview);
       (Arrangement.findById as any).mockResolvedValue(mockArrangement);
-      (Review.getAverageRating as any).mockResolvedValue({ average: 4.2, count: 4 });
+      (Review.getAverageRating as any).mockResolvedValue({
+        average: 4.2,
+        count: 4,
+      });
 
       await deleteReview(req as Request, res as Response);
 

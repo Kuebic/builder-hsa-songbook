@@ -20,8 +20,8 @@ export const getApiUrl = (path: string): string => {
  * @returns The favorite endpoint path
  */
 export const getFavoriteEndpoint = (
-  userId: string, 
-  type: "song" | "arrangement", 
+  userId: string,
+  type: "song" | "arrangement",
   itemId: string,
 ): string => {
   const itemType = type === "song" ? "songs" : "arrangements";
@@ -35,7 +35,7 @@ export const getFavoriteEndpoint = (
  * @returns The favorites list endpoint path
  */
 export const getFavoritesListEndpoint = (
-  userId: string, 
+  userId: string,
   type: "songs" | "arrangements" | "both" = "both",
 ): string => {
   return `/api/users/${userId}/favorites?type=${type}`;

@@ -1,8 +1,11 @@
 // API client for interacting with the backend server
-import type { DatabaseStatus } from '../../../shared/types/api.types';
+import type { DatabaseStatus } from "../../../shared/types/api.types";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (typeof window !== "undefined" ? `${window.location.protocol}//${window.location.host}/api` : "/api");
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (typeof window !== "undefined"
+    ? `${window.location.protocol}//${window.location.host}/api`
+    : "/api");
 
 export interface APISong {
   _id: string;
@@ -69,7 +72,7 @@ class APIClient {
     options: RequestInit = {},
   ): Promise<APIResponse<T>> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     const config: RequestInit = {
       headers: {
         "Content-Type": "application/json",
@@ -80,9 +83,11 @@ class APIClient {
 
     try {
       const response = await fetch(url, config);
-      
+
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `API request failed: ${response.status} ${response.statusText}`,
+        );
       }
 
       const data = await response.json();
@@ -96,7 +101,7 @@ class APIClient {
   // Songs API methods
   async getSongs(filters: SongFilters = {}): Promise<APIResponse<APISong[]>> {
     const searchParams = new URLSearchParams();
-    
+
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         searchParams.append(key, String(value));
@@ -111,18 +116,25 @@ class APIClient {
     return this.request<APISong>(`/songs/${id}`);
   }
 
-  async searchSongs(query: string, limit = 20): Promise<APIResponse<APISong[]>> {
+  async searchSongs(
+    query: string,
+    limit = 20,
+  ): Promise<APIResponse<APISong[]>> {
     const searchParams = new URLSearchParams({
       search: query,
       limit: String(limit),
     });
-    
+
     return this.request<APISong[]>(`/songs/search?${searchParams.toString()}`);
   }
 
   // Health check
-  async healthCheck(): Promise<APIResponse<{ status: string; database: DatabaseStatus }>> {
-    return this.request<{ status: string; database: DatabaseStatus }>("/health");
+  async healthCheck(): Promise<
+    APIResponse<{ status: string; database: DatabaseStatus }>
+  > {
+    return this.request<{ status: string; database: DatabaseStatus }>(
+      "/health",
+    );
   }
 
   // User favorites methods
@@ -130,24 +142,62 @@ class APIClient {
     return this.request<APISong[]>(`/users/${userId}/favorites`);
   }
 
-  async addFavorite(userId: string, songId: string): Promise<APIResponse<{ userId: string; songId: string; message: string }>> {
+  async addFavorite(
+    userId: string,
+    songId: string,
+  ): Promise<APIResponse<{ userId: string; songId: string; message: string }>> {
     return this.request<{ userId: string; songId: string; message: string }>(
       `/users/${userId}/favorites/${songId}`,
       { method: "POST" },
     );
   }
 
-  async removeFavorite(userId: string, songId: string): Promise<APIResponse<{ userId: string; songId: string; message: string }>> {
+  async removeFavorite(
+    userId: string,
+    songId: string,
+  ): Promise<APIResponse<{ userId: string; songId: string; message: string }>> {
     return this.request<{ userId: string; songId: string; message: string }>(
       `/users/${userId}/favorites/${songId}`,
       { method: "DELETE" },
     );
   }
 
-  async checkFavorite(userId: string, songId: string): Promise<APIResponse<{ userId: string; songId: string; isFavorite: boolean }>> {
-    return this.request<{ userId: string; songId: string; isFavorite: boolean }>(
-      `/users/${userId}/favorites/check/${songId}`,
-    );
+  async checkFavorite(
+    userId: string,
+    songId: string,
+  ): Promise<
+    APIResponse<{ userId: string; songId: string; isFavorite: boolean }>
+  > {
+    return this.request<{
+      userId: string;
+      songId: string;
+      isFavorite: boolean;
+    }>(`/users/${userId}/favorites/check/${songId}`);
+  }
+
+  // Generic methods for profile functionality
+  async get<T>(endpoint: string): Promise<APIResponse<T>> {
+    return this.request<T>(endpoint);
+  }
+
+  async put<T>(endpoint: string, data: any): Promise<APIResponse<T>> {
+    return this.request<T>(endpoint, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async post<T>(endpoint: string, data: any): Promise<APIResponse<T>> {
+    return this.request<T>(endpoint, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async delete<T>(endpoint: string): Promise<APIResponse<T>> {
+    return this.request<T>(endpoint, {
+      method: "DELETE",
+    });
   }
 }
 

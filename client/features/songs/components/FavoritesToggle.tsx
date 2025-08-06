@@ -3,7 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useUserId } from "@/shared/hooks/useAuth";
-import { useAddFavorite, useRemoveFavorite, useCheckFavorite } from "../hooks/useFavorites";
+import {
+  useAddFavorite,
+  useRemoveFavorite,
+  useCheckFavorite,
+} from "@features/songs/hooks/useFavorites";
 import { cn } from "@/lib/utils";
 
 export interface FavoritesToggleProps {
@@ -28,31 +32,37 @@ interface APIErrorResponse {
 }
 
 // Helper function to parse API errors and provide user-friendly messages
-function getErrorMessage(error: unknown, type: "song" | "arrangement", itemName?: string): {
+function getErrorMessage(
+  error: unknown,
+  type: "song" | "arrangement",
+  itemName?: string,
+): {
   title: string;
   description: string;
 } {
   const itemLabel = itemName || `this ${type}`;
-  
+
   // Check if it's a network error (fetch failed)
   if (error instanceof TypeError && error.message.includes("fetch")) {
     return {
       title: "Network error",
-      description: "Unable to connect to the server. Please check your internet connection and try again.",
+      description:
+        "Unable to connect to the server. Please check your internet connection and try again.",
     };
   }
-  
+
   // Check if it's an Error with a message
   if (error instanceof Error) {
     try {
       // Try to parse the error message as JSON (in case it contains API error response)
       const apiError = JSON.parse(error.message) as APIErrorResponse;
-      
+
       switch (apiError.error.code) {
         case "USER_NOT_FOUND":
           return {
             title: "Authentication error",
-            description: "Your user account was not found. Please sign out and sign in again.",
+            description:
+              "Your user account was not found. Please sign out and sign in again.",
           };
         case "SONG_NOT_FOUND":
           return {
@@ -77,7 +87,8 @@ function getErrorMessage(error: unknown, type: "song" | "arrangement", itemName?
         case "VALIDATION_ERROR":
           return {
             title: "Invalid request",
-            description: "The request was invalid. Please refresh the page and try again.",
+            description:
+              "The request was invalid. Please refresh the page and try again.",
           };
         case "INTERNAL_ERROR":
           return {
@@ -87,7 +98,8 @@ function getErrorMessage(error: unknown, type: "song" | "arrangement", itemName?
         default:
           return {
             title: "Failed to update favorites",
-            description: apiError.error.message || "An unexpected error occurred.",
+            description:
+              apiError.error.message || "An unexpected error occurred.",
           };
       }
     } catch {
@@ -98,7 +110,7 @@ function getErrorMessage(error: unknown, type: "song" | "arrangement", itemName?
       };
     }
   }
-  
+
   // Fallback for unknown error types
   return {
     title: "Failed to update favorites",
@@ -118,8 +130,12 @@ export default function FavoritesToggle({
 }: FavoritesToggleProps): ReactElement {
   const userId = useUserId();
   const { toast } = useToast();
-  
-  const { data: isFavorite, isLoading: checkLoading } = useCheckFavorite(type, itemId, userId || undefined);
+
+  const { data: isFavorite, isLoading: checkLoading } = useCheckFavorite(
+    type,
+    itemId,
+    userId || undefined,
+  );
   const addFavoriteMutation = useAddFavorite();
   const removeFavoriteMutation = useRemoveFavorite();
 
@@ -143,7 +159,7 @@ export default function FavoritesToggle({
           itemId,
           userId,
         });
-        
+
         toast({
           title: "Removed from favorites",
           description: `${itemLabel} has been removed from your favorites`,
@@ -154,13 +170,13 @@ export default function FavoritesToggle({
           itemId,
           userId,
         });
-        
+
         toast({
           title: "Added to favorites",
           description: `${itemLabel} has been added to your favorites`,
         });
       }
-      
+
       onToggle?.(!isCurrentlyFavorite);
     } catch (error) {
       const errorInfo = getErrorMessage(error, type, itemName);
@@ -173,7 +189,8 @@ export default function FavoritesToggle({
   }, [userId, type, itemId, itemName, isFavorite, onToggle]);
 
   const isActive = isFavorite?.isFavorite || false;
-  const isPending = addFavoriteMutation.isPending || removeFavoriteMutation.isPending;
+  const isPending =
+    addFavoriteMutation.isPending || removeFavoriteMutation.isPending;
   const isDisabled = checkLoading || isPending;
 
   const iconSize = {
@@ -194,10 +211,12 @@ export default function FavoritesToggle({
         isActive && "text-red-500 hover:text-red-600",
         className,
       )}
-      title={isActive ? `Remove from favorite ${type}s` : `Add to favorite ${type}s`}
+      title={
+        isActive ? `Remove from favorite ${type}s` : `Add to favorite ${type}s`
+      }
       aria-label={
-        isActive 
-          ? `Remove ${itemName || `this ${type}`} from favorites` 
+        isActive
+          ? `Remove ${itemName || `this ${type}`} from favorites`
           : `Add ${itemName || `this ${type}`} to favorites`
       }
       aria-pressed={isActive}
@@ -210,11 +229,7 @@ export default function FavoritesToggle({
         )}
         aria-hidden="true"
       />
-      {showLabel && (
-        <span>
-          {isActive ? "Favorited" : "Favorite"}
-        </span>
-      )}
+      {showLabel && <span>{isActive ? "Favorited" : "Favorite"}</span>}
     </Button>
   );
 }

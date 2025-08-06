@@ -8,12 +8,13 @@ export async function getStorageStats(_req: Request, res: Response) {
     const stats = await database.getStorageStats();
 
     // Get additional collection stats
-    const [songCount, setlistCount, arrangementCount, userCount] = await Promise.all([
-      Song.countDocuments(),
-      Setlist.countDocuments(),
-      Arrangement.countDocuments(),
-      User.countDocuments(),
-    ]);
+    const [songCount, setlistCount, arrangementCount, userCount] =
+      await Promise.all([
+        Song.countDocuments(),
+        Setlist.countDocuments(),
+        Arrangement.countDocuments(),
+        User.countDocuments(),
+      ]);
 
     // Get top 10 largest documents
     const largeSongs = await Song.find({})
@@ -45,10 +46,9 @@ export async function getStorageStats(_req: Request, res: Response) {
         recommendations: generateRecommendations(stats),
       },
     });
-
   } catch (error) {
     console.error("Error fetching storage stats:", error);
-    
+
     res.status(500).json({
       success: false,
       error: {
@@ -63,7 +63,7 @@ export async function getStorageStats(_req: Request, res: Response) {
 export async function triggerCleanup(req: Request, res: Response) {
   try {
     const { dryRun = false } = req.query;
-    
+
     const cleanupResults = {
       duplicateSlugs: 0,
       unusedArrangements: 0,
@@ -103,7 +103,7 @@ export async function triggerCleanup(req: Request, res: Response) {
     cleanupResults.unusedArrangements = unusedArrangements.length;
 
     if (!dryRun && unusedArrangements.length > 0) {
-      const unusedIds = unusedArrangements.map(arr => arr._id);
+      const unusedIds = unusedArrangements.map((arr) => arr._id);
       await Arrangement.deleteMany({ _id: { $in: unusedIds } });
     }
 
@@ -121,7 +121,7 @@ export async function triggerCleanup(req: Request, res: Response) {
     cleanupResults.oldUnusedSongs = oldUnusedSongs.length;
 
     if (!dryRun && oldUnusedSongs.length > 0) {
-      const songIds = oldUnusedSongs.map(song => song._id);
+      const songIds = oldUnusedSongs.map((song) => song._id);
       await Song.deleteMany({ _id: { $in: songIds } });
     }
 
@@ -134,7 +134,7 @@ export async function triggerCleanup(req: Request, res: Response) {
     cleanupResults.emptySetlists = emptySetlists.length;
 
     if (!dryRun && emptySetlists.length > 0) {
-      const setlistIds = emptySetlists.map(setlist => setlist._id);
+      const setlistIds = emptySetlists.map((setlist) => setlist._id);
       await Setlist.deleteMany({ _id: { $in: setlistIds } });
     }
 
@@ -143,15 +143,14 @@ export async function triggerCleanup(req: Request, res: Response) {
       data: {
         dryRun: !!dryRun,
         results: cleanupResults,
-        message: dryRun 
+        message: dryRun
           ? "Cleanup analysis completed (no changes made)"
           : "Cleanup completed successfully",
       },
     });
-
   } catch (error) {
     console.error("Error during cleanup:", error);
-    
+
     res.status(500).json({
       success: false,
       error: {
@@ -198,24 +197,28 @@ export async function getCompressionStats(_req: Request, res: Response) {
       }
     }
 
-    const compressionRatio = totalOriginal > 0 
-      ? ((totalOriginal - totalCompressed) / totalOriginal) * 100 
-      : 0;
+    const compressionRatio =
+      totalOriginal > 0
+        ? ((totalOriginal - totalCompressed) / totalOriginal) * 100
+        : 0;
 
     res.json({
       success: true,
       data: {
         sampleSize: sampleSongs.length + sampleArrangements.length,
         estimatedCompressionRatio: Math.round(compressionRatio * 100) / 100,
-        originalSizeEstimate: Math.round(totalOriginal / 1024 / 1024 * 100) / 100, // MB
-        compressedSizeEstimate: Math.round(totalCompressed / 1024 / 1024 * 100) / 100, // MB
-        spacesSaved: Math.round((totalOriginal - totalCompressed) / 1024 / 1024 * 100) / 100, // MB
+        originalSizeEstimate:
+          Math.round((totalOriginal / 1024 / 1024) * 100) / 100, // MB
+        compressedSizeEstimate:
+          Math.round((totalCompressed / 1024 / 1024) * 100) / 100, // MB
+        spacesSaved:
+          Math.round(((totalOriginal - totalCompressed) / 1024 / 1024) * 100) /
+          100, // MB
       },
     });
-
   } catch (error) {
     console.error("Error fetching compression stats:", error);
-    
+
     res.status(500).json({
       success: false,
       error: {
@@ -230,7 +233,7 @@ export async function getCompressionStats(_req: Request, res: Response) {
 export async function healthCheck(_req: Request, res: Response) {
   try {
     const isConnected = database.isConnectedToDatabase();
-    
+
     if (!isConnected) {
       return res.status(503).json({
         success: false,
@@ -257,10 +260,9 @@ export async function healthCheck(_req: Request, res: Response) {
         warnings: stats.percentage > 80 ? ["High storage usage"] : [],
       },
     });
-
   } catch (error) {
     console.error("Health check error:", error);
-    
+
     res.status(503).json({
       success: false,
       status: "error",
@@ -275,22 +277,30 @@ export async function healthCheck(_req: Request, res: Response) {
 // Helper function to generate storage recommendations
 function generateRecommendations(stats: any): string[] {
   const recommendations: string[] = [];
-  
+
   if (stats.percentage > 90) {
-    recommendations.push("CRITICAL: Database storage usage above 90%. Immediate cleanup required.");
+    recommendations.push(
+      "CRITICAL: Database storage usage above 90%. Immediate cleanup required.",
+    );
   } else if (stats.percentage > 80) {
-    recommendations.push("WARNING: Database storage usage above 80%. Consider cleanup.");
+    recommendations.push(
+      "WARNING: Database storage usage above 80%. Consider cleanup.",
+    );
   }
-  
+
   if (stats.percentage > 70) {
-    recommendations.push("Consider increasing compression levels or archiving old data.");
+    recommendations.push(
+      "Consider increasing compression levels or archiving old data.",
+    );
   }
-  
+
   if (stats.dataSize > stats.indexSize * 10) {
-    recommendations.push("Index size is relatively small. Storage usage is mainly data.");
+    recommendations.push(
+      "Index size is relatively small. Storage usage is mainly data.",
+    );
   } else if (stats.indexSize > stats.dataSize * 0.3) {
     recommendations.push("Index size is large. Consider optimizing indexes.");
   }
-  
+
   return recommendations;
 }

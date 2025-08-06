@@ -4,19 +4,19 @@
  */
 
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { 
-  ChordTranspositionResult, 
-  MusicalKey, 
+import {
+  ChordTranspositionResult,
+  MusicalKey,
   ChordSheetMeta,
   TRANSPOSITION_BOUNDS,
-  TranspositionLevelSchema, 
-} from "../types/chord.types";
-import { 
-  detectMusicalKey, 
-  calculateTransposedKey, 
-  getAvailableKeys, 
-  isValidMusicalKey, 
-} from "../utils/chordSheetHelpers";
+  TranspositionLevelSchema,
+} from "@features/songs/types/chord.types";
+import {
+  detectMusicalKey,
+  calculateTransposedKey,
+  getAvailableKeys,
+  isValidMusicalKey,
+} from "@features/songs/utils/chordSheetHelpers";
 
 /**
  * Options for the useChordTransposition hook
@@ -31,21 +31,24 @@ interface UseChordTranspositionOptions {
   /** ChordPro content for key detection */
   content?: string;
   /** Callback when transposition changes */
-  onTranspositionChange?: (level: number, currentKey: MusicalKey | null) => void;
+  onTranspositionChange?: (
+    level: number,
+    currentKey: MusicalKey | null,
+  ) => void;
   /** Whether to detect key automatically from content/metadata */
   enableKeyDetection?: boolean;
 }
 
 /**
  * React hook for managing chord transposition with bounds checking and key detection
- * 
+ *
  * Provides state management for transposition levels, key detection, and bounds validation.
  * Automatically detects the original key from content or metadata and calculates
  * the current key based on transposition level.
- * 
+ *
  * @param options - Configuration options for transposition behavior
  * @returns Transposition state and control functions
- * 
+ *
  * @example
  * ```tsx
  * const transposition = useChordTransposition({
@@ -55,7 +58,7 @@ interface UseChordTranspositionOptions {
  *     console.log(`Transposed to ${key} (${level > 0 ? '+' : ''}${level})`);
  *   }
  * });
- * 
+ *
  * return (
  *   <div>
  *     <button onClick={transposition.transposeUp} disabled={!transposition.canTransposeUp}>
@@ -88,7 +91,9 @@ export function useChordTransposition(
   }, [initialTranspose]);
 
   // State for transposition level
-  const [transpositionLevel, setTranspositionLevel] = useState(validatedInitialTranspose);
+  const [transpositionLevel, setTranspositionLevel] = useState(
+    validatedInitialTranspose,
+  );
 
   // Detect original key from content, metadata, or provided key
   const originalKey = useMemo((): MusicalKey | null => {
@@ -112,9 +117,13 @@ export function useChordTransposition(
 
   // Calculate current key based on transposition
   const currentKey = useMemo((): MusicalKey | null => {
-    if (!originalKey) {return null;}
-    if (transpositionLevel === 0) {return originalKey;}
-    
+    if (!originalKey) {
+      return null;
+    }
+    if (transpositionLevel === 0) {
+      return originalKey;
+    }
+
     try {
       return calculateTransposedKey(originalKey, transpositionLevel);
     } catch (error) {
@@ -138,17 +147,20 @@ export function useChordTransposition(
   }, [transpositionLevel]);
 
   // Transpose by relative semitones with bounds checking
-  const transpose = useCallback((semitones: number) => {
-    const newLevel = transpositionLevel + semitones;
-    const clampedLevel = Math.max(
-      TRANSPOSITION_BOUNDS.MIN,
-      Math.min(TRANSPOSITION_BOUNDS.MAX, newLevel),
-    );
-    
-    if (clampedLevel !== transpositionLevel) {
-      setTranspositionLevel(clampedLevel);
-    }
-  }, [transpositionLevel]);
+  const transpose = useCallback(
+    (semitones: number) => {
+      const newLevel = transpositionLevel + semitones;
+      const clampedLevel = Math.max(
+        TRANSPOSITION_BOUNDS.MIN,
+        Math.min(TRANSPOSITION_BOUNDS.MAX, newLevel),
+      );
+
+      if (clampedLevel !== transpositionLevel) {
+        setTranspositionLevel(clampedLevel);
+      }
+    },
+    [transpositionLevel],
+  );
 
   // Transpose up by one semitone
   const transposeUp = useCallback(() => {
@@ -170,7 +182,10 @@ export function useChordTransposition(
     if (result.success) {
       setTranspositionLevel(level);
     } else {
-      console.warn("[useChordTransposition] Invalid transposition level:", level);
+      console.warn(
+        "[useChordTransposition] Invalid transposition level:",
+        level,
+      );
     }
   }, []);
 
@@ -203,11 +218,11 @@ export function useChordTransposition(
 /**
  * Hook for calculating transposition between two specific keys
  * Useful for key-to-key transposition without managing state
- * 
+ *
  * @param fromKey - Source key
  * @param toKey - Target key
  * @returns Transposition information
- * 
+ *
  * @example
  * ```tsx
  * const transposition = useKeyTransposition('C', 'G');
@@ -241,7 +256,20 @@ export function useKeyTransposition(
 
     try {
       // Calculate semitones between keys
-      const keyOrder = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+      const keyOrder = [
+        "C",
+        "C#",
+        "D",
+        "D#",
+        "E",
+        "F",
+        "F#",
+        "G",
+        "G#",
+        "A",
+        "A#",
+        "B",
+      ];
       const fromIndex = keyOrder.indexOf(fromKey.replace("b", "#")); // Normalize flats to sharps
       const toIndex = keyOrder.indexOf(toKey.replace("b", "#"));
 
@@ -254,7 +282,7 @@ export function useKeyTransposition(
       }
 
       let semitones = toIndex - fromIndex;
-      
+
       // Normalize to range [-11, 11]
       if (semitones > 6) {
         semitones -= 12;
@@ -270,7 +298,10 @@ export function useKeyTransposition(
       return {
         semitones: 0,
         isValid: false,
-        error: error instanceof Error ? error.message : "Unknown error calculating transposition",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Unknown error calculating transposition",
       };
     }
   }, [fromKey, toKey]);
@@ -279,17 +310,17 @@ export function useKeyTransposition(
 /**
  * Hook for transposing to a specific target key
  * Combines useChordTransposition with automatic target key calculation
- * 
+ *
  * @param options - Configuration options including target key
  * @returns Enhanced transposition result with target key functions
- * 
+ *
  * @example
  * ```tsx
  * const transposition = useTargetKeyTransposition({
  *   content: chordProContent,
  *   targetKey: 'G'
  * });
- * 
+ *
  * return (
  *   <button onClick={transposition.transposeToTarget}>
  *     Transpose to {transposition.targetKey}
@@ -305,10 +336,10 @@ export function useTargetKeyTransposition(
   canTransposeToTarget: boolean;
 } {
   const { targetKey, ...transpositionOptions } = options;
-  
+
   const transposition = useChordTransposition(transpositionOptions);
   const keyTransposition = useKeyTransposition(
-    transposition.currentKey as MusicalKey | null, 
+    transposition.currentKey as MusicalKey | null,
     targetKey || null,
   );
 
@@ -317,10 +348,15 @@ export function useTargetKeyTransposition(
       // Calculate required transposition from original key to target key
       const originalKey = options.originalKey || transposition.currentKey;
       if (originalKey && isValidMusicalKey(originalKey)) {
-        const originalToTargetTransposition = useKeyTransposition(originalKey as MusicalKey, targetKey);
-        
+        const originalToTargetTransposition = useKeyTransposition(
+          originalKey as MusicalKey,
+          targetKey,
+        );
+
         if (originalToTargetTransposition.isValid) {
-          transposition.setTransposition(originalToTargetTransposition.semitones);
+          transposition.setTransposition(
+            originalToTargetTransposition.semitones,
+          );
         }
       }
     }

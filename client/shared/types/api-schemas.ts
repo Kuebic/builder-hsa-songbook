@@ -26,18 +26,22 @@ export const favoriteItemSchema = z.object({
 });
 
 export const addFavoriteResponseSchema = baseResponseSchema.extend({
-  data: z.object({
-    success: z.boolean(),
-    message: z.string(),
-    favorite: favoriteItemSchema,
-  }).optional(),
+  data: z
+    .object({
+      success: z.boolean(),
+      message: z.string(),
+      favorite: favoriteItemSchema,
+    })
+    .optional(),
 });
 
 export const removeFavoriteResponseSchema = baseResponseSchema.extend({
-  data: z.object({
-    success: z.boolean(),
-    message: z.string(),
-  }).optional(),
+  data: z
+    .object({
+      success: z.boolean(),
+      message: z.string(),
+    })
+    .optional(),
 });
 
 export const checkFavoriteResponseSchema = z.object({
@@ -88,7 +92,9 @@ export type ApiError = z.infer<typeof apiErrorSchema>;
 export type BaseResponse = z.infer<typeof baseResponseSchema>;
 export type FavoriteItem = z.infer<typeof favoriteItemSchema>;
 export type AddFavoriteResponse = z.infer<typeof addFavoriteResponseSchema>;
-export type RemoveFavoriteResponse = z.infer<typeof removeFavoriteResponseSchema>;
+export type RemoveFavoriteResponse = z.infer<
+  typeof removeFavoriteResponseSchema
+>;
 export type CheckFavoriteResponse = z.infer<typeof checkFavoriteResponseSchema>;
 export type FavoriteSong = z.infer<typeof favoriteSongSchema>;
 export type FavoriteArrangement = z.infer<typeof favoriteArrangementSchema>;

@@ -33,7 +33,7 @@ coverage/
 .config/
 .env
 claude/
-claude/
+.claude/
 .env.local
 
 # Environment files

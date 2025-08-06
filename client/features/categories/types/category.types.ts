@@ -5,24 +5,43 @@ import type { ClientSong } from "@features/songs/types/song.types";
 // Lucide icon component type
 type LucideIcon = ComponentType<{ className?: string }>;
 
-// Primary category definitions based on Unification Church context  
+/**
+ * Spiritual category for organizing worship songs
+ * Based on worship themes and theological concepts
+ * @interface SpiritualCategory
+ */
 export interface SpiritualCategory {
+  /** Unique category identifier */
   id: string;
+  /** Display name of the category */
   name: string;
+  /** Detailed description of the category's purpose */
   description: string;
-  color: string; // Tailwind color for theming
-  icon: LucideIcon; // Lucide React icon
+  /** Tailwind color class for theming (e.g., "blue", "green") */
+  color: string;
+  /** Lucide React icon component for visual representation */
+  icon: LucideIcon;
+  /** Optional nested subcategories for hierarchical organization */
   subcategories?: SpiritualCategory[];
+  /** Rules for automatically categorizing songs */
   mappingRules: CategoryMappingRule[];
 }
 
+/**
+ * Rule for automatically mapping songs to categories
+ * @interface CategoryMappingRule
+ */
 export interface CategoryMappingRule {
   type: "theme" | "source" | "artist" | "title_pattern" | "lyrics_pattern";
   values: string[];
   weight: number; // 1-10 for fuzzy matching
 }
 
-// Category statistics for dashboard display
+/**
+ * Statistics and metrics for a category
+ * Used for dashboard displays and analytics
+ * @interface CategoryStats
+ */
 export interface CategoryStats {
   id: string;
   name: string;
@@ -34,7 +53,11 @@ export interface CategoryStats {
   lastUpdated: Date;
 }
 
-// Category browsing state management
+/**
+ * State management for category browsing UI
+ * Tracks filters, sorting, and view preferences
+ * @interface CategoryBrowsingState
+ */
 export interface CategoryBrowsingState {
   activeCategory?: string;
   subCategory?: string;
@@ -81,11 +104,13 @@ export const categoryStatsSchema = z.object({
   avgRating: z.number().min(0).max(5),
   recentCount: z.number().min(0),
   popularityScore: z.number().min(0),
-  topSongs: z.array(z.object({
-    id: z.string(),
-    title: z.string(),
-    artist: z.string().optional(),
-  })),
+  topSongs: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      artist: z.string().optional(),
+    }),
+  ),
   lastUpdated: z.date(),
 });
 
@@ -105,13 +130,13 @@ export function isCategoryStats(obj: unknown): obj is CategoryStats {
   return (
     typeof obj === "object" &&
     obj !== null &&
-    'id' in obj &&
-    'name' in obj &&
-    'songCount' in obj &&
-    'avgRating' in obj &&
-    'recentCount' in obj &&
-    'popularityScore' in obj &&
-    'topSongs' in obj &&
+    "id" in obj &&
+    "name" in obj &&
+    "songCount" in obj &&
+    "avgRating" in obj &&
+    "recentCount" in obj &&
+    "popularityScore" in obj &&
+    "topSongs" in obj &&
     typeof (obj as CategoryStats).id === "string" &&
     typeof (obj as CategoryStats).name === "string" &&
     typeof (obj as CategoryStats).songCount === "number" &&
@@ -142,7 +167,10 @@ export interface CategoryGridProps {
 
 export interface CategoryFiltersProps {
   filters: CategoryBrowsingState["filters"];
-  onFilterChange: (key: CategoryFilterKey, value: string | number | boolean | undefined) => void;
+  onFilterChange: (
+    key: CategoryFilterKey,
+    value: string | number | boolean | undefined,
+  ) => void;
   onClearAll: () => void;
   availableThemes: string[];
   availableKeys: string[];
