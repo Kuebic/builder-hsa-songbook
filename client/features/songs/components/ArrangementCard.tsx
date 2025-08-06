@@ -1,216 +1,189 @@
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
+import { memo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Star,
-  Clock,
-  User,
-  MoreHorizontal,
-  Eye,
-  Edit,
-  Copy,
-  Trash2,
-  Check,
-  MessageSquare,
-  Music,
-  Mic2,
-} from "lucide-react";
-import { ArrangementDetail } from "../types/song.types";
-import FavoritesToggle from "./FavoritesToggle";
-import MashupIndicator from "./MashupIndicator";
+import { Card, CardContent } from "@/components/ui/card";
+import { Heart, Star, ListMusic, Eye, Edit } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { ArrangementWithMetrics } from "@features/songs/types/song.types";
 
 export interface ArrangementCardProps {
-  arrangement: ArrangementDetail;
-  isDefault?: boolean;
-  onView?: () => void;
-  onEdit?: () => void;
-  onDelete?: () => void;
-  onDuplicate?: () => void;
-  onSetDefault?: () => void;
+  arrangement: ArrangementWithMetrics;
 }
 
-export default function ArrangementCard({
-  arrangement,
-  isDefault = false,
-  onView,
-  onEdit,
-  onDelete,
-  onDuplicate,
-  onSetDefault,
-}: ArrangementCardProps) {
+const getDifficultyColor = (difficulty: string) => {
+  switch (difficulty) {
+    case "beginner":
+      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+    case "intermediate":
+      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
+    case "advanced":
+      return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
+    default:
+      return "";
+  }
+};
 
-  const formatDate = (date: string): string => {
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+function ArrangementCard({ arrangement }: ArrangementCardProps) {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/arrangements/${arrangement.slug}`);
   };
 
-  // Get metadata with defaults
-  const rating = arrangement.metadata?.ratings?.average || 0;
-  const reviewCount = arrangement.metadata?.reviewCount || 0;
-  const isMashup = arrangement.metadata?.isMashup || false;
+  const rating = arrangement.rating || { average: 0, count: 0 };
+  const favoriteCount = arrangement.favoriteCount || 0;
+  const setlistCount = arrangement.setlistCount || 0;
 
   return (
-    <Card className={`relative ${isDefault ? "ring-2 ring-worship" : ""}`}>
-      {isDefault && (
-        <div className="absolute -top-2 -right-2 z-10">
-          <Badge className="bg-worship text-white">
-            <Check className="h-3 w-3 mr-1" />
-            Default
-          </Badge>
-        </div>
-      )}
-      
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="text-lg font-medium">
-              {arrangement.name}
-            </CardTitle>
-            <CardDescription className="mt-1">
-              Arrangement by {arrangement.createdBy}
-            </CardDescription>
-          </div>
-          
-          <div className="flex items-center gap-1">
-            <FavoritesToggle
-              type="arrangement"
-              itemId={arrangement._id}
-              itemName={arrangement.name}
-              size="sm"
-              variant="ghost"
-            />
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onView}>
-                <Eye className="mr-2 h-4 w-4" />
-                View
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onEdit}>
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onDuplicate}>
-                <Copy className="mr-2 h-4 w-4" />
-                Duplicate
-              </DropdownMenuItem>
-              {!isDefault && (
-                <DropdownMenuItem onClick={onSetDefault}>
-                  <Check className="mr-2 h-4 w-4" />
-                  Set as Default
-                </DropdownMenuItem>
+    <Card
+      className="hover:shadow-md transition-shadow cursor-pointer group"
+      onClick={handleCardClick}
+    >
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start">
+          <div className="space-y-2 flex-1">
+            {/* Name and Key */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <h3 className="font-semibold text-lg group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                {arrangement.name}
+              </h3>
+              <Badge variant="outline" className="font-medium">
+                {arrangement.metadata.key}
+              </Badge>
+              {arrangement.capo && (
+                <Badge variant="secondary">Capo {arrangement.capo}</Badge>
               )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                onClick={onDelete}
-                className="text-red-600 dark:text-red-400"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          </div>
-        </div>
-        
-        <div className="flex flex-wrap items-center gap-2 mt-3">
-          {arrangement.key && (
-            <Badge variant="outline" className="text-xs">
-              <Music className="h-3 w-3 mr-1" />
-              {arrangement.key}
-            </Badge>
-          )}
-          {arrangement.tempo && (
-            <Badge variant="outline" className="text-xs">
-              {arrangement.tempo} BPM
-            </Badge>
-          )}
-          {arrangement.difficulty && (
-            <Badge variant="outline" className="text-xs">
-              {arrangement.difficulty}
-            </Badge>
-          )}
-          {arrangement.genreStyle && (
-            <Badge variant="outline" className="text-xs">
-              {arrangement.genreStyle}
-            </Badge>
-          )}
-          {arrangement.vocalRange && (
-            <Badge variant="outline" className="text-xs">
-              <Mic2 className="h-3 w-3 mr-1" />
-              {arrangement.vocalRange.low} - {arrangement.vocalRange.high}
-            </Badge>
-          )}
-          <MashupIndicator
-            isMashup={isMashup}
-            songCount={arrangement.songIds?.length}
-            variant="minimal"
-          />
-        </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-3">
-        <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-4 text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <User className="h-3 w-3" />
-              {arrangement.createdBy}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {formatDate(arrangement.createdAt)}
-            </span>
-          </div>
-        </div>
-      </CardContent>
-      
-      <CardFooter className="border-t pt-3">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-3">
-            {rating > 0 && (
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
-                <span className="font-medium">{rating.toFixed(1)}</span>
+            </div>
+
+            {/* Rating */}
+            {rating.count > 0 && (
+              <div className="flex items-center gap-2">
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={cn(
+                        "h-4 w-4",
+                        i < Math.floor(rating.average)
+                          ? "text-yellow-500 fill-yellow-500"
+                          : "text-gray-300",
+                      )}
+                    />
+                  ))}
+                </div>
+                <span className="text-sm font-medium">
+                  {rating.average.toFixed(1)}
+                </span>
                 <span className="text-sm text-muted-foreground">
-                  ({arrangement.metadata?.ratings?.count || 0})
+                  ({rating.count} review{rating.count !== 1 ? "s" : ""})
                 </span>
               </div>
             )}
-            {reviewCount > 0 && (
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <MessageSquare className="h-4 w-4" />
-                <span>{reviewCount} review{reviewCount !== 1 ? "s" : ""}</span>
-              </div>
-            )}
+
+            {/* Social Proof Metrics */}
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              {favoriteCount > 0 && (
+                <>
+                  <span className="flex items-center gap-1">
+                    <Heart className="h-3 w-3" />
+                    {favoriteCount} favorite{favoriteCount !== 1 ? "s" : ""}
+                  </span>
+                  <span>•</span>
+                </>
+              )}
+              {setlistCount > 0 && (
+                <span className="flex items-center gap-1">
+                  <ListMusic className="h-3 w-3" />
+                  Used in {setlistCount} setlist{setlistCount !== 1 ? "s" : ""}
+                </span>
+              )}
+            </div>
+
+            {/* Additional Info */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {arrangement.metadata.difficulty && (
+                <Badge
+                  variant="outline"
+                  className={getDifficultyColor(
+                    arrangement.metadata.difficulty,
+                  )}
+                >
+                  {arrangement.metadata.difficulty.charAt(0).toUpperCase() +
+                    arrangement.metadata.difficulty.slice(1)}
+                </Badge>
+              )}
+
+              {arrangement.metadata.tempo && (
+                <Badge variant="outline">
+                  {arrangement.metadata.tempo} BPM
+                </Badge>
+              )}
+
+              {arrangement.metadata.timeSignature && (
+                <Badge variant="outline">
+                  {arrangement.metadata.timeSignature}
+                </Badge>
+              )}
+
+              {arrangement.metadata.isMashup && (
+                <Badge
+                  variant="secondary"
+                  className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
+                >
+                  Mashup
+                </Badge>
+              )}
+            </div>
+
+            {/* Instruments */}
+            {arrangement.metadata.instruments &&
+              arrangement.metadata.instruments.length > 0 && (
+                <div className="text-xs text-muted-foreground">
+                  Instruments: {arrangement.metadata.instruments.join(", ")}
+                </div>
+              )}
           </div>
-          
-          <Button onClick={onView} size="sm">
-            View Arrangement
-          </Button>
+
+          {/* Action Buttons */}
+          <div
+            className="flex gap-2 ml-4 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 w-8 p-0"
+              title="View arrangement"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 w-8 p-0"
+              title="Edit arrangement"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-      </CardFooter>
+
+        {/* Created info */}
+        <div className="flex items-center justify-between mt-3 pt-3 border-t text-xs text-muted-foreground">
+          <span>
+            Created {new Date(arrangement.createdAt).toLocaleDateString()}
+          </span>
+          {arrangement.stats?.lastUsed && (
+            <span>
+              Last used{" "}
+              {new Date(arrangement.stats.lastUsed).toLocaleDateString()}
+            </span>
+          )}
+        </div>
+      </CardContent>
     </Card>
   );
 }
+
+export default memo(ArrangementCard);

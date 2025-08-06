@@ -12,12 +12,34 @@ import { lazy, Suspense } from "react";
 import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
 
 // Lazy load all route components for code splitting
-const DashboardPage = lazy(() => import("@features/dashboard").then(m => ({ default: m.DashboardPage })));
-const SongsPage = lazy(() => import("@features/songs").then(m => ({ default: m.SongsPage })));
-const SongDetailPage = lazy(() => import("@features/songs").then(m => ({ default: m.SongDetailPage })));
-const CategoryBrowser = lazy(() => import("@features/categories").then(m => ({ default: m.CategoryBrowser })));
-const SetlistsPage = lazy(() => import("@features/setlists").then(m => ({ default: m.SetlistsPage })));
-const ArrangementsPage = lazy(() => import("@features/arrangements").then(m => ({ default: m.ArrangementsPage })));
+const DashboardPage = lazy(() =>
+  import("@features/dashboard").then((m) => ({ default: m.DashboardPage })),
+);
+const SongsPage = lazy(() =>
+  import("@features/songs").then((m) => ({ default: m.SongsPage })),
+);
+const SongDetailPage = lazy(() =>
+  import("@features/songs").then((m) => ({ default: m.SongDetailPage })),
+);
+const CategoryBrowser = lazy(() =>
+  import("@features/categories").then((m) => ({ default: m.CategoryBrowser })),
+);
+const SetlistsPage = lazy(() =>
+  import("@features/setlists").then((m) => ({ default: m.SetlistsPage })),
+);
+const ArrangementsPage = lazy(() =>
+  import("@features/arrangements").then((m) => ({
+    default: m.ArrangementsPage,
+  })),
+);
+const ArrangementDetailPage = lazy(() =>
+  import("@features/arrangements").then((m) => ({
+    default: m.ArrangementDetailPage,
+  })),
+);
+const ProfilePage = lazy(() =>
+  import("@features/profile").then((m) => ({ default: m.ProfilePage })),
+);
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -28,30 +50,39 @@ if (!PUBLISHABLE_KEY) {
 }
 
 const App = () => (
-  <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+  <BrowserRouter>
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
             <Suspense fallback={<LoadingSpinner message="Loading page..." />}>
               <Routes>
                 <Route path="/" element={<DashboardPage />} />
                 <Route path="/songs" element={<SongsPage />} />
                 <Route path="/songs/:slug" element={<SongDetailPage />} />
-                <Route path="/categories/:categoryId" element={<CategoryBrowser />} />
+                <Route
+                  path="/categories/:categoryId"
+                  element={<CategoryBrowser />}
+                />
                 <Route path="/setlists" element={<SetlistsPage />} />
                 <Route path="/arrangements" element={<ArrangementsPage />} />
+                <Route
+                  path="/arrangements/:slug"
+                  element={<ArrangementDetailPage />}
+                />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/profile/:userId" element={<ProfilePage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </QueryClientProvider>
-  </ClerkProvider>
+          </TooltipProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ClerkProvider>
+  </BrowserRouter>
 );
 
 const rootElement = document.getElementById("root");
