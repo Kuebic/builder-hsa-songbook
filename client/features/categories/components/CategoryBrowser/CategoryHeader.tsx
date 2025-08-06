@@ -21,9 +21,13 @@ export interface CategoryHeaderProps {
   totalSongs?: number;
 }
 
-export function CategoryHeader({ category, themeColors, totalSongs }: CategoryHeaderProps) {
+export function CategoryHeader({
+  category,
+  themeColors,
+  totalSongs,
+}: CategoryHeaderProps) {
   const IconComponent = category.icon;
-  
+
   return (
     <>
       {/* Breadcrumb Navigation */}
@@ -31,7 +35,9 @@ export function CategoryHeader({ category, themeColors, totalSongs }: CategoryHe
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link to="/"><Home className="h-4 w-4" /></Link>
+              <Link to="/">
+                <Home className="h-4 w-4" />
+              </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
@@ -46,22 +52,27 @@ export function CategoryHeader({ category, themeColors, totalSongs }: CategoryHe
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      
+
       {/* Category Header */}
-      <div className={`rounded-lg border p-6 ${themeColors?.background} ${themeColors?.border}`}>
+      <div
+        className={`rounded-lg border p-6 ${themeColors?.background} ${themeColors?.border}`}
+      >
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-4">
             <div className={`p-3 rounded-lg ${themeColors?.text} bg-white/80`}>
               <IconComponent className="h-8 w-8" />
             </div>
             <div>
-              <h1 className={`text-3xl font-bold ${themeColors?.text}`}>{category.name}</h1>
+              <h1 className={`text-3xl font-bold ${themeColors?.text}`}>
+                {category.name}
+              </h1>
               <p className="text-muted-foreground mt-2 max-w-2xl">
                 {category.description}
               </p>
               {totalSongs !== undefined && (
                 <p className="text-sm text-muted-foreground mt-2">
-                  {totalSongs} {totalSongs === 1 ? 'song' : 'songs'} in this category
+                  {totalSongs} {totalSongs === 1 ? "song" : "songs"} in this
+                  category
                 </p>
               )}
             </div>

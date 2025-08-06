@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import { Layout } from "@/shared/components/Layout";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -19,24 +19,28 @@ export function CategoryBrowser() {
   const [searchParams] = useSearchParams();
   const userId = useUserId();
   const { toast } = useToast();
-  
+
   // Get category configuration
   const categoryConfig = categoryId ? getCategoryById(categoryId) : null;
   const themeColors = categoryId ? getCategoryThemeColors(categoryId) : null;
-  
+
   // Fetch category songs
-  const currentPage = parseInt(searchParams.get('page') || '1');
-  const { data: categoryData, isLoading, error } = useCategoryBrowsing({
-    categoryId: categoryId || '',
+  const currentPage = parseInt(searchParams.get("page") || "1");
+  const {
+    data: categoryData,
+    isLoading,
+    error,
+  } = useCategoryBrowsing({
+    categoryId: categoryId || "",
     page: currentPage,
     limit: 20,
-    sortBy: searchParams.get('sort') || 'popular',
-    searchQuery: searchParams.get('search') || '',
+    sortBy: (searchParams.get("sort") || "popular") as "title" | "rating" | "popular" | "recent" | undefined,
+    searchQuery: searchParams.get("search") || "",
   });
-  
+
   const songs = categoryData?.data || [];
   const pagination = categoryData?.meta?.pagination;
-  
+
   // Use the shared filtering hook
   const {
     filters,
@@ -47,36 +51,42 @@ export function CategoryBrowser() {
     availableThemes,
     updateFilter,
     clearFilters,
-  } = useFilteredSongs({ 
+  } = useFilteredSongs({
     songs,
-    defaultSort: 'popular'
+    defaultSort: "popular",
   });
-  
+
   // Authentication-dependent functionality
-  const handleToggleFavorite = useCallback(async (_songId: string) => {
-    if (!userId) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to save favorites",
-        variant: "default",
-      });
-      return;
-    }
-    // TODO: Implement favorites toggle with API call
-  }, [userId, toast]);
-  
-  const handleAddToSetlist = useCallback((_songId: string) => {
-    if (!userId) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to add songs to setlists",
-        variant: "default",
-      });
-      return;
-    }
-    // TODO: Implement add to setlist functionality
-  }, [userId, toast]);
-  
+  const handleToggleFavorite = useCallback(
+    async (_songId: string) => {
+      if (!userId) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to save favorites",
+          variant: "default",
+        });
+        return;
+      }
+      // TODO: Implement favorites toggle with API call
+    },
+    [userId, toast],
+  );
+
+  const handleAddToSetlist = useCallback(
+    (_songId: string) => {
+      if (!userId) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to add songs to setlists",
+          variant: "default",
+        });
+        return;
+      }
+      // TODO: Implement add to setlist functionality
+    },
+    [userId, toast],
+  );
+
   // Handle invalid category
   if (!categoryId || !categoryConfig) {
     return (
@@ -84,7 +94,8 @@ export function CategoryBrowser() {
         <div className="max-w-4xl mx-auto py-16">
           <Alert className="border-destructive">
             <AlertDescription>
-              Category not found. Please check the URL or go back to browse all categories.
+              Category not found. Please check the URL or go back to browse all
+              categories.
             </AlertDescription>
           </Alert>
           <div className="mt-6 flex justify-center">
@@ -96,16 +107,16 @@ export function CategoryBrowser() {
       </Layout>
     );
   }
-  
+
   return (
     <Layout>
       <div className="max-w-7xl mx-auto space-y-6">
-        <CategoryHeader 
+        <CategoryHeader
           category={categoryConfig}
           themeColors={themeColors}
           totalSongs={pagination?.total}
         />
-        
+
         <SongsFilterBar
           filters={filters}
           availableKeys={availableKeys}
@@ -115,7 +126,7 @@ export function CategoryBrowser() {
           onFilterChange={updateFilter}
           onClearFilters={clearFilters}
         />
-        
+
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">
@@ -132,7 +143,7 @@ export function CategoryBrowser() {
               </div>
             )}
           </div>
-          
+
           <SongsList
             songs={filteredSongs}
             viewMode={filters.viewMode}
@@ -145,7 +156,7 @@ export function CategoryBrowser() {
             onAddToSetlist={handleAddToSetlist}
           />
         </div>
-        
+
         <CategoryPagination pagination={pagination} />
       </div>
     </Layout>

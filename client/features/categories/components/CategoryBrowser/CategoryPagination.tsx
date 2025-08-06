@@ -15,17 +15,17 @@ export interface CategoryPaginationProps {
 
 export function CategoryPagination({ pagination }: CategoryPaginationProps) {
   const [searchParams] = useSearchParams();
-  
+
   if (!pagination || pagination.totalPages <= 1) {
     return null;
   }
-  
+
   const createPageUrl = (page: number) => {
     const params = new URLSearchParams(searchParams);
-    params.set('page', String(page));
+    params.set("page", String(page));
     return `?${params.toString()}`;
   };
-  
+
   return (
     <div className="flex items-center justify-between">
       <div className="text-sm text-muted-foreground">
@@ -39,9 +39,7 @@ export function CategoryPagination({ pagination }: CategoryPaginationProps) {
           asChild={pagination.hasPrevPage}
         >
           {pagination.hasPrevPage ? (
-            <Link to={createPageUrl(pagination.page - 1)}>
-              Previous
-            </Link>
+            <Link to={createPageUrl(pagination.page - 1)}>Previous</Link>
           ) : (
             <span>Previous</span>
           )}
@@ -53,9 +51,7 @@ export function CategoryPagination({ pagination }: CategoryPaginationProps) {
           asChild={pagination.hasNextPage}
         >
           {pagination.hasNextPage ? (
-            <Link to={createPageUrl(pagination.page + 1)}>
-              Next
-            </Link>
+            <Link to={createPageUrl(pagination.page + 1)}>Next</Link>
           ) : (
             <span>Next</span>
           )}
